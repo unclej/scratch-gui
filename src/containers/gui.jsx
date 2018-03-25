@@ -4,6 +4,8 @@ import React from 'react';
 import VM from 'scratch-vm';
 import {connect} from 'react-redux';
 import ReactModal from 'react-modal';
+import EventMessage from './event-message.jsx';
+
 
 import ErrorBoundaryHOC from '../lib/error-boundary-hoc.jsx';
 import {openExtensionLibrary} from '../reducers/modals';
@@ -24,6 +26,7 @@ import ProjectLoaderHOC from '../lib/project-loader-hoc.jsx';
 import vmListenerHOC from '../lib/vm-listener-hoc.jsx';
 
 import GUIComponent from '../components/gui/gui.jsx';
+import ITCH_CONFIG from '../../itch.config';
 
 class GUI extends React.Component {
     constructor (props) {
@@ -76,6 +79,17 @@ class GUI extends React.Component {
     }
     render () {
         if (this.state.loadingError) {
+            if(window.self !== window.top){
+                var url = window.location.search.substring(1).split('&');
+                var keyValue={};
+                for(var i = 0; i<url.length; i++){
+                    var d = url[i].split('=');
+                    keyValue[d[0]] = d[1];
+                }
+                parent.postMessage(
+                    ['loaded',[true]],
+                    ((typeof keyValue['baseUrl'] !== "undefined") ? keyValue['baseUrl']:(ITCH_CONFIG.BASE_URL+ITCH_CONFIG.BASE_URL_EXTENSION)));
+            }
             throw new Error(
                 `Failed to load project from server [id=${window.location.hash}]: ${this.state.errorMessage}`);
         }
@@ -94,10 +108,22 @@ class GUI extends React.Component {
             vm,
             ...componentProps
         } = this.props;
+        if(window.self !== window.top && !(fetchingProject || this.state.loading || loadingStateVisible)){
+            var url = window.location.search.substring(1).split('&');
+            var keyValue={};
+            for(var i = 0; i<url.length; i++){
+                var d = url[i].split('=');
+                keyValue[d[0]] = d[1];
+            }
+            parent.postMessage(
+                ['loaded',[true]],
+                ((typeof keyValue['baseUrl'] !== "undefined") ? keyValue['baseUrl']:(ITCH_CONFIG.BASE_URL+ITCH_CONFIG.BASE_URL_EXTENSION)));
+        }
         return (
             <GUIComponent
                 loading={fetchingProject || this.state.loading || loadingStateVisible}
                 vm={vm}
+                projectData={projectData}
                 {...componentProps}
             >
                 {children}

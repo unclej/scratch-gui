@@ -10,6 +10,7 @@ import Divider from '../divider/divider.jsx';
 import Filter from '../filter/filter.jsx';
 import TagButton from '../../containers/tag-button.jsx';
 import analytics from '../../lib/analytics';
+import ITCH_CONFIG from '../../../itch.config';
 
 import styles from './library.css';
 
@@ -169,7 +170,8 @@ class LibraryComponent extends React.Component {
                 >
                     {this.getFilteredData().map((dataItem, index) => {
                         const scratchURL = dataItem.md5 ?
-                            `https://cdn.assets.scratch.mit.edu/internalapi/asset/${dataItem.md5}/get/` :
+                            //`https://cdn.assets.scratch.mit.edu/internalapi/asset/${dataItem.md5}/get/` :
+                            `${ITCH_CONFIG.ASSET_SERVER}/public/${dataItem.md5}?x-request=html`:
                             dataItem.rawURL;
                         return (
                             <LibraryItem

@@ -38,6 +38,7 @@ import searchIcon from '../components/action-menu/icon--search.svg';
 
 import costumeLibraryContent from '../lib/libraries/costumes.json';
 import backdropLibraryContent from '../lib/libraries/backdrops.json';
+import UpdateAsset from '../lib/update-asset';
 
 let messages = defineMessages({
     addLibraryBackdropMsg: {
@@ -151,7 +152,11 @@ class CostumeTab extends React.Component {
         this.props.vm.duplicateCostume(costumeIndex);
     }
     handleNewCostume (costume) {
-        this.props.vm.addCostume(costume.md5, costume);
+        const lastIndex = this.props.vm.editingTarget.getCostumes().length;
+        const update = new UpdateAsset();
+        this.props.vm.addCostume(costume.md5, costume).then(() => {
+            update.saveNewCostume(this.props.vm, lastIndex);
+        });
     }
     handleNewBlankCostume () {
         const name = this.props.vm.editingTarget.isStage ?

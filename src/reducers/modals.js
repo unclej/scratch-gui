@@ -7,6 +7,7 @@ const MODAL_BACKDROP_LIBRARY = 'backdropLibrary';
 const MODAL_CAMERA_CAPTURE = 'cameraCapture';
 const MODAL_COSTUME_LIBRARY = 'costumeLibrary';
 const MODAL_EXTENSION_LIBRARY = 'extensionLibrary';
+const MODAL_FEEDBACK_FORM = 'feedbackForm';
 const MODAL_IMPORT_INFO = 'importInfo';
 const MODAL_LOADING_PROJECT = 'loadingProject';
 const MODAL_PREVIEW_INFO = 'previewInfo';
@@ -16,19 +17,25 @@ const MODAL_SOUND_RECORDER = 'soundRecorder';
 
 const MODAL_TIPS_LIBRARY = 'tipsLibrary';
 
+const MODAL_PROJECT_LESSONS = 'projectLessons';
+const MODAL_SHARE_PROJECT = 'shareProject';
+
 
 const initialState = {
     [MODAL_BACKDROP_LIBRARY]: false,
     [MODAL_CAMERA_CAPTURE]: false,
     [MODAL_COSTUME_LIBRARY]: false,
     [MODAL_EXTENSION_LIBRARY]: false,
+    [MODAL_FEEDBACK_FORM]: false,
     [MODAL_IMPORT_INFO]: false,
     [MODAL_LOADING_PROJECT]: false,
-    [MODAL_PREVIEW_INFO]: true,
+    [MODAL_PREVIEW_INFO]: false,
     [MODAL_SOUND_LIBRARY]: false,
     [MODAL_SPRITE_LIBRARY]: false,
     [MODAL_SOUND_RECORDER]: false,
-    [MODAL_TIPS_LIBRARY]: false
+    [MODAL_TIPS_LIBRARY]: false,
+    [MODAL_SHARE_PROJECT]: false,
+    [MODAL_PROJECT_LESSONS]:false
 };
 
 const reducer = function (state, action) {
@@ -74,6 +81,10 @@ const openExtensionLibrary = function () {
     analytics.pageview('/libraries/extensions');
     return openModal(MODAL_EXTENSION_LIBRARY);
 };
+const openFeedbackForm = function () {
+    analytics.pageview('/modals/feedback');
+    return openModal(MODAL_FEEDBACK_FORM);
+};
 const openImportInfo = function () {
     analytics.pageview('modals/import');
     return openModal(MODAL_IMPORT_INFO);
@@ -102,6 +113,14 @@ const openTipsLibrary = function () {
     analytics.pageview('/modals/tips');
     return openModal(MODAL_TIPS_LIBRARY);
 };
+const openShareProject = function () {
+    analytics.pageview('/modals/share-project');
+    return openModal(MODAL_SHARE_PROJECT);
+};
+const openProjectLessons = function () {
+    analytics.pageview('/modals/project-lessons');
+    return openModal(MODAL_PROJECT_LESSONS);
+};
 const closeBackdropLibrary = function () {
     return closeModal(MODAL_BACKDROP_LIBRARY);
 };
@@ -113,6 +132,9 @@ const closeCostumeLibrary = function () {
 };
 const closeExtensionLibrary = function () {
     return closeModal(MODAL_EXTENSION_LIBRARY);
+};
+const closeFeedbackForm = function () {
+    return closeModal(MODAL_FEEDBACK_FORM);
 };
 const closeImportInfo = function () {
     return closeModal(MODAL_IMPORT_INFO);
@@ -135,6 +157,12 @@ const closeSoundRecorder = function () {
 const closeTipsLibrary = function () {
     return closeModal(MODAL_TIPS_LIBRARY);
 };
+const closeShareProject = function(){
+    return closeModal(MODAL_SHARE_PROJECT);
+}
+const closeProjectLessons = function(){
+    return closeModal(MODAL_PROJECT_LESSONS);
+}
 export {
     reducer as default,
     initialState as modalsInitialState,
@@ -142,6 +170,7 @@ export {
     openCameraCapture,
     openCostumeLibrary,
     openExtensionLibrary,
+    openFeedbackForm,
     openImportInfo,
     openLoadingProject,
     openPreviewInfo,
@@ -149,15 +178,20 @@ export {
     openSpriteLibrary,
     openSoundRecorder,
     openTipsLibrary,
+    openShareProject,
+    openProjectLessons,
     closeBackdropLibrary,
     closeCameraCapture,
     closeCostumeLibrary,
     closeExtensionLibrary,
+    closeFeedbackForm,
     closeImportInfo,
     closeLoadingProject,
     closePreviewInfo,
     closeSpriteLibrary,
     closeSoundLibrary,
     closeSoundRecorder,
-    closeTipsLibrary
+    closeTipsLibrary,
+    closeShareProject,
+    closeProjectLessons
 };

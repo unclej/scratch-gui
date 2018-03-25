@@ -29,6 +29,7 @@ const StageWrapperComponent = function (props) {
                     isRendererSupported ?
                         <Stage
                             stageSize={stageSize}
+                            id="mainStageCanvas"
                             vm={vm}
                         /> :
                         null

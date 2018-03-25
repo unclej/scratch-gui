@@ -91,6 +91,13 @@ const GUIComponent = props => {
         stageSizeMode,
         tipsLibraryVisible,
         vm,
+        projectData,
+        projectName,
+        studioLessons,
+        thumbnail,
+        projectUser,
+        createdProject,
+        userName,
         ...componentProps
     } = omit(props, 'dispatch');
     if (children) {
@@ -171,6 +178,13 @@ const GUIComponent = props => {
                     onLogOut={onLogOut}
                     onOpenRegistration={onOpenRegistration}
                     onSeeCommunity={onSeeCommunity}
+                    projectname={projectName}
+                    studioLessons={studioLessons}
+                    thumbnail={thumbnail}
+                    projectdata={projectData}
+                    projectuser={projectUser}
+                    createdProject={createdProject}
+                    userName={userName}
                     onShare={onShare}
                     onToggleLoginOpen={onToggleLoginOpen}
                     onUpdateProjectTitle={onUpdateProjectTitle}
@@ -335,7 +349,14 @@ GUIComponent.propTypes = {
     stageSizeMode: PropTypes.oneOf(Object.keys(STAGE_SIZE_MODES)),
     targetIsStage: PropTypes.bool,
     tipsLibraryVisible: PropTypes.bool,
-    vm: PropTypes.instanceOf(VM).isRequired
+    vm: PropTypes.instanceOf(VM).isRequired,
+    projectData:PropTypes.string,
+    projectName:PropTypes.string,
+    studioLessons:PropTypes.string,
+    thumbnail:PropTypes.string,
+    projectUser:PropTypes.number,
+    createdProject:PropTypes.bool,
+    userName:PropTypes.string
 };
 GUIComponent.defaultProps = {
     backpackOptions: {

@@ -18,6 +18,7 @@ import StageSelectorComponent from '../components/stage-selector/stage-selector.
 import backdropLibraryContent from '../lib/libraries/backdrops.json';
 import {handleFileUpload, costumeUpload} from '../lib/file-uploader.js';
 
+import UpdateAsset from '../lib/update-asset';
 const dragTypes = [
     DragConstants.COSTUME,
     DragConstants.SOUND,
@@ -59,8 +60,13 @@ class StageSelector extends React.Component {
         this.props.onSelect(this.props.id);
     }
     handleNewBackdrop (backdrop) {
-        this.props.vm.addBackdrop(backdrop.md5, backdrop).then(() =>
-            this.props.onActivateTab(COSTUMES_TAB_INDEX));
+        var lastIndex = this.props.vm.editingTarget.getCostumes().length;
+        var update = new UpdateAsset();
+        this.props.vm.addBackdrop(backdrop.md5, backdrop).then(() =>{
+            this.props.onActivateTab(COSTUMES_TAB_INDEX)
+            update.saveNewCostume(this.props.vm, lastIndex);
+        });
+            
     }
     handleSurpriseBackdrop () {
         // @todo should this not add a backdrop you already have?

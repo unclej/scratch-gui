@@ -43,6 +43,7 @@ const StageComponent = props => {
                     minHeight: stageDimensions.height,
                     minWidth: stageDimensions.width
                 }}
+                id="parentOfMainStageCanvas"
                 onDoubleClick={onDoubleClick}
             >
                 <DOMElementRenderer

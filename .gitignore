@@ -17,3 +17,7 @@ npm-*
 # generated translation files
 /translations
 /locale
+
+#Itch Config
+itch.config.js
+build.bat

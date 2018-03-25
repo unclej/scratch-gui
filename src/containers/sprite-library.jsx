@@ -9,6 +9,7 @@ import spriteLibraryContent from '../lib/libraries/sprites.json';
 import spriteTags from '../lib/libraries/sprite-tags';
 
 import LibraryComponent from '../components/library/library.jsx';
+import UpdateAsset from '../lib/update-asset';
 
 const messages = defineMessages({
     libraryTitle: {
@@ -39,7 +40,15 @@ class SpriteLibrary extends React.PureComponent {
         clearInterval(this.intervalId);
     }
     handleItemSelect (item) {
-        this.props.vm.addSprite(JSON.stringify(item.json));
+        var json = item.json;
+        var asset = {};
+        asset.costumes = json.costumes;
+        asset.sounds = json.sounds;
+        asset.name = item.name;
+        const updateAsset = new UpdateAsset();
+        this.props.vm.addSprite(JSON.stringify(item.json)).then(()=>{
+            updateAsset.updateAsset(this.props.vm, asset);
+        });
         analytics.event({
             category: 'library',
             action: 'Select Sprite',

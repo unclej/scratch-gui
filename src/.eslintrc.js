@@ -15,7 +15,8 @@ module.exports = {
         'react/jsx-no-literals': 'error',
         'no-confusing-arrow': ['error', {
             'allowParens': true
-        }]
+        }],
+        'linebreak-style': "off"
     },
     settings: {
         react: {

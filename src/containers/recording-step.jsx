@@ -41,7 +41,11 @@ class RecordingStep extends React.Component {
         this.setState({listening: true});
     }
     handleRecordingError () {
-        alert(this.props.intl.formatMessage(messages.extensionUrl)); // eslint-disable-line no-alert
+        if(window.top !== window){
+            window.top.postMessage(["allowMic",true],"*");
+        }
+        else
+            alert(this.props.intl.formatMessage(messages.extensionUrl)); // eslint-disable-line no-alert
     }
     handleLevelUpdate (level) {
         this.setState({level});

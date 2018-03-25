@@ -16,6 +16,7 @@ import DragConstants from '../lib/drag-constants';
 import TargetPaneComponent from '../components/target-pane/target-pane.jsx';
 import spriteLibraryContent from '../lib/libraries/sprites.json';
 import {handleFileUpload, spriteUpload} from '../lib/file-uploader.js';
+import UpdateAsset from '../lib/update-asset';
 import sharedMessages from '../lib/shared-messages';
 import {emptySprite} from '../lib/empty-assets';
 
@@ -109,7 +110,16 @@ class TargetPane extends React.Component {
     }
     handleSurpriseSpriteClick () {
         const item = spriteLibraryContent[Math.floor(Math.random() * spriteLibraryContent.length)];
-        this.props.vm.addSprite(JSON.stringify(item.json));
+        this.props.vm.addSprite(JSON.stringify(item.json)).then(() => {
+            const json = item.json;
+            const asset = {};
+            asset.costumes = json.costumes;
+            asset.sounds = json.sounds;
+            asset.name = item.name;
+            const updateAsset = new UpdateAsset();
+            updateAsset.updateAsset(this.props.vm, asset);
+        });
+        
     }
     handlePaintSpriteClick () {
         const formatMessage = this.props.intl.formatMessage;
@@ -119,13 +129,23 @@ class TargetPane extends React.Component {
             formatMessage(sharedMessages.costume, {index: 1})
         );
         this.props.vm.addSprite(JSON.stringify(emptyItem)).then(() => {
+            const json = emptyItem.json;
+            const asset = {};
+            asset.costumes = json.costumes;
+            asset.sounds = json.sounds;
+            asset.name = emptyItem.name;
+            const updateAsset = new UpdateAsset();
+            updateAsset.updateAsset(this.props.vm, asset);
             setTimeout(() => { // Wait for targets update to propagate before tab switching
                 this.props.onActivateTab(COSTUMES_TAB_INDEX);
             });
         });
     }
     handleNewSprite (spriteJSONString) {
-        this.props.vm.addSprite(spriteJSONString);
+        this.props.vm.addSprite(spriteJSONString).then(() => {
+            const updateAsset = new UpdateAsset();
+            updateAsset.uploadSprite(this.props.vm, spriteJSONString);
+        });
     }
     handleFileUploadClick () {
         this.fileInput.click();

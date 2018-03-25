@@ -7,6 +7,7 @@ import {defineMessages, injectIntl, intlShape} from 'react-intl';
 import analytics from '../lib/analytics';
 import log from '../lib/log';
 import {setProjectTitle} from '../reducers/project-title';
+import UpdateAsset from '../lib/update-asset';
 
 import {
     openLoadingProject,
@@ -50,7 +51,9 @@ class ProjectLoader extends React.Component {
     }
     handleChange (e) {
         // Remove the hash if any (without triggering a hash change event or a reload)
-        history.replaceState({}, document.title, '.');
+        /** * CHANGES FOR ITCH ***/
+        /* We don't need to update any url parameter here so any upload of projects needs to update the current project */
+        // history.replaceState({}, document.title, '.');
         const reader = new FileReader();
         const thisFileInput = e.target;
         reader.onload = () => this.props.vm.loadProject(reader.result)
@@ -60,6 +63,8 @@ class ProjectLoader extends React.Component {
                     action: 'Import Project File',
                     nonInteraction: true
                 });
+                const updateAsset = new UpdateAsset();
+                updateAsset.uploadProject(this.props.vm);
                 this.props.closeLoadingState();
                 // Reset the file input after project is loaded
                 // This is necessary in case the user wants to reload a project

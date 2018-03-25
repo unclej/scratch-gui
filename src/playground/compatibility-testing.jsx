@@ -12,22 +12,22 @@ const DEFAULT_PROJECT_ID = '10015059';
 class Player extends React.Component {
     constructor (props) {
         super(props);
-        this.updateProject = this.updateProject.bind(this);
+        this.UpdateAsset = this.UpdateAsset.bind(this);
 
         this.state = {
             projectId: window.location.hash.substring(1) || DEFAULT_PROJECT_ID
         };
     }
     componentDidMount () {
-        window.addEventListener('hashchange', this.updateProject);
+        window.addEventListener('hashchange', this.UpdateAsset);
         if (!window.location.hash.substring(1)) {
             window.location.hash = DEFAULT_PROJECT_ID;
         }
     }
     componentWillUnmount () {
-        window.addEventListener('hashchange', this.updateProject);
+        window.addEventListener('hashchange', this.UpdateAsset);
     }
-    updateProject () {
+    UpdateAsset () {
         this.setState({projectId: window.location.hash.substring(1)});
     }
     render () {

@@ -23,6 +23,7 @@ import errorBoundaryHOC from '../lib/error-boundary-hoc.jsx';
 import DragConstants from '../lib/drag-constants';
 
 import {connect} from 'react-redux';
+import UpdateAsset from '../lib/update-asset';
 
 import {
     closeSoundLibrary,
@@ -99,6 +100,9 @@ class SoundTab extends React.Component {
         const sprite = this.props.vm.editingTarget.sprite;
         const sounds = sprite.sounds ? sprite.sounds : [];
         this.setState({selectedSoundIndex: Math.max(sounds.length - 1, 0)});
+        var sound = sounds[this.state.selectedSoundIndex];
+        var update = new UpdateAsset();
+        update.handleNewSound(this.props.vm,sound);
     }
 
     handleSurpriseSound () {

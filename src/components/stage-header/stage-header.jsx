@@ -15,6 +15,9 @@ import fullScreenIcon from './icon--fullscreen.svg';
 import largeStageIcon from './icon--large-stage.svg';
 import smallStageIcon from './icon--small-stage.svg';
 import unFullScreenIcon from './icon--unfullscreen.svg';
+import closeIcon from './close_black.svg';
+import windowFullScreenIcon from './up_arrow.svg';
+import windowExitFullScreenIcon from './down_arrow.svg';
 
 import styles from './stage-header.css';
 
@@ -43,6 +46,21 @@ const messages = defineMessages({
         defaultMessage: 'Full Screen Control',
         description: 'Button to enter/exit full screen mode',
         id: 'gui.stageHeader.fullscreenControl'
+    },
+    closeButtonMessage: {
+        defaultMessage: 'See Project Page',
+        description: 'Button to get out of full screen mode',
+        id: 'gui.gui.closeButton'
+    },
+    windowFullScreen: {
+        defaultMessage: 'Set window Fullscreen',
+        description: 'Button to set window on full screen mode',
+        id: 'gui.gui.windowFullScreen'
+    },
+    windowExitFullScreen: {
+        defaultMessage: 'Exit Fullscreen',
+        description: 'Button to exit window from full screen mode',
+        id: 'gui.gui.windowExitFullScreen'
     }
 });
 
@@ -50,18 +68,83 @@ const StageHeaderComponent = function (props) {
     const {
         isFullScreen,
         isPlayerOnly,
+        isProjectPage,
         onKeyPress,
         onSetStageLarge,
         onSetStageSmall,
         onSetStageFull,
         onSetStageUnFull,
         stageSizeMode,
+        onSetToEditProject,
+        onSetWindowFullScreen,
+        onSetProjectPageFromFull,
+        onSetProjectPageFromUnFull,
         vm
     } = props;
-
     let header = null;
-
-    if (isFullScreen) {
+    
+    const isIpad = (navigator.userAgent.match(/iPad/i) !== null);
+    const windowFullscreenControl = isIpad ? ([]) : (
+        <Button
+            className={classNames(
+                styles.stageFullscreenButton
+            )}
+            onClick={onSetWindowFullScreen}
+            onKeyPress={onKeyPress}
+        >
+            <img
+                alt={props.intl.formatMessage(messages.windowFullScreen)}
+                className={styles.stageButtonIcon}
+                draggable={false}
+                id="img_up_arrow_for_fullscreen"
+                src={windowFullScreenIcon}
+                title="Fullscreen"
+            />
+            <img
+                alt={props.intl.formatMessage(messages.windowExitFullScreen)}
+                className={classNames(styles.stageButtonIcon, styles.hidden)}
+                draggable={false}
+                id="img_down_arrow_for_exitfullscreen"
+                src={windowExitFullScreenIcon}
+                title="Exit Fullscreen"
+            />
+        </Button>
+    );
+    if (isProjectPage) {
+        header = (
+            <Box className={styles.stageHeaderWrapperOverlay}>
+                <Box
+                    className={styles.stageMenuWrapper}
+                >
+                    <Controls vm={vm} />
+                    <div
+                        className={styles.rightButtons}
+                    >
+                        <Button
+                            className={classNames(
+                                styles.stageButton,
+                                styles.stageButtonFirst,
+                                (stageSizeMode === STAGE_SIZE_MODES.small) ? null : styles.stageButtonToggledOff,
+                                styles.stageFullscreenButton,
+                                styles.hidden
+                            )}
+                            id="scratch-header-fullscreen-btn"
+                            onClick={onSetToEditProject}
+                            onKeyPress={onKeyPress}
+                        >
+                            <img
+                                alt={props.intl.formatMessage(messages.unFullStageSizeMessage)}
+                                className={styles.stageButtonIcon}
+                                draggable={false}
+                                src={unFullScreenIcon}
+                                title="Full Screen Control"
+                            />
+                        </Button>
+                    </div>
+                </Box>
+            </Box>
+        );
+    } else if (isFullScreen) {
         const stageDimensions = getStageDimensions(null, true);
         header = (
             <Box className={styles.stageHeaderWrapperOverlay}>
@@ -70,73 +153,93 @@ const StageHeaderComponent = function (props) {
                     style={{width: stageDimensions.width}}
                 >
                     <Controls vm={vm} />
-                    <Button
-                        className={styles.stageButton}
-                        onClick={onSetStageUnFull}
-                        onKeyPress={onKeyPress}
+                    <div
+                        className={styles.rightButtons}
                     >
-                        <img
-                            alt={props.intl.formatMessage(messages.unFullStageSizeMessage)}
-                            className={styles.stageButtonIcon}
-                            draggable={false}
-                            src={unFullScreenIcon}
-                            title={props.intl.formatMessage(messages.fullscreenControl)}
-                        />
-                    </Button>
+                        <Button
+                            className={styles.stageFullscreenButton}
+                            id="scratch-header-fullscreen-btn"
+                            onClick={onSetStageUnFull}
+                            onKeyPress={onKeyPress}
+                        >
+                            <img
+                                alt={props.intl.formatMessage(messages.unFullStageSizeMessage)}
+                                className={styles.stageButtonIcon}
+                                draggable={false}
+                                src={unFullScreenIcon}
+                                title={props.intl.formatMessage(messages.fullscreenControl)}
+                            />
+                        </Button>
+                        {windowFullscreenControl}
+                        <Button
+                            className={styles.projectButton}
+                            onClick={onSetProjectPageFromUnFull}
+                            onKeyPress={onKeyPress}
+                        >
+                            <img
+                                alt={props.intl.formatMessage(messages.closeButtonMessage)}
+                                className={styles.stageButtonIcon}
+                                draggable={false}
+                                src={closeIcon}
+                                title="See Project Page"
+                            />
+                        </Button>
+                    </div>
                 </Box>
             </Box>
         );
     } else {
         const stageControls =
-            isPlayerOnly ? (
-                []
-            ) : (
-                <div className={styles.stageSizeToggleGroup}>
-                    <div>
-                        <Button
-                            className={classNames(
-                                styles.stageButton,
-                                styles.stageButtonFirst,
-                                (stageSizeMode === STAGE_SIZE_MODES.small) ? null : styles.stageButtonToggledOff
-                            )}
-                            onClick={onSetStageSmall}
-                        >
-                            <img
-                                alt={props.intl.formatMessage(messages.smallStageSizeMessage)}
-                                className={styles.stageButtonIcon}
-                                draggable={false}
-                                src={smallStageIcon}
-                            />
-                        </Button>
+                isPlayerOnly ? (
+                    []
+                ) : (
+                    <div className={styles.stageSizeToggleGroup}>
+                        <div>
+                            <Button
+                                className={classNames(
+                                    styles.stageButton,
+                                    styles.stageButtonFirst,
+                                    (stageSizeMode === STAGE_SIZE_MODES.small) ? null : styles.stageButtonToggledOff,
+                                )}
+                                onClick={onSetStageSmall}
+                            >
+                                <img
+                                    alt={props.intl.formatMessage(messages.smallStageSizeMessage)}
+                                    className={styles.stageButtonIcon}
+                                    draggable={false}
+                                    src={smallStageIcon}
+                                />
+                            </Button>
+                        </div>
+                        <div>
+                            <Button
+                                className={classNames(
+                                    styles.stageButton,
+                                    styles.stageButtonLast,
+                                    (stageSizeMode === STAGE_SIZE_MODES.large) ? null : styles.stageButtonToggledOff
+                                )}
+                                id="buttonToSetStageSizeLarge"
+                                onClick={onSetStageLarge}
+                            >
+                                <img
+                                    alt={props.intl.formatMessage(messages.largeStageSizeMessage)}
+                                    className={styles.stageButtonIcon}
+                                    draggable={false}
+                                    src={largeStageIcon}
+                                />
+                            </Button>
+                        </div>
                     </div>
-                    <div>
-                        <Button
-                            className={classNames(
-                                styles.stageButton,
-                                styles.stageButtonLast,
-                                (stageSizeMode === STAGE_SIZE_MODES.large) ? null : styles.stageButtonToggledOff
-                            )}
-                            onClick={onSetStageLarge}
-                        >
-                            <img
-                                alt={props.intl.formatMessage(messages.largeStageSizeMessage)}
-                                className={styles.stageButtonIcon}
-                                draggable={false}
-                                src={largeStageIcon}
-                            />
-                        </Button>
-                    </div>
-                </div>
-            );
+                );
         header = (
             <Box className={styles.stageHeaderWrapper}>
                 <Box className={styles.stageMenuWrapper}>
                     <Controls vm={vm} />
                     <div className={styles.stageSizeRow}>
                         {stageControls}
-                        <div>
+                        <div className={styles.rightButtons}>
                             <Button
-                                className={styles.stageButton}
+                                className={styles.stageFullscreenButton}
                                 onClick={onSetStageFull}
                             >
                                 <img
@@ -144,7 +247,21 @@ const StageHeaderComponent = function (props) {
                                     className={styles.stageButtonIcon}
                                     draggable={false}
                                     src={fullScreenIcon}
-                                    title={props.intl.formatMessage(messages.fullscreenControl)}
+                                    title="Full Screen Control"
+                                />
+                            </Button>
+                            {windowFullscreenControl}
+                            <Button
+                                className={styles.projectButton}
+                                onClick={onSetProjectPageFromFull}
+                                onKeyPress={onKeyPress}
+                            >
+                                <img
+                                    alt={props.intl.formatMessage(messages.closeButtonMessage)}
+                                    className={styles.stageButtonIcon}
+                                    draggable={false}
+                                    src={closeIcon}
+                                    title="See Project Page"
                                 />
                             </Button>
                         </div>
@@ -167,10 +284,14 @@ StageHeaderComponent.propTypes = {
     isFullScreen: PropTypes.bool.isRequired,
     isPlayerOnly: PropTypes.bool.isRequired,
     onKeyPress: PropTypes.func.isRequired,
+    onSetProjectPageFromFull: PropTypes.func.isRequired,
+    onSetProjectPageFromUnFull: PropTypes.func.isRequired,
     onSetStageFull: PropTypes.func.isRequired,
     onSetStageLarge: PropTypes.func.isRequired,
     onSetStageSmall: PropTypes.func.isRequired,
     onSetStageUnFull: PropTypes.func.isRequired,
+    onSetToEditProject: PropTypes.func.isRequired,
+    onSetWindowFullScreen: PropTypes.func.isRequired,
     stageSizeMode: PropTypes.oneOf(Object.keys(STAGE_SIZE_MODES)),
     vm: PropTypes.instanceOf(VM).isRequired
 };

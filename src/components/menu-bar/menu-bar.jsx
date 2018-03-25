@@ -13,15 +13,17 @@ import LanguageSelector from '../../containers/language-selector.jsx';
 import ProjectLoader from '../../containers/project-loader.jsx';
 import MenuBarMenu from './menu-bar-menu.jsx';
 import {MenuItem, MenuSection} from '../menu/menu.jsx';
-import ProjectTitleInput from './project-title-input.jsx';
+/* import ProjectTitleInput from './project-title-input.jsx';
 import AccountNav from '../../containers/account-nav.jsx';
-import LoginDropdown from './login-dropdown.jsx';
+import LoginDropdown from './login-dropdown.jsx'; */
 import ProjectSaver from '../../containers/project-saver.jsx';
 import DeletionRestorer from '../../containers/deletion-restorer.jsx';
 import TurboMode from '../../containers/turbo-mode.jsx';
+import SaveProject from '../../containers/save-project.jsx';
 
 import {openTipsLibrary} from '../../reducers/modals';
 import {setPlayer} from '../../reducers/mode';
+/* import EventMessage from '../../containers/event-message.jsx'; */
 import {
     openAccountMenu,
     closeAccountMenu,
@@ -45,12 +47,10 @@ import styles from './menu-bar.css';
 import helpIcon from '../../lib/assets/icon--tutorials.svg';
 import mystuffIcon from './icon--mystuff.png';
 import feedbackIcon from './icon--feedback.svg';
-import profileIcon from './icon--profile.png';
-import communityIcon from './icon--see-community.svg';
+/* import profileIcon from './icon--profile.png';
+import communityIcon from './icon--see-community.svg'; */
 import dropdownCaret from './dropdown-caret.svg';
 import languageIcon from '../language-selector/language-icon.svg';
-
-import scratchLogo from './scratch-logo.svg';
 
 const ariaMessages = defineMessages({
     language: {
@@ -62,6 +62,11 @@ const ariaMessages = defineMessages({
         id: 'gui.menuBar.tutorialsLibrary',
         defaultMessage: 'Tutorials',
         description: 'accessibility text for the tutorials button'
+    },
+    lessons: {
+        id: 'gui.menuBar.lessonPanel',
+        defaultMessage: 'Lessons',
+        description: 'go to lesson panel'
     }
 });
 
@@ -196,7 +201,7 @@ class MenuBar extends React.Component {
                 id="gui.menuBar.saveNow"
             />
         );
-        const shareButton = (
+        /* const shareButton = (
             <Button
                 className={classNames(styles.shareButton)}
                 onClick={this.props.onShare}
@@ -207,7 +212,7 @@ class MenuBar extends React.Component {
                     id="gui.menuBar.share"
                 />
             </Button>
-        );
+        ); */
         return (
             <Box
                 className={classNames(styles.menuBar, {
@@ -216,7 +221,7 @@ class MenuBar extends React.Component {
             >
                 <div className={styles.mainMenu}>
                     <div className={styles.fileGroup}>
-                        <div className={classNames(styles.menuBarItem)}>
+                        {/* <div className={classNames(styles.menuBarItem)}>
                             <a
                                 href="https://scratch.mit.edu"
                                 rel="noopener noreferrer"
@@ -229,7 +234,7 @@ class MenuBar extends React.Component {
                                     src={scratchLogo}
                                 />
                             </a>
-                        </div>
+                        </div> */}
                         <div
                             className={classNames(styles.menuBarItem, styles.hoverable, styles.languageMenu)}
                         >
@@ -392,7 +397,7 @@ class MenuBar extends React.Component {
                         <FormattedMessage {...ariaMessages.tutorials} />
                     </div>
                     <Divider className={classNames(styles.divider)} />
-                    <div className={classNames(styles.menuBarItem, styles.growable)}>
+                    {/* <div className={classNames(styles.menuBarItem, styles.growable)}>
                         <MenuBarItemTooltip
                             enable
                             id="title-field"
@@ -402,15 +407,39 @@ class MenuBar extends React.Component {
                                 onUpdateProjectTitle={this.props.onUpdateProjectTitle}
                             />
                         </MenuBarItemTooltip>
-                    </div>
-                    <div className={classNames(styles.menuBarItem)}>
+                    </div> */}
+                    {/* <div className={classNames(styles.menuBarItem)}>
                         {this.props.onShare ? shareButton : (
                             <MenuBarItemTooltip id="share-button">
                                 {shareButton}
                             </MenuBarItemTooltip>
                         )}
-                    </div>
-                    <div className={classNames(styles.menuBarItem, styles.communityButtonWrapper)}>
+                    </div> */}
+                    <SaveProject
+                        className={styles.saveProjectButton}
+                        createdProject={this.props.createdProject}
+                        projectLessonsVisible={this.props.projectLessonsVisible}
+                        projectdata={this.props.projectdata}
+                        projectname={this.props.projectname}
+                        projectuser={this.props.projectuser}
+                        shareProjectVisible={this.props.shareProjectVisible}
+                        studioLessons={this.props.studioLessons}
+                        thumbnail={this.props.thumbnail}
+                    />
+                    
+                    {/* <Divider className={classNames(styles.divider,(window.top == window?styles.hidden:""))} />
+                    <div className={classNames([styles.menuBarItem,(window.top == window?styles.hidden:"")])}>
+                        <Button
+                            className={classNames(styles.shareButton)}
+                            onClick={EventMessage.shareProject}
+                        >
+                            <FormattedMessage
+                                defaultMessage="Share"
+                                description="Label for project share button"
+                                id="gui.menuBar.share"
+                            />
+                        </Button>
+                    </div><div className={classNames(styles.menuBarItem, styles.communityButtonWrapper)}>
                         {this.props.enableCommunity ?
                             <Button
                                 className={classNames(styles.communityButton)}
@@ -438,12 +467,12 @@ class MenuBar extends React.Component {
                                 </Button>
                             </MenuBarItemTooltip>
                         }
-                    </div>
+                    </div> */}
                 </div>
 
                 {/* show the proper UI in the account menu, given whether the user is
                 logged in, and whether a session is available to log in with */}
-                <div className={styles.accountInfoGroup}>
+                {/*  <div className={styles.accountInfoGroup}>
                     {this.props.sessionExists ? (
                         this.props.username ? (
                             // ************ user is logged in ************
@@ -579,7 +608,66 @@ class MenuBar extends React.Component {
                             </MenuBarItemTooltip>
                         </React.Fragment>
                     )}
+                </div> */}
+                <div className={classNames(styles.menuBarItem, styles.feedbackButtonWrapper)}>
+                    <a
+                        className={styles.feedbackLink}
+                        href="https://docs.google.com/forms/d/e/1FAIpQLScRjrOVVgR47D3-vHYUaR5EWr1B148pv4d9L8sfg2tMV3lOGQ/viewform"
+                        rel="noopener noreferrer"
+                        target="_blank"
+                    >
+                        <Button
+                            className={styles.feedbackButton}
+                            iconSrc={feedbackIcon}
+                        >
+                            <FormattedMessage
+                                defaultMessage="Give Feedback"
+                                description="Label for feedback form modal button"
+                                id="gui.menuBar.giveFeedback"
+                            />
+                        </Button>
+                    </a>
                 </div>
+                {/* <div className={styles.accountInfoWrapper}> */}
+                <MenuBarItemTooltip id="mystuff">
+                    <div
+                        className={classNames(
+                            styles.menuBarItem,
+                            styles.hoverable,
+                            styles.mystuffButton
+                        )}
+                    >
+                        <img
+                            className={styles.mystuffIcon}
+                            src={mystuffIcon}
+                        />
+                    </div>
+                </MenuBarItemTooltip>
+                <MenuBarItemTooltip
+                    id="account-nav"
+                    place="left"
+                >
+                    <div
+                        className={classNames(
+                            styles.menuBarItem,
+                            styles.hoverable,
+                            styles.accountNavMenu
+                        )}
+                    >
+                        {/* <img
+                                className={styles.profileIcon}
+                                src={profileIcon}
+                            />*/}
+                        <span>
+                            {this.props.userName}
+                        </span>
+                        <img
+                            className={styles.dropdownCaretIcon}
+                            src={dropdownCaret}
+                        />
+                    </div>
+                </MenuBarItemTooltip>
+                {/* </div> */}
             </Box>
         );
     }
@@ -588,6 +676,7 @@ class MenuBar extends React.Component {
 MenuBar.propTypes = {
     accountMenuOpen: PropTypes.bool,
     canUpdateProject: PropTypes.bool,
+    createdProject: PropTypes.bool,
     editMenuOpen: PropTypes.bool,
     enableCommunity: PropTypes.bool,
     fileMenuOpen: PropTypes.bool,
@@ -611,8 +700,15 @@ MenuBar.propTypes = {
     onSeeCommunity: PropTypes.func,
     onToggleLoginOpen: PropTypes.func,
     onUpdateProjectTitle: PropTypes.func,
+    projectLessonsVisible: PropTypes.bool,
+    projectdata: PropTypes.string,
+    projectname: PropTypes.string,
+    projectuser: PropTypes.number,
     renderLogin: PropTypes.func,
     sessionExists: PropTypes.bool,
+    shareProjectVisible: PropTypes.bool,
+    studioLessons: PropTypes.string,
+    thumbnail: PropTypes.string,
     username: PropTypes.string
 };
 
@@ -626,7 +722,9 @@ const mapStateToProps = state => ({
     loginMenuOpen: loginMenuOpen(state),
     sessionExists: state.session && typeof state.session.session !== 'undefined',
     username: state.session && state.session.session && state.session.session.user ?
-        state.session.session.user.username : null
+        state.session.session.user.username : null,
+    shareProjectVisible: state.scratchGui.modals.shareProject,
+    projectLessonsVisible: state.scratchGui.modals.projectLessons
 });
 
 const mapDispatchToProps = dispatch => ({

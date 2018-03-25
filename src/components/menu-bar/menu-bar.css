@@ -157,7 +157,11 @@
 .help-icon {
     margin-right: 0.35rem;
 }
-
+.lesson-icon{
+    margin-right: 0.35rem;
+    width: 34px;
+    height: 15px;
+}
 .account-nav-menu, .mystuff-button {
     padding: 0 .25rem;
     display: flex;
@@ -176,6 +180,12 @@
     height: 0.5rem;
 }
 
+.save-button {
+    background: $ui-white;
+    height: 32px;
+    box-shadow: 0 0 0 1px $ui-black-transparent;
+    color:$motion-primary;
+}
 [dir="ltr"] .dropdown-caret-icon {
     margin-left: .5rem;
 }

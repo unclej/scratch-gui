@@ -50,7 +50,7 @@ class ErrorBoundary extends React.Component {
     }
 
     handleReload () {
-        window.location.replace(window.location.origin + window.location.pathname);
+        window.location.reload(true);
     }
 
     render () {

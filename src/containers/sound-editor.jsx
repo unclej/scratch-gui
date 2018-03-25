@@ -11,6 +11,7 @@ import AudioEffects from '../lib/audio/audio-effects.js';
 import SoundEditorComponent from '../components/sound-editor/sound-editor.jsx';
 import AudioBufferPlayer from '../lib/audio/audio-buffer-player.js';
 import log from '../lib/log.js';
+import UpdateAsset from '../lib/update-asset';
 
 const UNDO_STACK_SIZE = 99;
 
@@ -87,12 +88,14 @@ class SoundEditor extends React.Component {
             // should yield this error.
             log.error(`Encountered error while trying to encode sound update: ${e}`);
         }
-
         this.resetState(samples, sampleRate);
         this.props.vm.updateSoundBuffer(
             this.props.soundIndex,
             this.audioBufferPlayer.buffer,
             wavBuffer ? new Uint8Array(wavBuffer) : new Uint8Array());
+
+        var update = new UpdateAsset();
+        update.handleUpdateSound(this.props.vm,this.props.soundIndex);
     }
     handlePlay () {
         this.audioBufferPlayer.play(

@@ -7,6 +7,7 @@ import PaintEditor from 'scratch-paint';
 import analytics from '../lib/analytics';
 
 import {connect} from 'react-redux';
+import UpdateAsset from '../lib/update-asset';
 
 class PaintEditorWrapper extends React.Component {
     constructor (props) {
@@ -23,6 +24,8 @@ class PaintEditorWrapper extends React.Component {
         this.props.vm.renameCostume(this.props.selectedCostumeIndex, name);
     }
     handleUpdateImage (isVector, image, rotationCenterX, rotationCenterY) {
+        const updateAsset = new UpdateAsset();
+        updateAsset.handleNewCostume(this.props.vm,this.props.selectedCostumeIndex);
         if (isVector) {
             this.props.vm.updateSvg(
                 this.props.selectedCostumeIndex,

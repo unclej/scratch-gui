@@ -16,13 +16,19 @@ const base = {
     mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
     devtool: 'cheap-module-source-map',
     devServer: {
+        headers: {'Access-Control-Allow-Origin': '*'},
         contentBase: path.resolve(__dirname, 'build'),
         host: '0.0.0.0',
-        port: process.env.PORT || 8601
+        port: process.env.PORT || 8000
+    },
+    node: {
+        fs: 'empty',
+        net: 'empty',
+        tls: 'empty'
     },
     output: {
         library: 'GUI',
-        filename: '[name].js'
+        filename: '[name]_[chunkhash].js'
     },
     externals: {
         React: 'react',
@@ -101,7 +107,7 @@ module.exports = [
         },
         output: {
             path: path.resolve(__dirname, 'build'),
-            filename: '[name].js'
+            filename: '[name]_[chunkhash].js'
         },
         externals: {
             React: 'react',
