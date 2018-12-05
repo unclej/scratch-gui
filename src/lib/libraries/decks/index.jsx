@@ -20,7 +20,7 @@ import stepTXTSpin from './txt/09_hoc-spin.gif';
 import stepTXTGrow from './txt/10_hoc-grow-shrink.gif';
 
 // Cartoon Network
-import libraryCartoonNetwork from './cartoonnetwork/lib_CartoonNetwork.jpg';
+/* import libraryCartoonNetwork from './cartoonnetwork/lib_CartoonNetwork.jpg';
 import stepCNcharacter from './cartoonnetwork/01_cn-pick-character.gif';
 import stepCNsay from './cartoonnetwork/02_cn-say-something.gif';
 import stepCNglide from './cartoonnetwork/03_cn-glide-around.gif';
@@ -30,7 +30,7 @@ import stepCNscore from './cartoonnetwork/06_cn-keep-score.gif';
 import stepCNkeepscore from './cartoonnetwork/07_cn-level-up.gif';
 import stepCNlevel from './cartoonnetwork/08_cn-pick-another-character.gif';
 import stepCNcharacter2 from './cartoonnetwork/09_cn-level-up-say-something.gif';
-import stepCNlevelup from './cartoonnetwork/10_cn-animate-run.gif';
+import stepCNlevelup from './cartoonnetwork/10_cn-animate-run.gif'; */
 
 // Add sprite
 import libraryAddSprite from './sprite/cover-add-sprite.jpg';
@@ -240,7 +240,7 @@ export default {
         urlId: 'animations-that-talk'
     },
 
-    'cartoon-network': {
+    /* 'cartoon-network': {
         name: (
             <FormattedMessage
                 defaultMessage="Animate an Adventure Game"
@@ -350,7 +350,7 @@ export default {
         }
         ],
         urlId: 'animate-an-adventure-game'
-    },
+    }, */
     'animate-a-name': {
         name: (
             <FormattedMessage

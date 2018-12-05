@@ -32,10 +32,10 @@ export default appTarget => {
         visible: true,
         host: backpackHost
     };
-    if (process.env.NODE_ENV === 'production' && typeof window === 'object') {
+    /* if (process.env.NODE_ENV === 'production' && typeof window === 'object') {
         // Warn before navigating away
         window.onbeforeunload = () => true;
-    }
+    } */
 
     ReactDOM.render(
         <WrappedGui

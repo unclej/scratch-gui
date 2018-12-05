@@ -2,20 +2,20 @@ import {addLocaleData} from 'react-intl';
 
 import {localeData} from 'scratch-l10n';
 import editorMessages from 'scratch-l10n/locales/editor-msgs';
+import itchLocale from '../lib/itch/editor-msgs';
 import {isRtl} from 'scratch-l10n';
 
 addLocaleData(localeData);
 
 const UPDATE_LOCALES = 'scratch-gui/locales/UPDATE_LOCALES';
 const SELECT_LOCALE = 'scratch-gui/locales/SELECT_LOCALE';
-
 const initialState = {
     isRtl: false,
     locale: 'en',
     messagesByLocale: editorMessages,
-    messages: editorMessages.en
+    itchMessagesByLocale: itchLocale,
+    messages: Object.assign(editorMessages.en, itchLocale.en)
 };
-
 const reducer = function (state, action) {
     if (typeof state === 'undefined') state = initialState;
     switch (action.type) {
@@ -24,14 +24,20 @@ const reducer = function (state, action) {
             isRtl: isRtl(action.locale),
             locale: action.locale,
             messagesByLocale: state.messagesByLocale,
-            messages: state.messagesByLocale[action.locale]
+            messages: Object.assign(
+                state.messagesByLocale[action.locale],
+                (state.itchMessagesByLocale[action.locale] || state.itchMessagesByLocale.en)
+            )
         });
     case UPDATE_LOCALES:
         return Object.assign({}, state, {
             isRtl: state.isRtl,
             locale: state.locale,
             messagesByLocale: action.messagesByLocale,
-            messages: action.messagesByLocale[state.locale]
+            messages: Object.assign(
+                state.messagesByLocale[action.locale],
+                (state.itchMessagesByLocale[action.locale] || state.itchMessagesByLocale.en)
+            )
         });
     default:
         return state;

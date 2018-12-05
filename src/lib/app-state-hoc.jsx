@@ -11,6 +11,7 @@ import {setPlayer, setFullScreen} from '../reducers/mode.js';
 import locales from 'scratch-l10n';
 import {detectLocale} from './detect-locale';
 import {detectTutorialId} from './tutorial-from-url';
+import sessionReducer, {sessionInitialState} from '../reducers/session';
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
@@ -76,7 +77,8 @@ const AppStateHOC = function (WrappedComponent, localesOnly) {
                 reducers = {
                     locales: localesReducer,
                     scratchGui: guiReducer,
-                    scratchPaint: ScratchPaintReducer
+                    scratchPaint: ScratchPaintReducer,
+                    session: sessionReducer
                 };
                 initialState = {
                     locales: initializedLocales,

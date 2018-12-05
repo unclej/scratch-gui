@@ -29,8 +29,11 @@ import FontLoaderHOC from '../lib/font-loader-hoc.jsx';
 import LocalizationHOC from '../lib/localization-hoc.jsx';
 import ProjectFetcherHOC from '../lib/project-fetcher-hoc.jsx';
 import ProjectSaverHOC from '../lib/project-saver-hoc.jsx';
+import ItchProject from '../lib/project.jsx';
 import vmListenerHOC from '../lib/vm-listener-hoc.jsx';
 import vmManagerHOC from '../lib/vm-manager-hoc.jsx';
+import EventMessageHOC from '../lib/event-message-hoc.jsx';
+import ITCH_CONFIG from '../../itch.config';
 
 import GUIComponent from '../components/gui/gui.jsx';
 
@@ -64,7 +67,16 @@ class GUI extends React.Component {
         }
     }
     render () {
+        const url = window.location.search.substring(1).split('&');
+        const keyValue = {};
+        for (let i = 0; i < url.length; i++){
+            const d = url[i].split('=');
+            keyValue[d[0]] = d[1];
+        }
         if (this.props.isError) {
+            parent.postMessage(
+                ['loaded', [true]],
+                (keyValue.baseUrl ? keyValue.baseUrl : (ITCH_CONFIG.BASE_URL + ITCH_CONFIG.BASE_URL_EXTENSION)));
             throw new Error(
                 `Error in Scratch GUI [location=${window.location}]: ${this.props.error}`);
         }
@@ -87,6 +99,11 @@ class GUI extends React.Component {
             loadingStateVisible,
             ...componentProps
         } = this.props;
+        if (window.self !== window.top && !(fetchingProject || isLoading || loadingStateVisible)){
+            parent.postMessage(
+                ['loaded', [true]],
+                (keyValue.baseUrl ? keyValue.baseUrl : (ITCH_CONFIG.BASE_URL + ITCH_CONFIG.BASE_URL_EXTENSION)));
+        }
         return (
             <GUIComponent
                 loading={fetchingProject || isLoading || loadingStateVisible}
@@ -118,6 +135,7 @@ GUI.propTypes = {
     projectHost: PropTypes.string,
     projectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     projectTitle: PropTypes.string,
+    shareProjectVisible: PropTypes.bool,
     vm: PropTypes.instanceOf(VM).isRequired
 };
 
@@ -151,7 +169,8 @@ const mapStateToProps = (state, ownProps) => {
         ),
         soundsTabVisible: state.scratchGui.editorTab.activeTabIndex === SOUNDS_TAB_INDEX,
         tipsLibraryVisible: state.scratchGui.modals.tipsLibrary,
-        vm: state.scratchGui.vm
+        vm: state.scratchGui.vm,
+        shareProjectVisible: state.scratchGui.modals.shareProject
     };
 };
 
@@ -179,6 +198,7 @@ const WrappedGui = compose(
     FontLoaderHOC,
     ProjectFetcherHOC,
     ProjectSaverHOC,
+    ItchProject,
     vmListenerHOC,
     vmManagerHOC
 )(ConnectedGUI);

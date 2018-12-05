@@ -39,6 +39,7 @@ const StageComponent = props => {
                     [styles.stageWrapperOverlay]: isFullScreen,
                     [styles.withColorPicker]: !isFullScreen && isColorPicking
                 })}
+                id="parentOfMainStageCanvas"
                 style={{
                     minHeight: stageDimensions.height,
                     minWidth: stageDimensions.width

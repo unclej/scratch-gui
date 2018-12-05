@@ -18,6 +18,8 @@ analytics.pageview('/');
 
 const appTarget = document.createElement('div');
 appTarget.className = styles.app;
+appTarget.classList.add('only-player-app-screen');
+appTarget.id = 'mainDivApp';
 document.body.appendChild(appTarget);
 
 if (supportedBrowser()) {

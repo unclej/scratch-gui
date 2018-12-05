@@ -6,7 +6,7 @@ import {defineMessages, injectIntl, intlShape} from 'react-intl';
 
 import analytics from '../lib/analytics';
 import log from '../lib/log';
-import {LoadingStates, onLoadedProject, onProjectUploadStarted} from '../reducers/project-state';
+import {LoadingStates, onLoadedProject, onProjectUploadStarted, setProjectIdAndState} from '../reducers/project-state';
 
 import {
     openLoadingProject,
@@ -58,8 +58,10 @@ class SBFileUploader extends React.Component {
     // called when user has finished selecting a file to upload
     handleChange (e) {
         // Remove the hash if any (without triggering a hash change event or a reload)
-        history.replaceState({}, document.title, '.');
+        // we need to update current project
+        // history.replaceState({}, document.title, '.');
         const reader = new FileReader();
+        const projectId = this.props.projectId;
         const thisFileInput = e.target;
         reader.onload = () => this.props.vm.loadProject(reader.result)
             .then(() => {
@@ -68,7 +70,9 @@ class SBFileUploader extends React.Component {
                     action: 'Import Project File',
                     nonInteraction: true
                 });
-                this.props.onLoadingFinished(this.props.loadingState);
+                // window.location.hash = `#${projectId}`;
+                history.replaceState({}, document.title, `${document.location.pathname}${document.location.search}#${projectId}`);
+                this.props.onLoadingFinished(this.props.loadingState, projectId);
                 // Reset the file input after project is loaded
                 // This is necessary in case the user wants to reload a project
                 thisFileInput.value = null;
@@ -119,18 +123,21 @@ SBFileUploader.propTypes = {
     onLoadingFinished: PropTypes.func,
     onLoadingStarted: PropTypes.func,
     onUpdateProjectTitle: PropTypes.func,
+    projectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     vm: PropTypes.shape({
         loadProject: PropTypes.func
     })
 };
 const mapStateToProps = state => ({
+    projectId: state.scratchGui.projectState.projectId,
     loadingState: state.scratchGui.projectState.loadingState,
     vm: state.scratchGui.vm
 });
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-    onLoadingFinished: loadingState => {
+    onLoadingFinished: (loadingState, projectId) => {
         dispatch(onLoadedProject(loadingState, ownProps.canSave));
+        dispatch(setProjectIdAndState(projectId, 'SHOWING_WITH_ID'));
         dispatch(closeLoadingProject());
     },
     onLoadingStarted: () => {

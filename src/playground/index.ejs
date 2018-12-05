@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html class="only-player-app-screen">
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -14,7 +14,28 @@
         </script>
         <!-- /Sentry -->
     <% } %>
+    <style type="text/css">
+        .only-player-app-screen{
+            min-width: 380px!important;
+            min-height: 334px!important;
+            overflow: hidden;
+        }
+        .full-app-screen{
+            min-height: 600px!important;
+            min-width: 1024px!important;
+            overflow: auto;
+        }
+      
+  </style>
+    <script type="text/javascript">
+        window.__IS_PROJECT_PAGE=true;
+        (function(_,e,rr,s){_errs=[s];var c=_.onerror;_.onerror=function(){var a=arguments;_errs.push(a);
+        c&&c.apply(this,a)};var b=function(){var c=e.createElement(rr),b=e.getElementsByTagName(rr)[0];
+        c.src="//beacon.errorception.com/"+s+".js";c.async=!0;b.parentNode.insertBefore(c,b)};
+        _.addEventListener?_.addEventListener("load",b,!1):_.attachEvent("onload",b)})
+        (window,document,"script","589263eb728951840e000307");
+    </script>
   </head>
-  <body>
+  <body class="only-player-app-screen">
   </body>
 </html>

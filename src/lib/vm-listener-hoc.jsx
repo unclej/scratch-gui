@@ -9,7 +9,7 @@ import {updateTargets} from '../reducers/targets';
 import {updateBlockDrag} from '../reducers/block-drag';
 import {updateMonitors} from '../reducers/monitors';
 import {setRunningState, setTurboState} from '../reducers/vm-status';
-import {showAlert} from '../reducers/alerts';
+import {showExtensionAlert} from '../reducers/alerts';
 import {updateMicIndicator} from '../reducers/mic-indicator';
 
 /*
@@ -146,7 +146,7 @@ const vmListenerHOC = function (WrappedComponent) {
         onTurboModeOn: () => dispatch(setTurboState(true)),
         onTurboModeOff: () => dispatch(setTurboState(false)),
         onShowAlert: data => {
-            dispatch(showAlert(data));
+            dispatch(showExtensionAlert(data));
         },
         onMicListeningUpdate: listening => {
             dispatch(updateMicIndicator(listening));

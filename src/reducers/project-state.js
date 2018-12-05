@@ -11,6 +11,8 @@ const DONE_REMIXING = 'scratch-gui/project-state/DONE_REMIXING';
 const DONE_UPDATING = 'scratch-gui/project-state/DONE_UPDATING';
 const DONE_UPDATING_BEFORE_NEW = 'scratch-gui/project-state/DONE_UPDATING_BEFORE_NEW';
 const SET_PROJECT_ID = 'scratch-gui/project-state/SET_PROJECT_ID';
+const SET_PROJECT_ID_AND_STATE = 'scratch-gui/project-state/SET_PROJECT_ID_AND_STATE';
+const START_AUTO_UPDATING = 'scratch-gui/project-state/START_AUTO_UPDATING';
 const START_CREATING_COPY = 'scratch-gui/project-state/START_CREATING_COPY';
 const START_CREATING_NEW = 'scratch-gui/project-state/START_CREATING_NEW';
 const START_ERROR = 'scratch-gui/project-state/START_ERROR';
@@ -19,12 +21,15 @@ const START_LOADING_VM_FILE_UPLOAD = 'scratch-gui/project-state/START_LOADING_FI
 const START_REMIXING = 'scratch-gui/project-state/START_REMIXING';
 const START_UPDATING = 'scratch-gui/project-state/START_UPDATING';
 const START_UPDATING_BEFORE_CREATING_NEW = 'scratch-gui/project-state/START_UPDATING_BEFORE_CREATING_NEW';
+const SERVER_AUTO_UPDATE = 'scratch-gui/project-state/SERVER_AUTO_UPDATE';
+const SET_NEEDS_UPDATE = 'scratch-gui/project-state/SET_NEEDS_UPDATE';
 
 const defaultProjectId = '0'; // hardcoded id of default project
 
 const LoadingState = keyMirror({
     NOT_LOADED: null,
     ERROR: null,
+    AUTO_UPDATING: null,
     FETCHING_WITH_ID: null,
     FETCHING_NEW_DEFAULT: null,
     LOADING_VM_WITH_ID: null,
@@ -36,7 +41,8 @@ const LoadingState = keyMirror({
     CREATING_COPY: null,
     UPDATING: null,
     UPDATING_BEFORE_NEW: null,
-    CREATING_NEW: null
+    CREATING_NEW: null,
+    SERVER_AUTO_UPDATE: null
 });
 
 const LoadingStates = Object.keys(LoadingState);
@@ -55,13 +61,22 @@ const getIsLoadingWithId = loadingState => (
     loadingState === LoadingState.LOADING_VM_NEW_DEFAULT
 );
 const getIsCreating = loadingState => (
-    loadingState === LoadingState.CREATING_NEW ||
-    loadingState === LoadingState.REMIXING ||
+    loadingState === LoadingState.CREATING_NEW
+);
+const getIsCoping = loadingState => (
     loadingState === LoadingState.CREATING_COPY
 );
+const getIsManualUpdating = loadingState => (
+    loadingState === LoadingState.UPDATING
+);
+const getIsRemixing = loadingState => (
+    loadingState === LoadingState.REMIXING
+);
 const getIsUpdating = loadingState => (
+    loadingState === LoadingState.AUTO_UPDATING ||
     loadingState === LoadingState.UPDATING ||
-    loadingState === LoadingState.UPDATING_BEFORE_NEW
+    loadingState === LoadingState.UPDATING_BEFORE_NEW ||
+    loadingState === LoadingState.SERVER_AUTO_UPDATE
 );
 const getIsShowingProject = loadingState => (
     loadingState === LoadingState.SHOWING_WITH_ID ||
@@ -76,12 +91,16 @@ const getIsShowingWithoutId = loadingState => (
 const getIsError = loadingState => (
     loadingState === LoadingState.ERROR
 );
+const getIsFromServerUpdate = loadingState => (
+    loadingState === LoadingState.SERVER_AUTO_UPDATE
+);
 
 const initialState = {
     error: null,
     projectData: null,
     projectId: null,
-    loadingState: LoadingState.NOT_LOADED
+    loadingState: LoadingState.NOT_LOADED,
+    needsUpdate: false
 };
 
 const reducer = function (state, action) {
@@ -132,7 +151,7 @@ const reducer = function (state, action) {
     case DONE_LOADING_VM_TO_SAVE:
         if (state.loadingState === LoadingState.LOADING_VM_FILE_UPLOAD) {
             return Object.assign({}, state, {
-                loadingState: LoadingState.UPDATING
+                loadingState: LoadingState.AUTO_UPDATING
             });
         }
         return state;
@@ -141,7 +160,7 @@ const reducer = function (state, action) {
         // No need to load, we should have data already in vm.
         if (state.loadingState === LoadingState.REMIXING) {
             return Object.assign({}, state, {
-                loadingState: LoadingState.SHOWING_WITH_ID,
+                loadingState: LoadingState.FETCHING_WITH_ID,
                 projectId: action.projectId
             });
         }
@@ -151,15 +170,31 @@ const reducer = function (state, action) {
         // No need to load, we should have data already in vm.
         if (state.loadingState === LoadingState.CREATING_COPY) {
             return Object.assign({}, state, {
-                loadingState: LoadingState.SHOWING_WITH_ID,
+                loadingState: LoadingState.FETCHING_WITH_ID,
                 projectId: action.projectId
             });
         }
         return state;
     case DONE_UPDATING:
-        if (state.loadingState === LoadingState.UPDATING) {
+        if (state.loadingState === LoadingState.AUTO_UPDATING ||
+            state.loadingState === LoadingState.UPDATING ||
+            state.loadingState === LoadingState.SERVER_AUTO_UPDATE) {
             return Object.assign({}, state, {
                 loadingState: LoadingState.SHOWING_WITH_ID
+            });
+        }
+        return state;
+    case START_AUTO_UPDATING:
+        if (state.loadingState === LoadingState.SHOWING_WITH_ID) {
+            return Object.assign({}, state, {
+                loadingState: LoadingState.AUTO_UPDATING
+            });
+        }
+        return state;
+    case SERVER_AUTO_UPDATE:
+        if (state.loadingState === LoadingState.SHOWING_WITH_ID) {
+            return Object.assign({}, state, {
+                loadingState: LoadingState.SERVER_AUTO_UPDATE
             });
         }
         return state;
@@ -195,6 +230,36 @@ const reducer = function (state, action) {
         } else { // allow any other states to transition to fetching project
             return Object.assign({}, state, {
                 loadingState: LoadingState.FETCHING_WITH_ID,
+                projectId: action.projectId
+            });
+        }
+        return state;
+    case SET_PROJECT_ID_AND_STATE:
+        // if the projectId hasn't actually changed and state hasn't changed do nothing
+        if (state.projectId === action.projectId && state.loadingState === action.loadingState) {
+            return state;
+        }
+        // if setting the default project id, specifically fetch that project
+        if (action.projectId === defaultProjectId) {
+            return Object.assign({}, state, {
+                loadingState: LoadingState.FETCHING_NEW_DEFAULT,
+                projectId: defaultProjectId
+            });
+        }
+        // if we were already showing a project, and a different projectId is set, only fetch that project if
+        // projectId has changed. This prevents re-fetching projects unnecessarily.
+        if (state.loadingState === LoadingState.SHOWING_WITH_ID) {
+            if (state.projectId !== action.projectId) {
+                window.location.hash = `#${action.projectId}`;
+                return Object.assign({}, state, {
+                    loadingState: LoadingState.SHOWING_WITH_ID,
+                    projectId: action.projectId
+                });
+            }
+        } else { // allow any other states to transition to fetching project
+            window.location.hash = `#${action.projectId}`;
+            return Object.assign({}, state, {
+                loadingState: LoadingState.SHOWING_WITH_ID,
                 projectId: action.projectId
             });
         }
@@ -262,15 +327,17 @@ const reducer = function (state, action) {
     case START_ERROR:
     // NOTE: we should introduce handling in components for showing ERROR state
         if ([
+            LoadingState.AUTO_UPDATING,
+            LoadingState.CREATING_COPY,
             LoadingState.CREATING_NEW,
             LoadingState.FETCHING_NEW_DEFAULT,
             LoadingState.FETCHING_WITH_ID,
             LoadingState.LOADING_VM_NEW_DEFAULT,
             LoadingState.LOADING_VM_WITH_ID,
             LoadingState.REMIXING,
-            LoadingState.CREATING_COPY,
             LoadingState.UPDATING_BEFORE_NEW,
-            LoadingState.UPDATING
+            LoadingState.UPDATING,
+            LoadingState.SERVER_AUTO_UPDATE
         ].includes(state.loadingState)) {
             return Object.assign({}, state, {
                 loadingState: LoadingState.ERROR,
@@ -278,6 +345,10 @@ const reducer = function (state, action) {
             });
         }
         return state;
+    case SET_NEEDS_UPDATE:
+        return Object.assign({}, state, {
+            needsUpdate: action.needsUpdate
+        });
     default:
         return state;
     }
@@ -352,6 +423,8 @@ const onLoadedProject = (loadingState, canSave) => {
 
 const doneUpdatingProject = loadingState => {
     switch (loadingState) {
+    case LoadingState.AUTO_UPDATING:
+    case LoadingState.SERVER_AUTO_UPDATE:
     case LoadingState.UPDATING:
         return {
             type: DONE_UPDATING
@@ -374,7 +447,11 @@ const setProjectId = id => ({
     type: SET_PROJECT_ID,
     projectId: id
 });
-
+const setProjectIdAndState = (id, loadingState) => ({
+    type: SET_PROJECT_ID_AND_STATE,
+    projectId: id,
+    loadingState
+});
 const requestNewProject = canCreateNew => {
     if (canCreateNew) return {type: START_UPDATING_BEFORE_CREATING_NEW};
     return {type: START_FETCHING_NEW};
@@ -383,7 +460,9 @@ const requestNewProject = canCreateNew => {
 const onProjectUploadStarted = () => ({
     type: START_LOADING_VM_FILE_UPLOAD
 });
-
+const autoUpdateProject = () => ({
+    type: START_AUTO_UPDATING
+});
 const updateProject = () => ({
     type: START_UPDATING
 });
@@ -395,10 +474,17 @@ const saveProjectAsCopy = () => ({
 const remixProject = () => ({
     type: START_REMIXING
 });
-
+const serverAutoUpdateProject = () => ({
+    type: SERVER_AUTO_UPDATE
+});
+const setNeedsUpdate = update => ({
+    type: SET_NEEDS_UPDATE,
+    needsUpdate: update
+});
 export {
     reducer as default,
     initialState as projectStateInitialState,
+    autoUpdateProject,
     LoadingState,
     LoadingStates,
     createProject,
@@ -406,10 +492,13 @@ export {
     doneCreatingProject,
     doneUpdatingProject,
     getIsCreating,
+    getIsCoping,
+    getIsRemixing,
     getIsError,
     getIsFetchingWithId,
     getIsFetchingWithoutId,
     getIsLoadingWithId,
+    getIsManualUpdating,
     getIsShowingProject,
     getIsShowingWithId,
     getIsShowingWithoutId,
@@ -422,5 +511,9 @@ export {
     requestNewProject,
     saveProjectAsCopy,
     setProjectId,
-    updateProject
+    updateProject,
+    setProjectIdAndState,
+    serverAutoUpdateProject,
+    getIsFromServerUpdate,
+    setNeedsUpdate
 };

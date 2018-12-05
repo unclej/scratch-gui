@@ -2,6 +2,7 @@ import {applyMiddleware, compose, combineReducers} from 'redux';
 import alertsReducer, {alertsInitialState} from './alerts';
 import assetDragReducer, {assetDragInitialState} from './asset-drag';
 import cardsReducer, {cardsInitialState} from './cards';
+import studioLessonsReducer, {studioLessonsInitialState} from './studioLessons';
 import colorPickerReducer, {colorPickerInitialState} from './color-picker';
 import connectionModalReducer, {connectionModalInitialState} from './connection-modal';
 import customProceduresReducer, {customProceduresInitialState} from './custom-procedures';
@@ -14,7 +15,9 @@ import modalReducer, {modalsInitialState} from './modals';
 import modeReducer, {modeInitialState} from './mode';
 import monitorReducer, {monitorsInitialState} from './monitors';
 import monitorLayoutReducer, {monitorLayoutInitialState} from './monitor-layout';
+import projectAssetsReducer, {projectAssetsInitialState} from './project-assets';
 import projectStateReducer, {projectStateInitialState} from './project-state';
+import itchProjectReducer, {itchProjectInitialState} from './itch-project';
 import projectTitleReducer, {projectTitleInitialState} from './project-title';
 import restoreDeletionReducer, {restoreDeletionInitialState} from './restore-deletion';
 import stageSizeReducer, {stageSizeInitialState} from './stage-size';
@@ -45,12 +48,15 @@ const guiInitialState = {
     modals: modalsInitialState,
     monitors: monitorsInitialState,
     monitorLayout: monitorLayoutInitialState,
+    projectAssets: projectAssetsInitialState,
     projectState: projectStateInitialState,
+    itchProject: itchProjectInitialState,
     projectTitle: projectTitleInitialState,
     restoreDeletion: restoreDeletionInitialState,
     targets: targetsInitialState,
     toolbox: toolboxInitialState,
     vm: vmInitialState,
+    studioLessons: studioLessonsInitialState,
     vmStatus: vmStatusInitialState
 };
 
@@ -113,12 +119,15 @@ const guiReducer = combineReducers({
     modals: modalReducer,
     monitors: monitorReducer,
     monitorLayout: monitorLayoutReducer,
+    projectAssets: projectAssetsReducer,
     projectState: projectStateReducer,
+    itchProject: itchProjectReducer,
     projectTitle: projectTitleReducer,
     restoreDeletion: restoreDeletionReducer,
     targets: targetReducer,
     toolbox: toolboxReducer,
     vm: vmReducer,
+    studioLessons: studioLessonsReducer,
     vmStatus: vmStatusReducer
 });
 
