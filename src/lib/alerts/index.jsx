@@ -212,7 +212,21 @@ const alerts = [
         ),
         iconSpinner: true,
         level: AlertLevels.SUCCESS
-    }
+    },
+    {
+        alertId: 'saveOriginalProject',
+        alertType: AlertTypes.INLINE,
+        clearList: ['saveSuccess', 'saving', 'savingError'],
+        content: (
+            <FormattedMessage
+                defaultMessage="Save original project..."
+                description="Message indicating that project is on process of saving original Project"
+                id="itchLocale.alerts.savingOriginal"
+            />
+        ),
+        iconSpinner: true,
+        level: AlertLevels.INFO
+    },
 ];
 
 export {

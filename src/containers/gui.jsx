@@ -35,6 +35,9 @@ import storage from '../lib/storage';
 import vmListenerHOC from '../lib/vm-listener-hoc.jsx';
 import vmManagerHOC from '../lib/vm-manager-hoc.jsx';
 import cloudManagerHOC from '../lib/cloud-manager-hoc.jsx';
+import ItchProject from '../lib/project.jsx';
+import EventMessageHOC from '../lib/event-message-hoc.jsx';
+import ITCH_CONFIG from '../../itch.config';
 
 import GUIComponent from '../components/gui/gui.jsx';
 import {setIsScratchDesktop} from '../lib/isScratchDesktop.js';
@@ -76,7 +79,16 @@ class GUI extends React.Component {
         }
     }
     render () {
+        const url = window.location.search.substring(1).split('&');
+        const keyValue = {};
+        for (let i = 0; i < url.length; i++){
+            const d = url[i].split('=');
+            keyValue[d[0]] = d[1];
+        }
         if (this.props.isError) {
+            parent.postMessage(
+                ['loaded', [true]],
+                (keyValue.baseUrl ? keyValue.baseUrl : (ITCH_CONFIG.BASE_URL + ITCH_CONFIG.BASE_URL_EXTENSION)));
             throw new Error(
                 `Error in Scratch GUI [location=${window.location}]: ${this.props.error}`);
         }
@@ -102,6 +114,11 @@ class GUI extends React.Component {
             loadingStateVisible,
             ...componentProps
         } = this.props;
+        if (window.self !== window.top && !(fetchingProject || isLoading || loadingStateVisible)){
+            parent.postMessage(
+                ['loaded', [true]],
+                (keyValue.baseUrl ? keyValue.baseUrl : (ITCH_CONFIG.BASE_URL + ITCH_CONFIG.BASE_URL_EXTENSION)));
+        }
         return (
             <GUIComponent
                 loading={fetchingProject || isLoading || loadingStateVisible}
@@ -135,6 +152,7 @@ GUI.propTypes = {
     projectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     projectTitle: PropTypes.string,
     telemetryModalVisible: PropTypes.bool,
+    shareProjectVisible: PropTypes.bool,
     vm: PropTypes.instanceOf(VM).isRequired
 };
 
@@ -171,7 +189,8 @@ const mapStateToProps = state => {
         ),
         telemetryModalVisible: state.scratchGui.modals.telemetryModal,
         tipsLibraryVisible: state.scratchGui.modals.tipsLibrary,
-        vm: state.scratchGui.vm
+        vm: state.scratchGui.vm,
+        shareProjectVisible: state.scratchGui.modals.shareProject
     };
 };
 
@@ -201,6 +220,7 @@ const WrappedGui = compose(
     QueryParserHOC,
     ProjectFetcherHOC,
     ProjectSaverHOC,
+    ItchProject,
     vmListenerHOC,
     vmManagerHOC,
     cloudManagerHOC

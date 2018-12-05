@@ -37,6 +37,7 @@ class ProjectTitleInput extends React.Component {
         return (
             <BufferedInput
                 className={classNames(styles.titleField, this.props.className)}
+                disabled={!this.props.canEditTitle}
                 maxLength="100"
                 placeholder={this.props.intl.formatMessage(messages.projectTitlePlaceholder)}
                 tabIndex="0"
@@ -49,15 +50,27 @@ class ProjectTitleInput extends React.Component {
 }
 
 ProjectTitleInput.propTypes = {
+    canEditTitle: PropTypes.bool,
     className: PropTypes.string,
     intl: intlShape.isRequired,
     onUpdateProjectTitle: PropTypes.func,
     projectTitle: PropTypes.string
 };
 
-const mapStateToProps = state => ({
-    projectTitle: state.scratchGui.projectTitle
-});
+const mapStateToProps = state => {
+    const isLoggedIn = state.session.session.user !== null &&
+        typeof state.session.session.user !== 'undefined' &&
+        Object.keys(state.session.session.user).length > 0;
+    const userOwnsProject = isLoggedIn && state.scratchGui.itchProject.projectUser !== null &&
+        typeof state.session.session.user !== 'undefined' &&
+        typeof state.session.session.user.id !== 'undefined' &&
+        state.session.session.user.id === state.scratchGui.itchProject.projectUser;
+    const isSubmitted = state.scratchGui.itchProject.isSubmitted;
+    return {
+        projectTitle: state.scratchGui.projectTitle,
+        canEditTitle: userOwnsProject && !isSubmitted
+    };
+};
 
 const mapDispatchToProps = () => ({});
 

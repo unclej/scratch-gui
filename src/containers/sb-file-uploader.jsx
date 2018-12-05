@@ -13,7 +13,8 @@ import {
     getIsLoadingUpload,
     getIsShowingWithoutId,
     onLoadedProject,
-    requestProjectUpload
+    requestProjectUpload,
+    setProjectIdAndState
 } from '../reducers/project-state';
 
 import {
@@ -126,7 +127,7 @@ class SBFileUploader extends React.Component {
                     });
                     // Remove the hash if any (without triggering a hash change event or a reload)
                     try { // Can fail e.g. when GUI is loaded from static file (integration tests)
-                        history.replaceState({}, document.title, '.');
+                        history.replaceState({}, document.title, `${document.location.pathname}${document.location.search}#${projectId}`);
                     } catch {
                         // No fallback, just do not trigger promise catch below
                     }
@@ -185,6 +186,7 @@ SBFileUploader.propTypes = {
     onUpdateProjectTitle: PropTypes.func,
     projectChanged: PropTypes.bool,
     requestProjectUpload: PropTypes.func,
+    projectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     vm: PropTypes.shape({
         loadProject: PropTypes.func
     })
@@ -198,6 +200,7 @@ const mapStateToProps = state => {
         isLoadingUpload: getIsLoadingUpload(loadingState),
         isShowingWithoutId: getIsShowingWithoutId(loadingState),
         loadingState: loadingState,
+        projectId: state.scratchGui.projectState.projectId,
         projectChanged: state.scratchGui.projectChanged,
         vm: state.scratchGui.vm
     };
@@ -206,6 +209,7 @@ const mapStateToProps = state => {
 const mapDispatchToProps = (dispatch, ownProps) => ({
     onLoadingFinished: (loadingState, success) => {
         dispatch(onLoadedProject(loadingState, ownProps.canSave, success));
+        dispatch(setProjectIdAndState(projectId, 'SHOWING_WITH_ID'));
         dispatch(closeLoadingProject());
         dispatch(closeFileMenu());
     },

@@ -7,6 +7,7 @@ const SHOW_EXTENSION_ALERT = 'scratch-gui/alerts/SHOW_EXTENSION_ALERT';
 const CLOSE_ALERT = 'scratch-gui/alerts/CLOSE_ALERT';
 const CLOSE_ALERTS_WITH_ID = 'scratch-gui/alerts/CLOSE_ALERTS_WITH_ID';
 const CLOSE_ALERT_WITH_ID = 'scratch-gui/alerts/CLOSE_ALERT_WITH_ID';
+const CLOSE_EXTENSION_ALERT = 'scratch-gui/alerts/CLOSE_EXTENSION_ALERT';
 
 /**
  * Initial state of alerts reducer
@@ -24,6 +25,12 @@ const CLOSE_ALERT_WITH_ID = 'scratch-gui/alerts/CLOSE_ALERT_WITH_ID';
  */
 const initialState = {
     visible: true,
+    // list of alerts, each with properties:
+    // * content (optional): react element (a <FormattedMessage />)
+    // * extentionId (optional): id string that identifies the extension
+    // * iconURL (optional): string
+    // * level (required): string, one of AlertLevels
+    // * message (optional): string
     alertsList: []
 };
 
@@ -132,7 +139,7 @@ const reducer = function (state, action) {
  */
 const closeAlert = function (index) {
     return {
-        type: CLOSE_ALERT,
+        type: CLOSE_EXTENSION_ALERT,
         index
     };
 };

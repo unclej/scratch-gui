@@ -40,6 +40,18 @@
     padding-right: 1rem;
 }
 
+.alert.warn {
+    background: #FFF0DF;
+    border: 1px solid #FF8C1A;
+    box-shadow: 0px 0px 0px 2px rgba(255, 140, 26, 0.25);
+}
+
+.alert.success {
+    background: $extensions-light;
+    border: 1px solid $extensions-tertiary;
+    box-shadow: 0px 0px 0px 2px $extensions-light;
+}
+
 .alert-icon {
     vertical-align: middle;
 }
@@ -61,6 +73,51 @@
 
 .alert-close-button {
     outline-style:none;
+    width: 30px;
+    height: 30px;
+}
+
+.connection-button {
+    padding: 0.55rem 0.9rem;
+    border-radius: 0.35rem;
+    background: #FF8C1A;
+    color: white;
+    font-weight: 700;
+    font-size: 0.77rem;
+    margin: 0.25rem;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    margin-right: 13px;
+    outline-style:none;
+}
+.spinner {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 3px solid #FFDCBA;
+    display: inline-block;
+    position: relative;
+    left: 30px;
+    top: 50%;
+    transform: translate(-50%, -60%);
+    margin-right: 35px;
+}
+.spinner:after, .spinner:before {
+    content: '';
+    display: block;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+}
+.spinner:after {
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    border: 3px solid transparent;
+    border-top-color: orange;
+    animation: spin 1.5s cubic-bezier(0.4, 0.1, 0.4, 1) infinite;
 }
 
 .alert-close-button-container {
@@ -101,3 +158,12 @@
     margin-left: 0;
     margin-right: 0;
 }
+  
+@keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }

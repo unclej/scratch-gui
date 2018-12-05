@@ -601,7 +601,7 @@ Blocks.defaultProps = {
 const mapStateToProps = state => ({
     anyModalVisible: (
         Object.keys(state.scratchGui.modals).some(key => state.scratchGui.modals[key]) ||
-        state.scratchGui.mode.isFullScreen
+        state.scratchGui.mode.isFullScreen || state.scratchGui.stageSize.isProjectPage
     ),
     extensionLibraryVisible: state.scratchGui.modals.extensionLibrary,
     isRtl: state.locales.isRtl,

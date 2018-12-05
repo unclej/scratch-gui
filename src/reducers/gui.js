@@ -2,6 +2,7 @@ import {applyMiddleware, compose, combineReducers} from 'redux';
 import alertsReducer, {alertsInitialState} from './alerts';
 import assetDragReducer, {assetDragInitialState} from './asset-drag';
 import cardsReducer, {cardsInitialState} from './cards';
+import studioLessonsReducer, {studioLessonsInitialState} from './studioLessons';
 import colorPickerReducer, {colorPickerInitialState} from './color-picker';
 import connectionModalReducer, {connectionModalInitialState} from './connection-modal';
 import customProceduresReducer, {customProceduresInitialState} from './custom-procedures';
@@ -15,7 +16,9 @@ import modeReducer, {modeInitialState} from './mode';
 import monitorReducer, {monitorsInitialState} from './monitors';
 import monitorLayoutReducer, {monitorLayoutInitialState} from './monitor-layout';
 import projectChangedReducer, {projectChangedInitialState} from './project-changed';
+import projectAssetsReducer, {projectAssetsInitialState} from './project-assets';
 import projectStateReducer, {projectStateInitialState} from './project-state';
+import itchProjectReducer, {itchProjectInitialState} from './itch-project';
 import projectTitleReducer, {projectTitleInitialState} from './project-title';
 import fontsLoadedReducer, {fontsLoadedInitialState} from './fonts-loaded';
 import restoreDeletionReducer, {restoreDeletionInitialState} from './restore-deletion';
@@ -49,7 +52,9 @@ const guiInitialState = {
     monitors: monitorsInitialState,
     monitorLayout: monitorLayoutInitialState,
     projectChanged: projectChangedInitialState,
+    projectAssets: projectAssetsInitialState,
     projectState: projectStateInitialState,
+    itchProject: itchProjectInitialState,
     projectTitle: projectTitleInitialState,
     fontsLoaded: fontsLoadedInitialState,
     restoreDeletion: restoreDeletionInitialState,
@@ -57,6 +62,7 @@ const guiInitialState = {
     timeout: timeoutInitialState,
     toolbox: toolboxInitialState,
     vm: vmInitialState,
+    studioLessons: studioLessonsInitialState,
     vmStatus: vmStatusInitialState
 };
 
@@ -146,7 +152,9 @@ const guiReducer = combineReducers({
     monitors: monitorReducer,
     monitorLayout: monitorLayoutReducer,
     projectChanged: projectChangedReducer,
+    projectAssets: projectAssetsReducer,
     projectState: projectStateReducer,
+    itchProject: itchProjectReducer,
     projectTitle: projectTitleReducer,
     fontsLoaded: fontsLoadedReducer,
     restoreDeletion: restoreDeletionReducer,
@@ -154,6 +162,7 @@ const guiReducer = combineReducers({
     timeout: timeoutReducer,
     toolbox: toolboxReducer,
     vm: vmReducer,
+    studioLessons: studioLessonsReducer,
     vmStatus: vmStatusReducer
 });
 

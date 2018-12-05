@@ -20,7 +20,7 @@ import stepTXTSpin from './txt/09_hoc-spin.gif';
 import stepTXTGrow from './txt/10_hoc-grow-shrink.gif';
 
 // Cartoon Network
-import libraryCartoonNetwork from './cartoonnetwork/lib_CartoonNetwork.jpg';
+/* import libraryCartoonNetwork from './cartoonnetwork/lib_CartoonNetwork.jpg';
 import stepCNcharacter from './cartoonnetwork/1-cn-hideshow.gif';
 import stepCNsay from './cartoonnetwork/2-cn-say.gif';
 import stepCNglide from './cartoonnetwork/3-cn-glide.gif';
@@ -28,7 +28,7 @@ import stepCNpicksprite from './cartoonnetwork/4-cn-pick-gem.gif';
 import stepCNcollect from './cartoonnetwork/5-cn-collect.gif';
 import stepCNvariable from './cartoonnetwork/6-cn-variable.gif';
 import stepCNscore from './cartoonnetwork/7-cn-score.gif';
-import stepCNbackdrop from './cartoonnetwork/8-cn-change-backdrop.gif';
+import stepCNbackdrop from './cartoonnetwork/8-cn-change-backdrop.gif'; */
 
 // Add sprite
 import libraryAddSprite from './sprite/cover-add-sprite.jpg';
@@ -272,7 +272,7 @@ export default {
         urlId: 'animations-that-talk'
     },
 
-    'cartoon-network': {
+    /* 'cartoon-network': {
         name: (
             <FormattedMessage
                 defaultMessage="Animate an Adventure Game"
@@ -371,7 +371,7 @@ export default {
         }
         ],
         urlId: 'animate-an-adventure-game'
-    },
+    }, */
     'animate-a-name': {
         name: (
             <FormattedMessage

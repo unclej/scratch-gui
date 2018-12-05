@@ -164,28 +164,33 @@ class LibraryComponent extends React.Component {
                     })}
                     ref={this.setFilteredDataRef}
                 >
-                    {this.getFilteredData().map((dataItem, index) => (
-                        <LibraryItem
-                            bluetoothRequired={dataItem.bluetoothRequired}
-                            collaborator={dataItem.collaborator}
-                            description={dataItem.description}
-                            disabled={dataItem.disabled}
-                            extensionId={dataItem.extensionId}
-                            featured={dataItem.featured}
-                            hidden={dataItem.hidden}
-                            iconMd5={dataItem.md5}
-                            iconRawURL={dataItem.rawURL}
-                            icons={dataItem.json && dataItem.json.costumes}
-                            id={index}
-                            insetIconURL={dataItem.insetIconURL}
-                            internetConnectionRequired={dataItem.internetConnectionRequired}
-                            key={`item_${index}`}
-                            name={dataItem.name}
-                            onMouseEnter={this.handleMouseEnter}
-                            onMouseLeave={this.handleMouseLeave}
-                            onSelect={this.handleSelect}
-                        />
-                    ))}
+                    {this.getFilteredData().map((dataItem, index) => {
+                        const scratchURL = dataItem.md5 ?
+                            `https://d3dch2j0kvht3t.cloudfront.net/public/${dataItem.md5}?requestType=html` :
+                            dataItem.rawURL;
+                        return (
+                            <LibraryItem
+                                bluetoothRequired={dataItem.bluetoothRequired}
+                                collaborator={dataItem.collaborator}
+                                description={dataItem.description}
+                                disabled={dataItem.disabled}
+                                extensionId={dataItem.extensionId}
+                                featured={dataItem.featured}
+                                hidden={dataItem.hidden}
+                                iconMd5={dataItem.md5}
+                                iconRawURL={scratchURL}
+                                icons={dataItem.json && dataItem.json.costumes}
+                                id={index}
+                                insetIconURL={dataItem.insetIconURL}
+                                internetConnectionRequired={dataItem.internetConnectionRequired}
+                                key={`item_${index}`}
+                                name={dataItem.name}
+                                onMouseEnter={this.handleMouseEnter}
+                                onMouseLeave={this.handleMouseLeave}
+                                onSelect={this.handleSelect}
+                            />
+                        )
+                    })}
                 </div>
             </Modal>
         );

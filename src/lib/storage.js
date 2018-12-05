@@ -29,32 +29,52 @@ class Storage extends ScratchStorage {
         );
         this.addWebStore(
             [this.AssetType.Sound],
-            asset => `static/extension-assets/scratch3_music/${asset.assetId}.${asset.dataFormat}`
+            this.getAssetGetConfig.bind(this)
+            // asset => `static/extension-assets/scratch3_music/${asset.assetId}.${asset.dataFormat}`
         );
+    }
+    setLoggedInUser (id) {
+        this.loggedInUser = id;
+    }
+    setLoggedInStudioId (id) {
+        this.loggedInStudio = id;
     }
     setProjectHost (projectHost) {
         this.projectHost = projectHost;
     }
     getProjectGetConfig (projectAsset) {
-        return `${this.projectHost}/${projectAsset.assetId}`;
+        return `${this.projectHost}project/user/${this.loggedInUser}/${projectAsset.assetId}/${this.loggedInStudio}/get`;
     }
     getProjectCreateConfig () {
         return {
-            url: `${this.projectHost}/`,
-            withCredentials: true
+            url: `${this.projectHost}project/create`,
+            withCredentials: false
         };
     }
     getProjectUpdateConfig (projectAsset) {
         return {
-            url: `${this.projectHost}/${projectAsset.assetId}`,
-            withCredentials: true
+            url: `${this.projectHost}project/${projectAsset.assetId}/update`,
+            withCredentials: false
         };
     }
     setAssetHost (assetHost) {
         this.assetHost = assetHost;
     }
     getAssetGetConfig (asset) {
-        return `${this.assetHost}/internalapi/asset/${asset.assetId}.${asset.dataFormat}/get/`;
+        const time = Date.now();
+        return `${this.assetHost}${asset.assetId}.${asset.dataFormat}?time=${time}`;
+    }
+    getAssetUpdateConfig (md5){
+        return `${this.projectHost}project/assets/${md5}`;
+    }
+    getThumbnailUpdateConfig (projectId, md5){
+        return `${this.projectHost}project/${projectId}/thumbnail/${md5}`;
+    }
+    getLessonReadUrl (projectId){
+        return `${this.projectHost}project/${projectId}/lesson/mark-as-read`;
+    }
+    getShareUrl (projectId){
+        return `${this.projectHost}project/${projectId}/share`;
     }
     getAssetCreateConfig (asset) {
         return {

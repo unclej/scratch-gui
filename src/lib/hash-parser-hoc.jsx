@@ -6,6 +6,7 @@ import {connect} from 'react-redux';
 import {
     defaultProjectId,
     getIsFetchingWithoutId,
+    getIsShowingWithoutId,
     setProjectId
 } from '../reducers/project-state';
 
@@ -40,6 +41,10 @@ const HashParserHOC = function (WrappedComponent) {
             const hashMatch = window.location.hash.match(/#(\d+)/);
             const hashProjectId = hashMatch === null ? defaultProjectId : hashMatch[1];
             this.props.setProjectId(hashProjectId.toString());
+            
+            if (hashProjectId !== defaultProjectId && !this.props.isFetchingWithoutId) {
+                this.setState({hideIntro: true});
+            }
         }
         render () {
             const {
@@ -59,6 +64,7 @@ const HashParserHOC = function (WrappedComponent) {
     }
     HashParserComponent.propTypes = {
         isFetchingWithoutId: PropTypes.bool,
+        isShowingWithoutId: PropTypes.bool,
         reduxProjectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
         setProjectId: PropTypes.func
     };
@@ -66,6 +72,7 @@ const HashParserHOC = function (WrappedComponent) {
         const loadingState = state.scratchGui.projectState.loadingState;
         return {
             isFetchingWithoutId: getIsFetchingWithoutId(loadingState),
+            isShowingWithoutId: getIsShowingWithoutId(loadingState),
             reduxProjectId: state.scratchGui.projectState.projectId
         };
     };

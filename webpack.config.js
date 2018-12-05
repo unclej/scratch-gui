@@ -20,9 +20,14 @@ const base = {
         host: '0.0.0.0',
         port: process.env.PORT || 8601
     },
+    node: {
+        fs: 'empty',
+        net: 'empty',
+        tls: 'empty'
+    },
     output: {
         library: 'GUI',
-        filename: '[name].js'
+        filename: '[name]_[chunkhash].js'
     },
     externals: {
         React: 'react',
@@ -104,7 +109,7 @@ module.exports = [
         },
         output: {
             path: path.resolve(__dirname, 'build'),
-            filename: '[name].js'
+            filename: '[name]_[chunkhash].js'
         },
         externals: {
             React: 'react',
