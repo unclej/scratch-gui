@@ -334,8 +334,7 @@ const ProjectSaverHOC = function (WrappedComponent) {
                     // If we set json:true then the body is double-stringified, so don't
                     headers: {
                         'Content-Type': 'application/json'
-                    },
-                    withCredentials: true
+                    }
                 };
                 const creatingProject = projectId === null || typeof projectId === 'undefined';
                 let qs = queryString.stringify(requestParams);
@@ -381,7 +380,7 @@ const ProjectSaverHOC = function (WrappedComponent) {
                     if(response.error === false){
                         this.props.onSetProjectUnchanged();
                         const id = response.projectID.toString();
-                        if (id && this.props.onUpdateProjectThumbnail) {
+                        if (id) {
                             this.storeProjectThumbnail(id);
                         }
                         return response;
@@ -406,7 +405,7 @@ const ProjectSaverHOC = function (WrappedComponent) {
                 this.props.vm.postIOData('video', {forceTransparentPreview: true});
                 this.props.vm.renderer.requestSnapshot(dataURI => {
                     this.props.vm.postIOData('video', {forceTransparentPreview: false});
-                    this.props.onUpdateProjectThumbnail(
+                    this.updateProjectThumbnail(
                         projectId, dataURItoBlob(dataURI));
                 });
                 this.props.vm.renderer.draw();
@@ -415,6 +414,19 @@ const ProjectSaverHOC = function (WrappedComponent) {
                 // This is intentionally fire/forget because a failure
                 // to save the thumbnail is not vitally important to the user.
             }
+        }
+        updateProjectThumbnail(projectId, blob){
+            const opts = {
+                body: blob,
+                headers: {
+                    'Content-Type': 'image/png'
+                },
+                method: 'POST',
+                url: `${storage.projectHost}project/thumbnail/${projectId}/set`
+            };
+            xhr(opts, (err, response) => {
+                
+            });
         }
         /****
          * OLD CODE START

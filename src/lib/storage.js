@@ -84,7 +84,7 @@ class Storage extends ScratchStorage {
             // Then when storage finds this config to use for the "update", still POSTs
             method: 'post',
             url: `${this.projectHost}project/upload/asset/${asset.assetId}.${asset.dataFormat}`,
-            withCredentials: true
+            withCredentials: false
         };
     }
     setTranslatorFunction (translator) {

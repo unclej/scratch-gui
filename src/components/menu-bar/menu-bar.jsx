@@ -230,12 +230,12 @@ class MenuBar extends React.Component {
             if (this.props.canShare) { // save before transitioning to project page
                 this.props.onShare();
             }
-            if (this.props.canSave) { // save before transitioning to project page
+            /* if (this.props.canSave) { // save before transitioning to project page
                 this.props.autoUpdateProject();
                 waitForUpdate(true); // queue the transition to project page
             } else {
                 waitForUpdate(false); // immediately transition to project page
-            }
+            } */
         }
     }
     handleRestoreOption (restoreFun) {
@@ -690,10 +690,32 @@ class MenuBar extends React.Component {
                         </MenuBarItemTooltip>
                     </div> */}
                     <div className={classNames(styles.menuBarItem)}>
-                        {this.props.canShare ? shareButton : []}
+                        {this.props.canShare && (
+                            (this.props.isShowingProject || this.props.isUpdating) && (
+                                <ProjectWatcher onDoneUpdating={this.props.onSeeCommunity}>
+                                    {
+                                        waitForUpdate => (
+                                            <ShareButton
+                                                className={styles.menuBarButton}
+                                                isShared={this.props.isShared}
+                                                /* eslint-disable react/jsx-no-bind */
+                                                onClick={() => {
+                                                    this.handleClickShare(waitForUpdate);
+                                                }}
+                                                /* eslint-enable react/jsx-no-bind */
+                                            />
+                                        )
+                                    }
+                                </ProjectWatcher>
+                            )
+                        )}
+                        {this.props.canRemix ? remixButton : []}
                     </div>
                     {/* <div className={classNames(styles.menuBarItem)}>
-                        {this.props.canSave ? itchSaveButton : this.props.canRemix ? remixButton : null}
+                        {this.props.canShare ? shareButton : []}
+                    </div>
+                    <div className={classNames(styles.menuBarItem)}>
+                        {this.props.canRemix ? remixButton : null}
                     </div> */}
                     {/* <div className={classNames(styles.menuBarItem, styles.communityButtonWrapper)}>
                         {this.props.enableCommunity ?

@@ -41,7 +41,7 @@ class ProjectTitleInput extends React.Component {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                withCredentials: true
+                withCredentials: false
             };
             xhr(opts, (err, response) => {
                 console.log(response, err);

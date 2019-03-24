@@ -133,7 +133,7 @@ Backpack.propTypes = {
     blockDragOver: PropTypes.bool,
     containerRef: PropTypes.func,
     contents: PropTypes.arrayOf(PropTypes.shape({
-        id: PropTypes.string,
+        id: PropTypes.number,
         thumbnailUrl: PropTypes.string,
         type: PropTypes.string,
         name: PropTypes.string

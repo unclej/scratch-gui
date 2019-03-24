@@ -94,11 +94,9 @@ const openTipsLibrary = function () {
     return openModal(MODAL_TIPS_LIBRARY);
 };
 const openShareProject = function () {
-    analytics.pageview('/modals/share-project');
     return openModal(MODAL_SHARE_PROJECT);
 };
 const openProjectLessons = function () {
-    analytics.pageview('/modals/project-lessons');
     return openModal(MODAL_PROJECT_LESSONS);
 };
 const closeBackdropLibrary = function () {

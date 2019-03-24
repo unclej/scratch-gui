@@ -558,6 +558,7 @@ const setProjectId = id => ({
     type: SET_PROJECT_ID,
     projectId: id
 });
+
 const requestNewProject = needSave => {
     if (needSave) return {type: START_UPDATING_BEFORE_CREATING_NEW};
     return {type: START_FETCHING_NEW};
@@ -613,9 +614,9 @@ const setNeedsUpdate = update => ({
 export {
     reducer as default,
     initialState as projectStateInitialState,
-    autoUpdateProject,
     LoadingState,
     LoadingStates,
+    autoUpdateProject,
     createProject,
     defaultProjectId,
     doneCreatingProject,

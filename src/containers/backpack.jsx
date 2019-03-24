@@ -231,7 +231,7 @@ const getTokenAndUsername = state => {
     if (state.session && state.session.session && state.session.session.user) {
         return {
             token: state.session.session.user.token,
-            username: state.session.session.user.username
+            username: state.session.session.user.id.toString()
         };
     }
     // Otherwise try to pull testing params out of the URL, or return nulls

@@ -9,6 +9,7 @@ addLocaleData(localeData);
 
 const UPDATE_LOCALES = 'scratch-gui/locales/UPDATE_LOCALES';
 const SELECT_LOCALE = 'scratch-gui/locales/SELECT_LOCALE';
+
 const initialState = {
     isRtl: false,
     locale: 'en',
@@ -16,6 +17,7 @@ const initialState = {
     itchMessagesByLocale: itchLocale,
     messages: Object.assign(editorMessages.en, itchLocale.en)
 };
+
 const reducer = function (state, action) {
     if (typeof state === 'undefined') state = initialState;
     switch (action.type) {

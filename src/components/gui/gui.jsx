@@ -41,6 +41,7 @@ import codeIcon from './icon--code.svg';
 import costumesIcon from './icon--costumes.svg';
 import soundsIcon from './icon--sounds.svg';
 import ShareModal from '../../containers/share-modal.jsx';
+import ITCH_CONFIG from '../../../itch.config';
 const messages = defineMessages({
     addExtension: {
         id: 'gui.gui.addExtension',
@@ -462,6 +463,13 @@ const mapStateToProps = state => {
     const isStudent = isLoggedIn && typeof state.session.session.user.role !== 'undefined' &&
         state.session.session.user.role === 'student';
     const isSubmitted = state.scratchGui.itchProject.isSubmitted;
+    const url = window.location.search.substring(1).split('&');
+    const keyValue = {};
+    for (let i = 0; i < url.length; i++){
+        const d = url[i].split('=');
+        keyValue[d[0]] = d[1];
+    }
+    const backpackHost = keyValue['backpackHost'] ? keyValue['backpackHost'] : ITCH_CONFIG.BACKPACK_HOST;
     return {
         isLoggedIn: isLoggedIn,
         stageSizeMode: state.scratchGui.stageSize.stageSize,
@@ -473,7 +481,9 @@ const mapStateToProps = state => {
         canUpload: isLoggedIn && userOwnsProject && !isSubmitted,
         canDownload: isLoggedIn && (userOwnsProject || !isStudent),
         lessonCardVisible: state.scratchGui.studioLessons.visible,
-        isHiddenLessonModal: state.scratchGui.studioLessons.minimize
+        isHiddenLessonModal: state.scratchGui.studioLessons.minimize,
+        backpackVisible: isLoggedIn && userOwnsProject && !isSubmitted,
+        backpackHost
     };
 };
 
