@@ -367,7 +367,7 @@ class MenuBar extends React.Component {
                 />
             </div>
         );
-        const itchSaveButton = (
+        /* const itchSaveButton = (
             <Button
                 className={classNames(styles.saveButton)}
                 onClick={this.handleClickSave}
@@ -379,7 +379,7 @@ class MenuBar extends React.Component {
                 }
             </Button>
 
-        );/* 
+        );
         const remixButton = (
             <Button
                 className={classNames(styles.shareButton)}
@@ -423,7 +423,7 @@ class MenuBar extends React.Component {
                             </div>
                             <LanguageSelector label={this.props.intl.formatMessage(ariaMessages.language)} />
                         </div>
-                        <div
+                        {/* <div
                             className={classNames(styles.menuBarItem, styles.hoverable, {
                                 [styles.active]: this.props.fileMenuOpen
                             })}
@@ -512,6 +512,87 @@ class MenuBar extends React.Component {
                                     </div>
                                 ) : []}
                             </MenuBarMenu>
+                        </div> */}
+                        <div
+                            className={classNames(styles.menuBarItem, styles.hoverable, {
+                                [styles.active]: this.props.fileMenuOpen
+                            })}
+                            onMouseUp={this.props.onClickFile}
+                        >
+                            <FormattedMessage
+                                defaultMessage="File"
+                                description="Text for file dropdown menu"
+                                id="gui.menuBar.file"
+                            />
+                            <MenuBarMenu
+                                className={classNames(styles.menuBarMenu)}
+                                open={this.props.fileMenuOpen}
+                                place={this.props.isRtl ? 'left' : 'right'}
+                                onRequestClose={this.props.onRequestCloseFile}
+                            >
+                                <MenuSection>
+                                    <MenuItem
+                                        isRtl={this.props.isRtl}
+                                        onClick={this.handleClickNew}
+                                    >
+                                        {newProjectMessage}
+                                    </MenuItem>
+                                </MenuSection>
+                                {(this.props.canSave || this.props.canCreateCopy || this.props.canRemix) && (
+                                    <MenuSection>
+                                        {this.props.canSave ? (
+                                            <MenuItem onClick={this.handleClickSave}>
+                                                {saveNowMessage}
+                                            </MenuItem>
+                                        ) : []}
+                                        {this.props.canCreateCopy ? (
+                                            <MenuItem onClick={this.handleClickSaveAsCopy}>
+                                                {createCopyMessage}
+                                            </MenuItem>
+                                        ) : []}
+                                        {this.props.canRemix ? (
+                                            <MenuItem onClick={this.handleClickRemix}>
+                                                {remixMessage}
+                                            </MenuItem>
+                                        ) : []}
+                                    </MenuSection>
+                                )}
+                                <MenuSection>
+                                    {this.props.canUpload ? (
+                                        <SBFileUploader onUpdateProjectTitle={this.props.onUpdateProjectTitle}>
+                                            {(className, renderFileInput, loadProject) => (
+                                                <MenuItem
+                                                    className={className}
+                                                    onClick={loadProject}
+                                                >
+                                                    <FormattedMessage
+                                                        defaultMessage="Load from your computer"
+                                                        description={
+                                                            'Menu bar item for uploading a project from your computer'
+                                                        }
+                                                        id="gui.menuBar.uploadFromComputer"
+                                                    />
+                                                    {renderFileInput()}
+                                                </MenuItem>
+                                            )}
+                                        </SBFileUploader>
+                                    ) : []}
+                                    {this.props.canDownload ? (
+                                        <SB3Downloader>{(className, downloadProject) => (
+                                            <MenuItem
+                                                className={className}
+                                                onClick={this.handleCloseFileMenuAndThen(downloadProject)}
+                                            >
+                                                <FormattedMessage
+                                                    defaultMessage="Save to your computer"
+                                                    description="Menu bar item for downloading a project to your computer"
+                                                    id="gui.menuBar.downloadToComputer"
+                                                />
+                                            </MenuItem>
+                                        )}</SB3Downloader>
+                                    ) : []}
+                                </MenuSection>
+                            </MenuBarMenu>
                         </div>
                         <div
                             className={classNames(styles.menuBarItem, styles.hoverable, {
@@ -576,7 +657,28 @@ class MenuBar extends React.Component {
                     </div>
                     <Divider className={classNames(styles.divider)} />
                     {this.props.canShare ? itchLessonButton : []}
-                    <div className={classNames(styles.menuBarItem, styles.growable)}>
+                    {this.props.canEditTitle ? (
+                        <div className={classNames(styles.menuBarItem, styles.growable)}>
+                            <MenuBarItemTooltip
+                                enable
+                                id="title-field"
+                            >
+                                <ProjectTitleInput
+                                    className={classNames(styles.titleFieldGrowable)}
+                                    onUpdateProjectTitle={this.props.onUpdateProjectTitle}
+                                />
+                            </MenuBarItemTooltip>
+                        </div>
+                    ) : ((this.props.authorUsername && this.props.authorUsername !== this.props.username) ? (
+                        <AuthorInfo
+                            className={styles.authorInfo}
+                            imageUrl={this.props.authorThumbnailUrl}
+                            projectTitle={this.props.projectTitle}
+                            userId={this.props.authorId}
+                            username={this.props.authorUsername}
+                        />
+                    ) : null)}
+                    {/* <div className={classNames(styles.menuBarItem, styles.growable)}>
                         <MenuBarItemTooltip
                             enable
                             id="title-field"
@@ -586,13 +688,13 @@ class MenuBar extends React.Component {
                                 onUpdateProjectTitle={this.props.onUpdateProjectTitle}
                             />
                         </MenuBarItemTooltip>
-                    </div>
+                    </div> */}
                     <div className={classNames(styles.menuBarItem)}>
                         {this.props.canShare ? shareButton : []}
                     </div>
-                    <div className={classNames(styles.menuBarItem)}>
+                    {/* <div className={classNames(styles.menuBarItem)}>
                         {this.props.canSave ? itchSaveButton : this.props.canRemix ? remixButton : null}
-                    </div>
+                    </div> */}
                     {/* <div className={classNames(styles.menuBarItem, styles.communityButtonWrapper)}>
                         {this.props.enableCommunity ?
                             <Button

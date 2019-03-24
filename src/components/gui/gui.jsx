@@ -445,7 +445,6 @@ GUIComponent.defaultProps = {
     canUpload: false,
     canDownload: false,
     isLoggedIn: false,
-    onUpdateProjectTitle: () => {},
     showComingSoon: false,
     stageSizeMode: STAGE_SIZE_MODES.large
 };

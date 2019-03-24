@@ -139,7 +139,7 @@ const ProjectSaverHOC = function (WrappedComponent) {
                         setTimeout(() => {
                             _this.props.onCloseAlert('createSuccess');
                         }, 2000);
-                        this.props.onCreatedProject(response.id.toString(), this.props.loadingState);
+                        this.props.onCreatedProject(response.projectID.toString(), this.props.loadingState);
                     })
                     .catch(err => {
                         // NOTE: should throw up a notice for user
@@ -264,7 +264,8 @@ const ProjectSaverHOC = function (WrappedComponent) {
         createNewProjectToStorage () {
             return this.storeProject(null)
                 .then(response => {
-                    this.props.onCreatedProject(response.id.toString(), this.props.loadingState);
+                    window.location.hash = `#${response.projectID}`;
+                    this.props.onCreatedProject(response.projectID.toString(), this.props.loadingState);
                 })
                 .catch(err => {
                     this.props.onShowAlert('creatingError');
@@ -273,34 +274,28 @@ const ProjectSaverHOC = function (WrappedComponent) {
         }
         createCopyToStorage () {
             this.props.onShowCreatingCopyAlert();
-            return this.storeProject(null, {
-                original_id: this.props.reduxProjectId,
-                is_copy: 1,
-                title: this.props.reduxProjectTitle
-            })
+            return this.storeProject(null, null, `${this.props.reduxProjectId}/${storage.loggedInStudio}/copy`)
                 .then(response => {
-                    this.props.onCreatedProject(response.id.toString(), this.props.loadingState);
+                    window.location.hash = `#${response.projectID}`;
+                    this.props.onCreatedProject(response.projectID.toString(), this.props.loadingState);
                     this.props.onShowCopySuccessAlert();
                 })
                 .catch(err => {
                     this.props.onShowAlert('creatingError');
-                    this.props.onProjectError(err);
+                    /* this.props.onProjectError(err); */
                 });
         }
         createRemixToStorage () {
             this.props.onShowCreatingRemixAlert();
-            return this.storeProject(null, {
-                original_id: this.props.reduxProjectId,
-                is_remix: 1,
-                title: this.props.reduxProjectTitle
-            })
+            return this.storeProject(null,null, `${this.props.reduxProjectId}/${storage.loggedInStudio}/remix`)
                 .then(response => {
-                    this.props.onCreatedProject(response.id.toString(), this.props.loadingState);
+                    window.location.hash = `#${response.projectID}`;
+                    this.props.onCreatedProject(response.projectID.toString(), this.props.loadingState);
                     this.props.onShowRemixSuccessAlert();
                 })
                 .catch(err => {
                     this.props.onShowAlert('creatingError');
-                    this.props.onProjectError(err);
+                    /* this.props.onProjectError(err); */
                 });
         }
         /**
@@ -309,7 +304,7 @@ const ProjectSaverHOC = function (WrappedComponent) {
          * @return {Promise} - resolves with json object containing project's existing or new id
          * @param {?object} requestParams - object of params to add to request body
          */
-        storeProject (projectId, requestParams) {
+        storeProject (projectId, requestParams, url) {
             requestParams = requestParams || {};
             this.clearAutoSaveTimeout();
             // Serialize VM state now before embarking on
@@ -319,6 +314,8 @@ const ProjectSaverHOC = function (WrappedComponent) {
             // serialized project refers to a newer asset than what
             // we just finished saving).
             const savedVMState = this.props.vm.toJSON();
+            const projectName = this.props.reduxProjectTitle;
+            const loggedInUser = this.props.loggedInUser;
             return Promise.all(this.props.vm.assets
                 .filter(asset => !asset.clean)
                 .map(
@@ -333,7 +330,7 @@ const ProjectSaverHOC = function (WrappedComponent) {
                 )
             ).then(() => {
                 const opts = {
-                    body: savedVMState,
+                    body: JSON.stringify({project:savedVMState, name: projectName, user_id: loggedInUser}),
                     // If we set json:true then the body is double-stringified, so don't
                     headers: {
                         'Content-Type': 'application/json'
@@ -344,14 +341,22 @@ const ProjectSaverHOC = function (WrappedComponent) {
                 let qs = queryString.stringify(requestParams);
                 if (qs) qs = `?${qs}`;
                 if (creatingProject) {
-                    Object.assign(opts, {
-                        method: 'post',
-                        url: `${storage.projectHost}/${qs}`
-                    });
+                    if(url){
+                        Object.assign(opts, {
+                            method: 'post',
+                            url: `${storage.projectHost}project/${url}`
+                        });
+                    }else{
+                        Object.assign(opts, {
+                            method: 'post',
+                            url: `${storage.projectHost}project/create/${qs}`
+                        });
+                    }
+                    
                 } else {
                     Object.assign(opts, {
                         method: 'put',
-                        url: `${storage.projectHost}/${projectId}${qs}`
+                        url: `${storage.projectHost}project/${projectId}/update${qs}`
                     });
                 }
                 return new Promise((resolve, reject) => {
@@ -373,12 +378,17 @@ const ProjectSaverHOC = function (WrappedComponent) {
                 });
             })
                 .then(response => {
-                    this.props.onSetProjectUnchanged();
-                    const id = response.id.toString();
-                    if (id && this.props.onUpdateProjectThumbnail) {
-                        this.storeProjectThumbnail(id);
+                    if(response.error === false){
+                        this.props.onSetProjectUnchanged();
+                        const id = response.projectID.toString();
+                        if (id && this.props.onUpdateProjectThumbnail) {
+                            this.storeProjectThumbnail(id);
+                        }
+                        return response;
+                    } else{
+                        throw response.message;
                     }
-                    return response;
+                    
                 })
                 .catch(err => {
                     log.error(err);
@@ -698,7 +708,7 @@ const ProjectSaverHOC = function (WrappedComponent) {
         vm: PropTypes.instanceOf(VM).isRequired
     };
     ProjectSaverComponent.defaultProps = {
-        autoSaveIntervalSecs: 120,
+        autoSaveIntervalSecs: 60,
         onRemixing: () => {}
     };
     const mapStateToProps = (state, ownProps) => {

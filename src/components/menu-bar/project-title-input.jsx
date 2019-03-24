@@ -4,6 +4,8 @@ import PropTypes from 'prop-types';
 import bindAll from 'lodash.bindall';
 import React from 'react';
 import {defineMessages, intlShape, injectIntl} from 'react-intl';
+import xhr from 'xhr';
+import storage from '../../lib/storage';
 
 import BufferedInputHOC from '../forms/buffered-input-hoc.jsx';
 import Input from '../forms/input.jsx';
@@ -31,6 +33,20 @@ class ProjectTitleInput extends React.Component {
     handleUpdateProjectTitle (newTitle) {
         if (this.props.onUpdateProjectTitle) {
             this.props.onUpdateProjectTitle(newTitle);
+            /* const opts = {
+                method: 'post',
+                url: `${storage.projectHost}project/${this.props.reduxProjectId}/update-title`,
+                body: JSON.stringify({title: newTitle}),
+                // If we set json:true then the body is double-stringified, so don't
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                withCredentials: true
+            };
+            xhr(opts, (err, response) => {
+                console.log(response, err);
+            }); */
+            
         }
     }
     render () {
@@ -54,7 +70,8 @@ ProjectTitleInput.propTypes = {
     className: PropTypes.string,
     intl: intlShape.isRequired,
     onUpdateProjectTitle: PropTypes.func,
-    projectTitle: PropTypes.string
+    projectTitle: PropTypes.string,
+    reduxProjectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
 };
 
 const mapStateToProps = state => {
@@ -68,7 +85,8 @@ const mapStateToProps = state => {
     const isSubmitted = state.scratchGui.itchProject.isSubmitted;
     return {
         projectTitle: state.scratchGui.projectTitle,
-        canEditTitle: userOwnsProject && !isSubmitted
+        canEditTitle: userOwnsProject && !isSubmitted,
+        reduxProjectId: state.scratchGui.projectState.projectId,
     };
 };
 

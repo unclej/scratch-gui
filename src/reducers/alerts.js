@@ -139,7 +139,7 @@ const reducer = function (state, action) {
  */
 const closeAlert = function (index) {
     return {
-        type: CLOSE_EXTENSION_ALERT,
+        type: CLOSE_ALERT,
         index
     };
 };
