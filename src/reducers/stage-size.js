@@ -2,6 +2,8 @@ import {STAGE_DISPLAY_SIZES} from '../lib/layout-constants.js';
 import ITCH_CONFIG from '../../itch.config';
 import FULLSCREEN from '../lib/screen-full';
 
+import screenfull from 'screenfull';
+
 
 const SET_STAGE_SIZE = 'scratch-gui/StageSize/SET_STAGE_SIZE';
 const SET_FULL_SCREEN = 'scratch-gui/mode/SET_FULL_SCREEN';
@@ -128,13 +130,14 @@ const setToEditProjectPage = function (){
     };
 };
 const setWindowFullScreen = function (){
-    if (FULLSCREEN.enabled) {
-        FULLSCREEN.toggle();
+    if (screenfull.enabled) {
+        screenfull.toggle();
     }
     return {
         type: SET_WINDOW_FULLSCREEN
     };
 };
+
 export {
     reducer as default,
     initialState as stageSizeInitialState,

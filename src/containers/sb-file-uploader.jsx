@@ -3,10 +3,12 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import {connect} from 'react-redux';
 import {defineMessages, injectIntl, intlShape} from 'react-intl';
+import xhr from 'xhr';
 
 import analytics from '../lib/analytics';
 import log from '../lib/log';
 import sharedMessages from '../lib/shared-messages';
+import storage from '../lib/storage';
 
 import {
     LoadingStates,
@@ -14,9 +16,15 @@ import {
     getIsShowingWithoutId,
     onLoadedProject,
     requestProjectUpload,
-    setProjectIdAndState
+    doneCreatingProject,
+    projectError,
+    setProjectId
 } from '../reducers/project-state';
 
+import { 
+    showStandardAlert,
+    showAlertWithTimeout
+} from '../reducers/alerts';
 import {
     openLoadingProject,
     closeLoadingProject
@@ -109,46 +117,94 @@ class SBFileUploader extends React.Component {
             const uploadAllowed = (isShowingWithoutId && projectChanged) ?
                 confirm(intl.formatMessage(sharedMessages.replaceProjectWarning)) : // eslint-disable-line no-alert
                 true;
-
+            console.log(1);
             if (uploadAllowed) this.props.requestProjectUpload(loadingState);
         }
     }
     // called when file upload raw data is available in the reader
     onload () {
         if (this.reader) {
-            this.props.onLoadingStarted();
-            const filename = this.fileToUpload && this.fileToUpload.name;
-            this.props.vm.loadProject(this.reader.result)
-                .then(() => {
-                    analytics.event({
-                        category: 'project',
-                        action: 'Import Project File',
-                        nonInteraction: true
+            // create a new project first
+            return this.createNewProject().then((response)=>{
+                /* window.location.hash = `#${response.projectID}`; */
+                const projectId = response.projectID.toString();
+                /* this.props.onsetProjectId(projectId) */
+                try { // Can fail e.g. when GUI is loaded from static file (integration tests)
+                    history.replaceState({}, document.title, `${document.location.pathname}${document.location.search}#${projectId}`);
+                } catch {
+                    // No fallback, just do not trigger promise catch below
+                }
+                this.props.onLoadingStarted();
+                const filename = this.fileToUpload && this.fileToUpload.name;
+                this.props.vm.loadProject(this.reader.result)
+                    .then(() => {
+                        analytics.event({
+                            category: 'project',
+                            action: 'Import Project File',
+                            nonInteraction: true
+                        });
+                        // Remove the hash if any (without triggering a hash change event or a reload)
+                        
+                        this.props.onLoadingFinished(this.props.loadingState, true, this.props.canSave, projectId);
+                        // Reset the file input after project is loaded
+                        // This is necessary in case the user wants to reload a project
+                        if (filename) {
+                            const uploadedProjectTitle = this.getProjectTitleFromFilename(filename);
+                            this.props.onUpdateProjectTitle(uploadedProjectTitle);
+                        }
+                        this.props.onShowCreateSuccessAlert();
+                        this.resetFileInput();
+                    })
+                    .catch(error => {
+                        log.warn(error);
+                        alert(this.props.intl.formatMessage(messages.loadError)); // eslint-disable-line no-alert
+                        this.props.onLoadingFinished(this.props.loadingState, this.props.canSave, false);
+                        // Reset the file input after project is loaded
+                        // This is necessary in case the user wants to reload a project
+                        this.resetFileInput();
                     });
-                    // Remove the hash if any (without triggering a hash change event or a reload)
-                    try { // Can fail e.g. when GUI is loaded from static file (integration tests)
-                        history.replaceState({}, document.title, `${document.location.pathname}${document.location.search}#${projectId}`);
-                    } catch {
-                        // No fallback, just do not trigger promise catch below
-                    }
-                    this.props.onLoadingFinished(this.props.loadingState, true);
-                    // Reset the file input after project is loaded
-                    // This is necessary in case the user wants to reload a project
-                    if (filename) {
-                        const uploadedProjectTitle = this.getProjectTitleFromFilename(filename);
-                        this.props.onUpdateProjectTitle(uploadedProjectTitle);
-                    }
-                    this.resetFileInput();
-                })
-                .catch(error => {
-                    log.warn(error);
-                    alert(this.props.intl.formatMessage(messages.loadError)); // eslint-disable-line no-alert
-                    this.props.onLoadingFinished(this.props.loadingState, false);
-                    // Reset the file input after project is loaded
-                    // This is necessary in case the user wants to reload a project
-                    this.resetFileInput();
-                });
+            })
+            .catch(err => {
+                this.props.onShowAlert('creatingError');
+                this.props.onProjectError(err);
+                this.props.onLoadingFinished(this.props.loadingState, this.props.canSave, false);
+                this.resetFileInput();
+            });
+            
         }
+    }
+    createNewProject(){
+        this.props.onShowCreatingAlert();
+        const savedVMState = this.props.vm.toJSON();
+        const loggedInUser = this.props.loggedInUser;
+        const opts = {
+            method: 'post',
+            url: `${storage.projectHost}project/create`,
+            body: JSON.stringify({
+                project: savedVMState, 
+                name: 'Untitled', 
+                user_id: loggedInUser,
+                studioID: storage.studioID
+            }),
+            // If we set json:true then the body is double-stringified, so don't
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        };
+        return new Promise((resolve, reject) => {
+            xhr(opts, (err, response) => {
+                if (err) return reject(err);
+                let body;
+                try {
+                    // Since we didn't set json: true, we have to parse manually
+                    body = JSON.parse(response.body);
+                } catch (e) {
+                    return reject(e);
+                }
+                body.id = body['content-name'];
+                resolve(body);
+            });
+        });
     }
     handleClick () {
         // open filesystem browsing window
@@ -187,6 +243,13 @@ SBFileUploader.propTypes = {
     projectChanged: PropTypes.bool,
     requestProjectUpload: PropTypes.func,
     projectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    loggedInUser: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    onShowAlert: PropTypes.func,
+    onShowCreatingAlert: PropTypes.func,
+    onShowCreateSuccessAlert: PropTypes.func,
+    onCreatedProject: PropTypes.func,
+    onProjectError: PropTypes.func,
+    onsetProjectId: PropTypes.func,
     vm: PropTypes.shape({
         loadProject: PropTypes.func
     })
@@ -196,25 +259,35 @@ SBFileUploader.defaultProps = {
 };
 const mapStateToProps = state => {
     const loadingState = state.scratchGui.projectState.loadingState;
+    const isLoggedIn = state.session.session.user !== null &&
+        typeof state.session.session.user !== 'undefined' &&
+        Object.keys(state.session.session.user).length > 0 && state.session.session.user.id !== 0;
     return {
+        canSave: isLoggedIn,
         isLoadingUpload: getIsLoadingUpload(loadingState),
         isShowingWithoutId: getIsShowingWithoutId(loadingState),
         loadingState: loadingState,
         projectId: state.scratchGui.projectState.projectId,
         projectChanged: state.scratchGui.projectChanged,
+        loggedInUser: state.scratchGui.itchProject.editingUser,
         vm: state.scratchGui.vm
     };
 };
 
-const mapDispatchToProps = (dispatch, ownProps) => ({
-    onLoadingFinished: (loadingState, success) => {
-        dispatch(onLoadedProject(loadingState, ownProps.canSave, success));
-        dispatch(setProjectIdAndState(projectId, 'SHOWING_WITH_ID'));
+const mapDispatchToProps = (dispatch) => ({
+    onLoadingFinished: (loadingState, success, canSave, projectId) => {
+        dispatch(onLoadedProject(loadingState, canSave, success, projectId));
         dispatch(closeLoadingProject());
         dispatch(closeFileMenu());
     },
+    onCreatedProject: (projectId, loadingState) => dispatch(doneCreatingProject(projectId, loadingState)),
+    onShowAlert: alertType => dispatch(showStandardAlert(alertType)),
+    onProjectError: error => dispatch(projectError(error)),
     requestProjectUpload: loadingState => dispatch(requestProjectUpload(loadingState)),
-    onLoadingStarted: () => dispatch(openLoadingProject())
+    onShowCreatingAlert: () => showAlertWithTimeout(dispatch, 'creating'),
+    onShowCreateSuccessAlert: () => showAlertWithTimeout(dispatch, 'createSuccess'),
+    onLoadingStarted: () => dispatch(openLoadingProject()),
+    onsetProjectId: (projectId) => dispatch(setProjectId(projectId))
 });
 
 // Allow incoming props to override redux-provided props. Used to mock in tests.

@@ -169,14 +169,16 @@ const reducer = function (state, action) {
     case DONE_LOADING_VM_WITH_ID:
         if (state.loadingState === LoadingState.LOADING_VM_WITH_ID) {
             return Object.assign({}, state, {
-                loadingState: LoadingState.SHOWING_WITH_ID
+                loadingState: LoadingState.SHOWING_WITH_ID,
+                projectId: action.projectId
             });
         }
         return state;
     case DONE_LOADING_VM_TO_SAVE:
         if (state.loadingState === LoadingState.LOADING_VM_FILE_UPLOAD) {
             return Object.assign({}, state, {
-                loadingState: LoadingState.AUTO_UPDATING
+                loadingState: LoadingState.AUTO_UPDATING,
+                projectId: action.projectId
             });
         }
         return state;
@@ -494,17 +496,19 @@ const onFetchedProjectData = (projectData, loadingState) => {
     }
 };
 
-const onLoadedProject = (loadingState, canSave, success) => {
+const onLoadedProject = (loadingState, canSave, success, projectId) => {
     if (success) {
         switch (loadingState) {
         case LoadingState.LOADING_VM_WITH_ID:
             return {
-                type: DONE_LOADING_VM_WITH_ID
+                type: DONE_LOADING_VM_WITH_ID,
+                projectId
             };
         case LoadingState.LOADING_VM_FILE_UPLOAD:
             if (canSave) {
                 return {
-                    type: DONE_LOADING_VM_TO_SAVE
+                    type: DONE_LOADING_VM_TO_SAVE,
+                    projectId
                 };
             }
             return {
@@ -571,17 +575,17 @@ const setProjectIdAndState = (id, loadingState) => ({
 
 const requestProjectUpload = loadingState => {
     switch (loadingState) {
-    case LoadingState.SHOWING_WITH_ID:
-        return {
-            type: START_UPDATING_BEFORE_FILE_UPLOAD
-        };
-    case LoadingState.NOT_LOADED:
-    case LoadingState.SHOWING_WITHOUT_ID:
-        return {
-            type: START_LOADING_VM_FILE_UPLOAD
-        };
-    default:
-        break;
+        case LoadingState.SHOWING_WITH_ID:
+            return {
+                type: START_UPDATING_BEFORE_FILE_UPLOAD
+            };
+        case LoadingState.NOT_LOADED:
+        case LoadingState.SHOWING_WITHOUT_ID:
+            return {
+                type: START_LOADING_VM_FILE_UPLOAD
+            };
+        default:
+            break;
     }
 };
 

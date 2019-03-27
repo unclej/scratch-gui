@@ -23,7 +23,7 @@ class EventMessage extends React.Component {
                     const functionName = data[0];
                     const functionParam = data[1];
                     switch (functionName){
-                    case 'setFullScreen':{
+                    case 'setFullScreen': {
                         const btn = document.getElementById('scratch-header-fullscreen-btn');
                         if (btn) {
                             btn.click();
