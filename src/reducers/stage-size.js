@@ -10,9 +10,9 @@ const SET_FULL_SCREEN = 'scratch-gui/mode/SET_FULL_SCREEN';
 const SET_WINDOW_FULLSCREEN = 'scratch-gui/mode/SET_WINDOW_FULLSCREEN';
 
 const initialState = {
-    isFullScreen: true,
+    isFullScreen: false,
     isWindowFullScreen: false,
-    isProjectPage: (window.self !== window.top),
+    isProjectPage: false,
     stageSize: STAGE_DISPLAY_SIZES.large
 };
 
@@ -99,6 +99,36 @@ const setProjectPage = function (){
         isProjectPage: isProjectPage
     };
 };
+const setProjectPageFromItch = function(){
+    let isProjectPage = false;
+    window.__IS_PROJECT_PAGE = false;
+    if (window.self !== window.top){
+        document.getElementsByTagName('body')[0].classList.remove('full-app-screen');
+        document.getElementsByTagName('html')[0].classList.remove('full-app-screen');
+        document.getElementById('mainDivApp').classList.remove('full-app-screen');
+
+        document.getElementsByTagName('body')[0].classList.add('only-player-app-screen');
+        document.getElementsByTagName('html')[0].classList.add('only-player-app-screen');
+        document.getElementById('mainDivApp').classList.add('only-player-app-screen');
+        if (FULLSCREEN.enabled) {
+            if (FULLSCREEN.isFullscreen){
+                FULLSCREEN.toggle();
+            }
+        }
+        const largeButton = document.getElementById('buttonToSetStageSizeLarge');
+        if (largeButton){
+            largeButton.click();
+        }
+        setTimeout(() => {
+            window.dispatchEvent(new Event('resize'));
+        }, 200);
+    }
+    return {
+        type: SET_FULL_SCREEN,
+        isFullScreen: true,
+        isProjectPage: isProjectPage
+    };
+}
 const setToEditProjectPage = function (){
     let isProjectPage = false;
     window.__IS_PROJECT_PAGE = true;
@@ -145,5 +175,6 @@ export {
     setFullScreen,
     setProjectPage,
     setToEditProjectPage,
+    setProjectPageFromItch,
     setWindowFullScreen
 };

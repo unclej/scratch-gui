@@ -22,7 +22,6 @@ import styles from './player.css';
 
 const Player = ({isPlayerOnly, onSeeInside, projectId}) => (
     <Box className={classNames(isPlayerOnly ? styles.stageOnly : styles.editor)}>
-        {isPlayerOnly && <button onClick={onSeeInside}>{'See inside'}</button>}
         <GUI
             enableCommunity
             isPlayerOnly={isPlayerOnly}
@@ -60,6 +59,8 @@ const WrappedPlayer = compose(
 )(ConnectedPlayer);
 
 const appTarget = document.createElement('div');
+appTarget.classList.add('only-player-app-screen');
+appTarget.id = 'mainDivApp';
 document.body.appendChild(appTarget);
 
 ReactDOM.render(<WrappedPlayer isPlayerOnly />, appTarget);

@@ -1,5 +1,6 @@
 import React from 'react';
 import ITCH_CONFIG from '../../itch.config';
+
 class EventMessage extends React.Component {
     constructor (props) {
         super(props);
@@ -25,6 +26,13 @@ class EventMessage extends React.Component {
                     switch (functionName){
                     case 'setFullScreen': {
                         const btn = document.getElementById('scratch-header-fullscreen-btn');
+                        if (btn) {
+                            btn.click();
+                        }
+                        break;
+                    }
+                    case 'setProjectPage': {
+                        const btn = document.getElementById('scratch-header-set-project-page-btn');
                         if (btn) {
                             btn.click();
                         }

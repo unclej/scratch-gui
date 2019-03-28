@@ -114,10 +114,13 @@ class GUI extends React.Component {
             loadingStateVisible,
             ...componentProps
         } = this.props;
-        if (window.self !== window.top && !(fetchingProject || isLoading || loadingStateVisible)){
+        if (window.self !== window.top && isShowingProject){
             parent.postMessage(
                 ['loaded', [true]],
                 (keyValue.baseUrl ? keyValue.baseUrl : (ITCH_CONFIG.BASE_URL + ITCH_CONFIG.BASE_URL_EXTENSION)));
+                parent.postMessage(
+                    ['checkIfProjectPage', [true]],
+                    (keyValue.baseUrl ? keyValue.baseUrl : (ITCH_CONFIG.BASE_URL + ITCH_CONFIG.BASE_URL_EXTENSION)));
         }
         return (
             <GUIComponent

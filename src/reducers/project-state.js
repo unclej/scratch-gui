@@ -1,4 +1,5 @@
 import keyMirror from 'keymirror';
+import ITCH_CONFIG from '../../itch.config';
 
 const DONE_CREATING_COPY = 'scratch-gui/project-state/DONE_CREATING_COPY';
 const DONE_CREATING_NEW = 'scratch-gui/project-state/DONE_CREATING_NEW';
@@ -498,6 +499,19 @@ const onFetchedProjectData = (projectData, loadingState) => {
 
 const onLoadedProject = (loadingState, canSave, success, projectId) => {
     if (success) {
+        /* if(window.self !== window.top){
+            const url = window.location.search.substring(1).split('&');
+            const keyValue = {};
+            for (let i = 0; i < url.length; i++){
+                const d = url[i].split('=');
+                keyValue[d[0]] = d[1];
+            }
+            parent.postMessage(['checkIfProjectPage', [true]], (
+                (typeof keyValue.baseUrl === 'undefined') ?
+                (ITCH_CONFIG.BASE_URL + ITCH_CONFIG.BASE_URL_EXTENSION) :
+                keyValue.baseUrl)
+            );
+        } */
         switch (loadingState) {
         case LoadingState.LOADING_VM_WITH_ID:
             return {

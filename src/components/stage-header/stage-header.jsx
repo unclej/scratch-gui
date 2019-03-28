@@ -218,7 +218,6 @@ const StageHeaderComponent = function (props) {
                             <Button
                                 className={styles.stageFullscreenButton}
                                 onClick={onSetStageFull}
-                                id="scratch-header-fullscreen-btn"
                             >
                                 <img
                                     alt={props.intl.formatMessage(messages.fullStageSizeMessage)}
@@ -233,6 +232,7 @@ const StageHeaderComponent = function (props) {
                                 className={styles.projectButton}
                                 onClick={onSetProjectPageFromFull}
                                 onKeyPress={onKeyPress}
+                                id="scratch-header-set-project-page-btn"
                             >
                                 <img
                                     alt="See Project Page"
