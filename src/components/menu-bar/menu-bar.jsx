@@ -39,6 +39,7 @@ import {
     getIsUpdating,
     getIsShowingProject,
     manualUpdateProject,
+    getIsManualUpdating,
     requestNewProject,
     remixProject,
     saveProjectAsCopy
@@ -93,10 +94,10 @@ const ariaMessages = defineMessages({
         defaultMessage: 'Lessons from iTCH',
         description: 'accessibility text for the lessons button'
     },
-    notSaved: {
-        id: 'itchLocale.menuBar.projectNotSaved',
-        defaultMessage: 'Not Saved',
-        description: 'accessibility text save button on not saved state'
+    saveNow: {
+        id: 'gui.menuBar.saveNowLink',
+        defaultMessage: 'Save Now',
+        description: 'Title bar link for saving now'
     },
     saving: {
         id: 'itchLocale.menuBar.projectIsSaving',
@@ -104,9 +105,9 @@ const ariaMessages = defineMessages({
         description: 'accessibility text save button on saving state'
     },
     saved: {
-        id: 'itchLocale.menuBar.projectSaved',
-        defaultMessage: 'Saved',
-        description: 'accessibility text save button on saved state'
+        id: 'gui.alerts.savesuccess',
+        defaultMessage: 'Project saved.',
+        description: 'Message indicating that project was successfully saved'
     }
 });
 const MenuBarItemTooltip = ({
@@ -367,20 +368,22 @@ class MenuBar extends React.Component {
                 />
             </div>
         );
-        /* const itchSaveButton = (
+        const itchSaveButton = (
             <Button
                 className={classNames(styles.saveButton)}
-                onClick={this.handleClickSave}
+                onClick={this.props.onClickSave}
+                disabled={this.props.isUpdating}
             >
                 {
-                    this.props.saveText === 1 ? this.props.intl.formatMessage(ariaMessages.saving) :
-                        this.props.saveText === 0 ? this.props.intl.formatMessage(ariaMessages.saved) :
-                            this.props.intl.formatMessage(ariaMessages.notSaved)
+                    this.props.projectChanged ? this.props.intl.formatMessage(ariaMessages.saveNow) :
+                        ( this.props.isUpdating ? this.props.intl.formatMessage(ariaMessages.saving) :
+                            this.props.intl.formatMessage(ariaMessages.saved) 
+                        )
                 }
             </Button>
 
         );
-        const remixButton = (
+        /* const remixButton = (
             <Button
                 className={classNames(styles.shareButton)}
                 onClick={this.handleClickRemix}
@@ -709,12 +712,11 @@ class MenuBar extends React.Component {
                                 </ProjectWatcher>
                             )
                         )}
-                        {this.props.canRemix ? remixButton : []}
-                    </div>
-                    {/* <div className={classNames(styles.menuBarItem)}>
-                        {this.props.canShare ? shareButton : []}
                     </div>
                     <div className={classNames(styles.menuBarItem)}>
+                        {this.props.canSave ? itchSaveButton : (this.props.canRemix ? remixButton : [])}
+                    </div>
+                    {/* <div className={classNames(styles.menuBarItem)}>
                         {this.props.canRemix ? remixButton : null}
                     </div> */}
                     {/* <div className={classNames(styles.menuBarItem, styles.communityButtonWrapper)}>
@@ -934,6 +936,7 @@ MenuBar.propTypes = {
     isRtl: PropTypes.bool,
     isShared: PropTypes.bool,
     isShowingProject: PropTypes.bool,
+    isManualupdating: PropTypes.bool,
     isUpdating: PropTypes.bool,
     languageMenuOpen: PropTypes.bool,
     loginMenuOpen: PropTypes.bool,
@@ -987,6 +990,7 @@ const mapStateToProps = state => {
         isRtl: state.locales.isRtl,
         isUpdating: getIsUpdating(loadingState),
         isShowingProject: getIsShowingProject(loadingState),
+        isManualupdating: getIsManualUpdating(loadingState),
         languageMenuOpen: languageMenuOpen(state),
         loginMenuOpen: loginMenuOpen(state),
         projectChanged: state.scratchGui.projectChanged,

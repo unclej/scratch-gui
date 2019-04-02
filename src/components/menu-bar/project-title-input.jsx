@@ -4,8 +4,7 @@ import PropTypes from 'prop-types';
 import bindAll from 'lodash.bindall';
 import React from 'react';
 import {defineMessages, intlShape, injectIntl} from 'react-intl';
-import xhr from 'xhr';
-import storage from '../../lib/storage';
+import {setProjectChanged} from '../../reducers/project-changed';
 
 import BufferedInputHOC from '../forms/buffered-input-hoc.jsx';
 import Input from '../forms/input.jsx';
@@ -33,6 +32,7 @@ class ProjectTitleInput extends React.Component {
     handleUpdateProjectTitle (newTitle) {
         if (this.props.onUpdateProjectTitle) {
             this.props.onUpdateProjectTitle(newTitle);
+            this.props.onProjectChanged();
             /* const opts = {
                 method: 'post',
                 url: `${storage.projectHost}project/${this.props.reduxProjectId}/update-title`,
@@ -70,6 +70,7 @@ ProjectTitleInput.propTypes = {
     className: PropTypes.string,
     intl: intlShape.isRequired,
     onUpdateProjectTitle: PropTypes.func,
+    onProjectChanged: PropTypes.func,
     projectTitle: PropTypes.string,
     reduxProjectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
 };
@@ -90,7 +91,9 @@ const mapStateToProps = state => {
     };
 };
 
-const mapDispatchToProps = () => ({});
+const mapDispatchToProps  = dispatch => ({
+    onProjectChanged: () => dispatch(setProjectChanged()),
+});
 
 export default injectIntl(connect(
     mapStateToProps,

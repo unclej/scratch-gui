@@ -27,7 +27,7 @@ const SaveStatus = ({
 }) => (
     filterInlineAlerts(alertsList).length > 0 ? (
         <InlineMessages />
-    ) : projectChanged && (
+    ) : []/* projectChanged && (
         <div
             className={styles.saveNow}
             onClick={onClickSave}
@@ -38,7 +38,7 @@ const SaveStatus = ({
                 id="gui.menuBar.saveNowLink"
             />
         </div>
-    ));
+    ) */);
 
 SaveStatus.propTypes = {
     alertsList: PropTypes.arrayOf(PropTypes.object),
