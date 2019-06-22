@@ -1,5 +1,7 @@
 import ScratchStorage from 'scratch-storage';
 
+import ITCH_CONFIG from '../../itch.config';
+
 import defaultProject from './default-project';
 
 /**
@@ -39,19 +41,59 @@ class Storage extends ScratchStorage {
     setLoggedInStudioId (id) {
         this.loggedInStudio = id;
     }
+    setStarterProjectId (id) {
+        this.starterProjectId = id ? id : 0;
+    }
     setProjectHost (projectHost) {
         this.projectHost = projectHost;
     }
+    setToken (token) {
+        this.token = token;
+    }
+    getToken () {
+        return this.token;
+    }
     getProjectGetConfig (projectAsset) {
-        return `${this.projectHost}project/user/${this.loggedInUser}/${projectAsset.assetId}/${this.loggedInStudio}/get`;
+        if (ITCH_CONFIG.ITCH_LESSONS){
+            return {
+                url: `${this.projectHost}project/${projectAsset.assetId}/${this.loggedInStudio}/get`,
+                headers: {
+                    Authorization: `Bearer ${this.getToken()}`
+                }
+            };
+        }
+
+        return `${this.projectHost}
+        project/user/
+        ${this.loggedInUser}/
+        ${projectAsset.assetId}/
+        ${this.loggedInStudio}/
+        get`;
     }
     getProjectCreateConfig () {
+        if (ITCH_CONFIG.ITCH_LESSONS){
+            return {
+                url: `${this.projectHost}project/create`,
+                headers: {
+                    Authorization: `Bearer ${this.getToken()}`
+                }
+            };
+        }
         return {
             url: `${this.projectHost}project/create`,
             withCredentials: false
         };
     }
     getProjectUpdateConfig (projectAsset) {
+        if (ITCH_CONFIG.ITCH_LESSONS){
+            return {
+                url: `${this.projectHost}project/${projectAsset.assetId}/update`,
+                headers: {
+                    Authorization: `Bearer ${this.getToken()}`
+                },
+                withCredentials: true
+            };
+        }
         return {
             url: `${this.projectHost}project/${projectAsset.assetId}/update`,
             withCredentials: false
@@ -77,6 +119,18 @@ class Storage extends ScratchStorage {
         return `${this.projectHost}project/${projectId}/share`;
     }
     getAssetCreateConfig (asset) {
+        // eslint-disable-next-line no-console
+        if (ITCH_CONFIG.ITCH_LESSONS){
+            return {
+                method: 'post',
+                url: `${this.projectHost}project/upload/asset/${asset.assetId}.${asset.dataFormat}`,
+                withCredentials: false,
+                headers: {
+                    'Authorization': `Bearer ${this.getToken()}`,
+                    'Content-Type': 'application/json'
+                }
+            };
+        }
         return {
             // There is no such thing as updating assets, but storage assumes it
             // should update if there is an assetId, and the asset store uses the

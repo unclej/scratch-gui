@@ -63,43 +63,10 @@ const ProjectFetcherHOC = function (WrappedComponent) {
             this.PROJECT_SERVER = ITCH_CONFIG.PROJECT_SERVER;
             this.URL_PARAMS = {};
             this.getConfigs();
-            let loggedInUserId = 0;
-            let loggedInStudioId = 0;
-            // set configs
-            if (this.fetchRemixProjectId() !== 0){
-                this.props.setRemixProjectId(this.fetchRemixProjectId());
-            }
-            if (this.fetchUserId() !== 0){
-                loggedInUserId = this.fetchUserId();
-            }
-            storage.setLoggedInUser(loggedInUserId);
-            this.props.setEditingUserId(loggedInUserId);
-            if (this.fetchStudioId() !== 0){
-                loggedInStudioId = this.fetchStudioId();
-            }
-            this.props.setStudioId(loggedInStudioId);
-            storage.setLoggedInStudioId(loggedInStudioId);
-            
-            if (this.fetchCsrfToken() !== ''){
-                this.props.setCsrfToken(this.fetchCsrfToken());
-            }
-            if (this.fetchAssetUrl() === ''){
-                this.props.setAssetHost(props.assetHost);
-                storage.setAssetHost(props.assetHost);
+            if (ITCH_CONFIG.ITCH_LESSONS) {
+                this.setConfigItchLessons(props);
             } else {
-                storage.setAssetHost(this.fetchAssetUrl());
-                this.props.setAssetHost(this.fetchAssetUrl());
-            }
-            if (this.fetchApiUrl() === ''){
-                const projectHost = this.PROJECT_SERVER ? this.PROJECT_SERVER : props.projectHost;
-                this.props.setProjectHost(projectHost);
-                storage.setProjectHost(projectHost);
-            } else {
-                storage.setProjectHost(this.fetchApiUrl());
-                this.props.setProjectHost(this.fetchApiUrl());
-            }
-            if (this.fetchBaseUrl() !== ''){
-                this.props.setBaseUrl(this.fetchBaseUrl());
+                this.setConfigs(props);
             }
             storage.setTranslatorFunction(props.intl.formatMessage);
             // props.projectId might be unset, in which case we use our default;
@@ -129,6 +96,64 @@ const ProjectFetcherHOC = function (WrappedComponent) {
             }
             if (this.props.isShowingProject && (prevProps.isLoadingProject || prevProps.isCreatingNew)) {
                 this.props.onActivateTab(BLOCKS_TAB_INDEX);
+            }
+        }
+        setConfigItchLessons (props) {
+            const configs = window.getScratchItchConfig();
+            const loggedInUserId = 0;
+            storage.setLoggedInUser(loggedInUserId);
+            this.props.setEditingUserId(loggedInUserId);
+            this.props.setStudioId(configs.courseId);
+            storage.setLoggedInStudioId(configs.courseId);
+            storage.setToken(configs.token);
+            this.props.setCsrfToken(configs.token);
+            this.props.setAssetHost(props.assetHost);
+            storage.setAssetHost(props.assetHost);
+            const projectHost = this.PROJECT_SERVER ? this.PROJECT_SERVER : props.projectHost;
+            this.props.setProjectHost(projectHost);
+            storage.setProjectHost(projectHost);
+            if (configs.starterProjectId) {
+                storage.setStarterProjectId(configs.starterProjectId);
+            }
+        }
+        setConfigs (props) {
+            let loggedInUserId = 0;
+            let loggedInStudioId = 0;
+            // set configs
+            if (this.fetchRemixProjectId() !== 0){
+                this.props.setRemixProjectId(this.fetchRemixProjectId());
+            }
+            if (this.fetchUserId() !== 0){
+                loggedInUserId = this.fetchUserId();
+            }
+            storage.setLoggedInUser(loggedInUserId);
+            this.props.setEditingUserId(loggedInUserId);
+            if (this.fetchStudioId() !== 0){
+                loggedInStudioId = this.fetchStudioId();
+            }
+            this.props.setStudioId(loggedInStudioId);
+            storage.setLoggedInStudioId(loggedInStudioId);
+
+            if (this.fetchCsrfToken() !== ''){
+                this.props.setCsrfToken(this.fetchCsrfToken());
+            }
+            if (this.fetchAssetUrl() === ''){
+                this.props.setAssetHost(props.assetHost);
+                storage.setAssetHost(props.assetHost);
+            } else {
+                storage.setAssetHost(this.fetchAssetUrl());
+                this.props.setAssetHost(this.fetchAssetUrl());
+            }
+            if (this.fetchApiUrl() === ''){
+                const projectHost = this.PROJECT_SERVER ? this.PROJECT_SERVER : props.projectHost;
+                this.props.setProjectHost(projectHost);
+                storage.setProjectHost(projectHost);
+            } else {
+                storage.setProjectHost(this.fetchApiUrl());
+                this.props.setProjectHost(this.fetchApiUrl());
+            }
+            if (this.fetchBaseUrl() !== ''){
+                this.props.setBaseUrl(this.fetchBaseUrl());
             }
         }
         getConfigs (){
@@ -165,29 +190,25 @@ const ProjectFetcherHOC = function (WrappedComponent) {
             return this.URL_PARAMS.baseUrl ? this.URL_PARAMS.baseUrl : '';
         }
         fetchProject (projectId, loadingState){
-            const self = this;
             if (1 * projectId === 0){
                 storage
                     .load(storage.AssetType.Project, projectId, storage.DataFormat.JSON)
                     .then(projectAsset => {
-                        request.post(`${self.PROJECT_SERVER}project/create`,
-                            {form: {
-                                name: 'Untitled',
-                                remix_of: self.fetchRemixProjectId(),
-                                user_id: self.fetchUserId(),
-                                studioID: self.fetchStudioId(),
-                                project_json: projectAsset.data
-                            }},
-                            (error, response, body) => {
-                                const project = JSON.parse(body);
-                                if (project.error){
-                                    log.error('There was a problem with creating new project');
-                                } else {
-                                    window.location.hash = `#${project.projectID}`;
-                                    self.props.setProjectId(project.projectID);
-                                    self.fetchProject(project.projectID, 'FETCHING_WITH_ID');
-                                }
-                            });
+                        if (this.props.isLoggedIn){
+                            if (ITCH_CONFIG.ITCH_LESSONS){
+                                this.createItchLessonProject(this, projectAsset);
+                            } else {
+                                this.createItchProject(this, projectAsset);
+                            }
+                        } else if (projectAsset) {
+                            this.props.onFetchedProjectData(projectAsset.data, loadingState);
+                        } else {
+                            // Treat failure to load as an error
+                            // Throw to be caught by catch later on
+                            throw new Error('Could not find project');
+                        }
+
+
                     })
                     .catch(err => log.error(err));
             } else {
@@ -276,6 +297,54 @@ const ProjectFetcherHOC = function (WrappedComponent) {
                     .catch(err => log.error(err));
             }
         }
+        createItchProject (self, projectAsset){
+            request.post(`${self.PROJECT_SERVER}project/create`,
+                {form: {
+                    name: 'Untitled',
+                    remix_of: self.fetchRemixProjectId(),
+                    user_id: self.fetchUserId(),
+                    studioID: self.fetchStudioId(),
+                    project_json: projectAsset.data
+                }},
+                (error, response, body) => {
+                    const project = JSON.parse(body);
+                    if (project.error){
+                        log.error('There was a problem with creating new project');
+                    } else {
+                        if (!ITCH_CONFIG.ITCH_LESSONS){
+                            window.location.hash = `#${project.projectID}`;
+                        }
+                        self.props.setProjectId(project.projectID);
+                        self.fetchProject(project.projectID, 'FETCHING_WITH_ID');
+                    }
+                });
+        }
+        createItchLessonProject (self, projectAsset){
+            const data = {
+                name: 'Untitled',
+                courseId: storage.loggedInStudio,
+                projectJson: projectAsset.data
+            };
+            if (storage.starterProjectId){
+                data.remixOf = storage.starterProjectId;
+            }
+            request.post(`${self.PROJECT_SERVER}project/create`,
+                {
+                    json: data,
+                    headers: {
+                        Authorization: `Bearer ${storage.getToken()}`
+                    }
+                },
+                (error, response, body) => {
+                    const project = body;
+                    if (project.error){
+                        log.error('There was a problem with creating new project');
+                    } else {
+                        self.props.setProjectId(project.projectID);
+                        self.fetchProject(project.projectID, 'FETCHING_WITH_ID');
+                    }
+                });
+        }
         storeAssets (targets) {
             let assets = [];
             for (let i = 0; i < targets.length; i++){
@@ -337,15 +406,16 @@ const ProjectFetcherHOC = function (WrappedComponent) {
         canSave: PropTypes.bool,
         intl: intlShape.isRequired,
         isFetchingWithId: PropTypes.bool,
+        isFetchingWithoutId: PropTypes.bool,
         isLoadingProject: PropTypes.bool,
+        isLoggedIn: PropTypes.bool,
         loadingState: PropTypes.oneOf(LoadingStates),
         onActivateTab: PropTypes.func,
+        onChangeLanguage: PropTypes.func.isRequired,
         onError: PropTypes.func,
         onFetchedProjectData: PropTypes.func,
-        onProjectUnchanged: PropTypes.func,
-        isFetchingWithoutId: PropTypes.bool,
-        onChangeLanguage: PropTypes.func.isRequired,
         onProjectLessons: PropTypes.func,
+        onProjectUnchanged: PropTypes.func,
         projectHost: PropTypes.string,
         projectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
         reduxProjectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
@@ -368,20 +438,27 @@ const ProjectFetcherHOC = function (WrappedComponent) {
         updateProjectAssets: PropTypes.func
     };
     ProjectFetcherComponent.defaultProps = {
-        assetHost: 'https://d3dch2j0kvht3t.cloudfront.net/public/',
-        projectHost: 'http://localhost/itch/api/v1/'
+        assetHost: ITCH_CONFIG.ASSET_SERVER,
+        projectHost: ITCH_CONFIG.PROJECT_SERVER
     };
 
-    const mapStateToProps = state => ({
-        isCreatingNew: getIsCreatingNew(state.scratchGui.projectState.loadingState),
-        isFetchingWithId: getIsFetchingWithId(state.scratchGui.projectState.loadingState),
-        isLoadingProject: getIsLoading(state.scratchGui.projectState.loadingState),
-        isShowingProject: getIsShowingProject(state.scratchGui.projectState.loadingState),
-        isFetchingWithoutId: getIsShowingWithoutId(state.scratchGui.projectState.loadingState),
-        loadingState: state.scratchGui.projectState.loadingState,
-        reduxProjectId: state.scratchGui.projectState.projectId,
-        supportedLocales: Object.keys(state.locales.messagesByLocale)
-    });
+    const mapStateToProps = state => {
+        const isLoggedIn = state.session.session.user !== null &&
+            typeof state.session.session.user !== 'undefined' &&
+            typeof state.session.session.user.id !== 'undefined' &&
+            Object.keys(state.session.session.user).length > 0 && state.session.session.user.id !== 0;
+        return {
+            isLoggedIn,
+            isCreatingNew: getIsCreatingNew(state.scratchGui.projectState.loadingState),
+            isFetchingWithId: getIsFetchingWithId(state.scratchGui.projectState.loadingState),
+            isLoadingProject: getIsLoading(state.scratchGui.projectState.loadingState),
+            isShowingProject: getIsShowingProject(state.scratchGui.projectState.loadingState),
+            isFetchingWithoutId: getIsShowingWithoutId(state.scratchGui.projectState.loadingState),
+            loadingState: state.scratchGui.projectState.loadingState,
+            reduxProjectId: state.scratchGui.projectState.projectId,
+            supportedLocales: Object.keys(state.locales.messagesByLocale)
+        };
+    };
     const mapDispatchToProps = dispatch => ({
         onActivateTab: tab => dispatch(activateTab(tab)),
         onError: error => dispatch(projectError(error)),

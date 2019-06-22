@@ -4,7 +4,7 @@ import ITCH_CONFIG from '../../itch.config';
 class EventMessage extends React.Component {
     constructor (props) {
         super(props);
-            
+
         window.addEventListener('message', event => {
             // Check the origin of the data!
             const url = window.location.search.substring(1).split('&');
@@ -83,6 +83,8 @@ class EventMessage extends React.Component {
                 return;
             }
         });
+        window.setScratchEnvironmentVariables = function(vars){
+        }
     }
 }
 

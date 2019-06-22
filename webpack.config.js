@@ -27,7 +27,7 @@ const base = {
     },
     output: {
         library: 'GUI',
-        filename: '[name]_[chunkhash].js'
+        filename: '[name].js'
     },
     externals: {
         React: 'react',
@@ -109,7 +109,7 @@ module.exports = [
         },
         output: {
             path: path.resolve(__dirname, 'build'),
-            filename: '[name]_[chunkhash].js'
+            filename: '[name].js'
         },
         externals: {
             React: 'react',
@@ -137,9 +137,11 @@ module.exports = [
         },
         plugins: base.plugins.concat([
             new webpack.DefinePlugin({
-                'process.env.NODE_ENV': '"' + process.env.NODE_ENV + '"',
+                'process.env.NODE_ENV': '"' + (process.env.NODE_ENV || 'local') + '"',
                 'process.env.DEBUG': Boolean(process.env.DEBUG),
-                'process.env.GA_ID': '"' + (process.env.GA_ID || 'UA-000000-01') + '"'
+                'process.env.GA_ID': '"' + (process.env.GA_ID || 'UA-000000-01') + '"',
+                'process.env.ITCH_LESSONS': (Boolean(process.env.ITCH_LESSONS) || false),
+                'process.env.SENTRY_CONFIG': '"' + (process.env.SENTRY_CONFIG || 'https://db27ae4ad5bc4bde90f03cd56521b330@sentry.io/1218798') + '"'
             }),
             new HtmlWebpackPlugin({
                 chunks: ['lib.min', 'gui'],

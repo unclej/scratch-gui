@@ -9,6 +9,7 @@ import {
     getIsShowingWithoutId,
     setProjectId
 } from '../reducers/project-state';
+import ITCH_CONFIG from '../../itch.config';
 
 /* Higher Order Component to get the project id from location.hash
  * @param {React.Component} WrappedComponent: component to render
@@ -19,29 +20,55 @@ const HashParserHOC = function (WrappedComponent) {
         constructor (props) {
             super(props);
             bindAll(this, [
-                'handleHashChange'
+                'handleHashChange',
+                'updateProjectIdFromConfigs'
             ]);
         }
         componentDidMount () {
-            window.addEventListener('hashchange', this.handleHashChange);
-            this.handleHashChange();
+            if (typeof window.getScratchItchConfig === 'function') {
+                window.updateScratchProjectId = this.updateProjectIdFromConfigs;
+                this.updateProjectIdFromConfigs();
+            } else {
+                window.addEventListener('hashchange', this.handleHashChange);
+                this.handleHashChange();
+            }
+
         }
         componentDidUpdate (prevProps) {
             // if we are newly fetching a non-hash project...
-            if (this.props.isFetchingWithoutId && !prevProps.isFetchingWithoutId) {
+            if (this.props.isFetchingWithoutId && !prevProps.isFetchingWithoutId && !ITCH_CONFIG.ITCH_LESSONS) {
                 // ...clear the hash from the url
                 history.pushState('new-project', 'new-project',
                     window.location.pathname + window.location.search);
             }
         }
         componentWillUnmount () {
-            window.removeEventListener('hashchange', this.handleHashChange);
+            if (typeof window.getScratchItchConfig === 'function') {
+                // eslint-disable-next-line no-undefined
+                window.updateScratchData = undefined;
+            } else {
+                window.removeEventListener('hashchange', this.handleHashChange);
+            }
+
         }
         handleHashChange () {
-            const hashMatch = window.location.hash.match(/#(\d+)/);
-            const hashProjectId = hashMatch === null ? defaultProjectId : hashMatch[1];
+            let hashProjectId;
+            if (typeof window.getScratchItchConfig === 'function') {
+                const data = window.getScratchItchConfig();
+                hashProjectId = data && data.projectId ? data.projectId : defaultProjectId;
+            } else {
+                const hashMatch = window.location.hash.match(/#(\d+)/);
+                hashProjectId = hashMatch === null ? defaultProjectId : hashMatch[1];
+            }
             this.props.setProjectId(hashProjectId.toString());
-            
+            if (hashProjectId !== defaultProjectId && !this.props.isFetchingWithoutId) {
+                this.setState({hideIntro: true});
+            }
+        }
+        updateProjectIdFromConfigs (){
+            const data = window.getScratchItchConfig();
+            const hashProjectId = data && data.projectId ? data.projectId : defaultProjectId;
+            this.props.setProjectId(hashProjectId.toString());
             if (hashProjectId !== defaultProjectId && !this.props.isFetchingWithoutId) {
                 this.setState({hideIntro: true});
             }

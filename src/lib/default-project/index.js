@@ -2,10 +2,13 @@ import projectData from './project-data';
 
 /* eslint-disable import/no-unresolved */
 import popWav from '!arraybuffer-loader!./83a9787d4cb6f3b7632b4ddfebf74367.wav';
-import meowWav from '!arraybuffer-loader!./83c36d806dc92327b9e7049a565c6bff.wav';
+import ballWav from '!arraybuffer-loader!./53a3c2e27d1fb5fdb14aaf0cb41e7889.wav';
 import backdrop from '!raw-loader!./cd21514d0531fdffb22204e0ec5ed84a.svg';
-import costume1 from '!raw-loader!./09dc888b0b7df19f70d81588ae73420e.svg';
-import costume2 from '!raw-loader!./3696356a03a8d938318876a593572843.svg';
+import costume1 from '!raw-loader!./10117ddaefa98d819f2b1df93805622f.svg';
+import costume2 from '!raw-loader!./6e6330cad7750ea7e9dc88402661deb8.svg';
+import costume3 from '!raw-loader!./bb45ed5db278f15c17c012c34a6b160f.svg';
+import costume4 from '!raw-loader!./5d494659deae5c0de06b5885f5524276.svg';
+import costume5 from '!raw-loader!./e80c98bc62fd32e8df81642af11ffb1a.svg';
 /* eslint-enable import/no-unresolved */
 
 const defaultProject = translator => {
@@ -30,25 +33,40 @@ const defaultProject = translator => {
         dataFormat: 'WAV',
         data: new Uint8Array(popWav)
     }, {
-        id: '83c36d806dc92327b9e7049a565c6bff',
+        id: '53a3c2e27d1fb5fdb14aaf0cb41e7889',
         assetType: 'Sound',
         dataFormat: 'WAV',
-        data: new Uint8Array(meowWav)
+        data: new Uint8Array(ballWav)
     }, {
         id: 'cd21514d0531fdffb22204e0ec5ed84a',
         assetType: 'ImageVector',
         dataFormat: 'SVG',
         data: encoder.encode(backdrop)
     }, {
-        id: '09dc888b0b7df19f70d81588ae73420e',
+        id: '10117ddaefa98d819f2b1df93805622f',
         assetType: 'ImageVector',
         dataFormat: 'SVG',
         data: encoder.encode(costume1)
     }, {
-        id: '3696356a03a8d938318876a593572843',
+        id: '6e6330cad7750ea7e9dc88402661deb8',
         assetType: 'ImageVector',
         dataFormat: 'SVG',
         data: encoder.encode(costume2)
+    }, {
+        id: 'bb45ed5db278f15c17c012c34a6b160f',
+        assetType: 'ImageVector',
+        dataFormat: 'SVG',
+        data: encoder.encode(costume3)
+    }, {
+        id: '5d494659deae5c0de06b5885f5524276',
+        assetType: 'ImageVector',
+        dataFormat: 'SVG',
+        data: encoder.encode(costume4)
+    }, {
+        id: 'e80c98bc62fd32e8df81642af11ffb1a',
+        assetType: 'ImageVector',
+        dataFormat: 'SVG',
+        data: encoder.encode(costume5)
     }];
 };
 

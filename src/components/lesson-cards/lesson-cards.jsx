@@ -150,7 +150,7 @@ const LessonStep = ({step, dragging, lessonName/* , autoPlayVideo */}) => (
                                     width="560"
                                 />
                             )}
-                            
+
                         </div>
                     );
                 } else if (dataItem.type === 'assignment'){
@@ -174,7 +174,7 @@ const LessonStep = ({step, dragging, lessonName/* , autoPlayVideo */}) => (
                 return (<div
                     key={`lesson-part-step-${index}`}
                 />);
-                
+
             })}
         </div>
     </Fragment>
@@ -270,7 +270,7 @@ const LessonCards = props => {
             onStart={props.onStartDrag}
             onStop={props.onEndDrag}
         >
-            
+
             <div className={styles.cardContainer}>
                 <div className={styles.card}>
                     <LessonCardHeader
@@ -297,7 +297,7 @@ const LessonCards = props => {
 };
 
 LessonCards.propTypes = {
-    activeLessonId: PropTypes.number.isRequired,
+    activeLessonId: PropTypes.number,
     /* autoPlayVideo: PropTypes.bool, */
     content: PropTypes.arrayOf(
         PropTypes.shape({
@@ -315,7 +315,7 @@ LessonCards.propTypes = {
     onNextStep: PropTypes.func,
     onPrevStep: PropTypes.func,
     onStartDrag: PropTypes.func,
-    step: PropTypes.number.isRequired,
+    step: PropTypes.number,
     x: PropTypes.number,
     y: PropTypes.number
 };

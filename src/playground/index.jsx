@@ -17,21 +17,33 @@ import styles from './index.css';
 // Register "base" page view
 analytics.pageview('/');
 
-const appTarget = document.createElement('div');
-appTarget.className = styles.app;
-appTarget.classList.add('only-player-app-screen');
-appTarget.id = 'mainDivApp';
-document.body.appendChild(appTarget);
+const scratchEditor = document.getElementById('scratch-editor');
+window.initScratch = function () {
+    const appTarget = document.createElement('div');
+    appTarget.className = styles.app;
+    appTarget.classList.add('only-player-app-screen');
+    appTarget.id = 'mainDivApp';
+    if (scratchEditor){
+        scratchEditor.appendChild(appTarget);
+    } else {
+        document.body.appendChild(appTarget);
+    }
 
-if (supportedBrowser()) {
-    // require needed here to avoid importing unsupported browser-crashing code
-    // at the top level
-    require('./render-gui.jsx').default(appTarget);
 
-} else {
-    BrowserModalComponent.setAppElement(appTarget);
-    const WrappedBrowserModalComponent = AppStateHOC(BrowserModalComponent, true /* localesOnly */);
-    const handleBack = () => {};
-    // eslint-disable-next-line react/jsx-no-bind
-    ReactDOM.render(<WrappedBrowserModalComponent onBack={handleBack} />, appTarget);
+    if (supportedBrowser()) {
+        // require needed here to avoid importing unsupported browser-crashing code
+        // at the top level
+        require('./render-gui.jsx').default(appTarget);
+
+    } else {
+        BrowserModalComponent.setAppElement(appTarget);
+        const WrappedBrowserModalComponent = AppStateHOC(BrowserModalComponent, true /* localesOnly */);
+        const handleBack = () => {};
+        // eslint-disable-next-line react/jsx-no-bind
+        ReactDOM.render(<WrappedBrowserModalComponent onBack={handleBack} />, appTarget);
+    }
+
+};
+if (!scratchEditor){
+    window.initScratch();
 }

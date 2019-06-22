@@ -21,7 +21,7 @@ import {
     setProjectId
 } from '../reducers/project-state';
 
-import { 
+import {
     showStandardAlert,
     showAlertWithTimeout
 } from '../reducers/alerts';
@@ -32,6 +32,7 @@ import {
 import {
     closeFileMenu
 } from '../reducers/menus';
+import ITCH_CONFIG from '../../itch.config';
 
 /**
  * SBFileUploader component passes a file input, load handler and props to its child.
@@ -117,7 +118,6 @@ class SBFileUploader extends React.Component {
             const uploadAllowed = (isShowingWithoutId && projectChanged) ?
                 confirm(intl.formatMessage(sharedMessages.replaceProjectWarning)) : // eslint-disable-line no-alert
                 true;
-            console.log(1);
             if (uploadAllowed) this.props.requestProjectUpload(loadingState);
         }
     }
@@ -125,7 +125,7 @@ class SBFileUploader extends React.Component {
     onload () {
         if (this.reader) {
             // create a new project first
-            return this.createNewProject().then((response)=>{
+            return this.createNewProject().then(response => {
                 /* window.location.hash = `#${response.projectID}`; */
                 const projectId = response.projectID.toString();
                 /* this.props.onsetProjectId(projectId) */
@@ -144,7 +144,7 @@ class SBFileUploader extends React.Component {
                             nonInteraction: true
                         });
                         // Remove the hash if any (without triggering a hash change event or a reload)
-                        
+
                         this.props.onLoadingFinished(this.props.loadingState, true, this.props.canSave, projectId);
                         // Reset the file input after project is loaded
                         // This is necessary in case the user wants to reload a project
@@ -164,32 +164,42 @@ class SBFileUploader extends React.Component {
                         this.resetFileInput();
                     });
             })
-            .catch(err => {
-                this.props.onShowAlert('creatingError');
-                this.props.onProjectError(err);
-                this.props.onLoadingFinished(this.props.loadingState, this.props.canSave, false);
-                this.resetFileInput();
-            });
-            
+                .catch(err => {
+                    this.props.onShowAlert('creatingError');
+                    this.props.onProjectError(err);
+                    this.props.onLoadingFinished(this.props.loadingState, this.props.canSave, false);
+                    this.resetFileInput();
+                });
+
         }
     }
-    createNewProject(){
+    createNewProject (){
         this.props.onShowCreatingAlert();
         const savedVMState = this.props.vm.toJSON();
         const loggedInUser = this.props.loggedInUser;
+        let data = {
+            project: savedVMState,
+            name: 'Untitled',
+            user_id: loggedInUser,
+            studioID: storage.studioID
+        };
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+        if (ITCH_CONFIG.ITCH_LESSONS){
+            data = {
+                name: 'Untitled',
+                courseId: storage.loggedInStudio,
+                projectJson: savedVMState
+            };
+            headers.Authorization = `Bearer ${storage.getToken()}`;
+        }
         const opts = {
             method: 'post',
             url: `${storage.projectHost}project/create`,
-            body: JSON.stringify({
-                project: savedVMState, 
-                name: 'Untitled', 
-                user_id: loggedInUser,
-                studioID: storage.studioID
-            }),
+            body: JSON.stringify(data),
             // If we set json:true then the body is double-stringified, so don't
-            headers: {
-                'Content-Type': 'application/json'
-            }
+            headers
         };
         return new Promise((resolve, reject) => {
             xhr(opts, (err, response) => {
@@ -237,19 +247,19 @@ SBFileUploader.propTypes = {
     isLoadingUpload: PropTypes.bool,
     isShowingWithoutId: PropTypes.bool,
     loadingState: PropTypes.oneOf(LoadingStates),
+    loggedInUser: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    onCreatedProject: PropTypes.func,
     onLoadingFinished: PropTypes.func,
     onLoadingStarted: PropTypes.func,
-    onUpdateProjectTitle: PropTypes.func,
-    projectChanged: PropTypes.bool,
-    requestProjectUpload: PropTypes.func,
-    projectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    loggedInUser: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    onShowAlert: PropTypes.func,
-    onShowCreatingAlert: PropTypes.func,
-    onShowCreateSuccessAlert: PropTypes.func,
-    onCreatedProject: PropTypes.func,
     onProjectError: PropTypes.func,
+    onShowAlert: PropTypes.func,
+    onShowCreateSuccessAlert: PropTypes.func,
+    onShowCreatingAlert: PropTypes.func,
+    onUpdateProjectTitle: PropTypes.func,
     onsetProjectId: PropTypes.func,
+    projectChanged: PropTypes.bool,
+    projectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    requestProjectUpload: PropTypes.func,
     vm: PropTypes.shape({
         loadProject: PropTypes.func
     })
@@ -274,7 +284,7 @@ const mapStateToProps = state => {
     };
 };
 
-const mapDispatchToProps = (dispatch) => ({
+const mapDispatchToProps = dispatch => ({
     onLoadingFinished: (loadingState, success, canSave, projectId) => {
         dispatch(onLoadedProject(loadingState, canSave, success, projectId));
         dispatch(closeLoadingProject());
@@ -287,7 +297,7 @@ const mapDispatchToProps = (dispatch) => ({
     onShowCreatingAlert: () => showAlertWithTimeout(dispatch, 'creating'),
     onShowCreateSuccessAlert: () => showAlertWithTimeout(dispatch, 'createSuccess'),
     onLoadingStarted: () => dispatch(openLoadingProject()),
-    onsetProjectId: (projectId) => dispatch(setProjectId(projectId))
+    onsetProjectId: projectId => dispatch(setProjectId(projectId))
 });
 
 // Allow incoming props to override redux-provided props. Used to mock in tests.

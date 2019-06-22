@@ -61,6 +61,11 @@ const WrappedPlayer = compose(
 const appTarget = document.createElement('div');
 appTarget.classList.add('only-player-app-screen');
 appTarget.id = 'mainDivApp';
-document.body.appendChild(appTarget);
+const scratchEditor = document.getElementById('scratch-editor');
+if(scratchEditor){
+    scratchEditor.appendChild(appTarget);
+} else {
+    document.body.appendChild(appTarget);
+}
 
 ReactDOM.render(<WrappedPlayer isPlayerOnly />, appTarget);

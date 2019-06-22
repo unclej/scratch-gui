@@ -118,9 +118,9 @@ class GUI extends React.Component {
             parent.postMessage(
                 ['loaded', [true]],
                 (keyValue.baseUrl ? keyValue.baseUrl : (ITCH_CONFIG.BASE_URL + ITCH_CONFIG.BASE_URL_EXTENSION)));
-                parent.postMessage(
-                    ['checkIfProjectPage', [true]],
-                    (keyValue.baseUrl ? keyValue.baseUrl : (ITCH_CONFIG.BASE_URL + ITCH_CONFIG.BASE_URL_EXTENSION)));
+            parent.postMessage(
+                ['checkIfProjectPage', [true]],
+                (keyValue.baseUrl ? keyValue.baseUrl : (ITCH_CONFIG.BASE_URL + ITCH_CONFIG.BASE_URL_EXTENSION)));
         }
         return (
             <GUIComponent
@@ -154,8 +154,8 @@ GUI.propTypes = {
     projectHost: PropTypes.string,
     projectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     projectTitle: PropTypes.string,
-    telemetryModalVisible: PropTypes.bool,
     shareProjectVisible: PropTypes.bool,
+    telemetryModalVisible: PropTypes.bool,
     vm: PropTypes.instanceOf(VM).isRequired
 };
 

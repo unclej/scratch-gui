@@ -22,7 +22,7 @@ const ShareModal = ({...props}) => (
                     id="gui.shareModal.shareMessage"
                 />
             </h2>
-            <div>
+            <div className={styles.shareInput}>
                 <a
                     className={styles.hashLink}
                     href={props.hashUrl}

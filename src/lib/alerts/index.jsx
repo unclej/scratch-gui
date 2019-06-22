@@ -3,6 +3,7 @@ import {FormattedMessage} from 'react-intl';
 import keyMirror from 'keymirror';
 
 import successImage from '../assets/icon--success.svg';
+import ITCH_CONFIG from '../../../itch.config';
 
 const AlertTypes = keyMirror({
     STANDARD: null,
@@ -15,7 +16,11 @@ const AlertLevels = {
     INFO: 'info',
     WARN: 'warn'
 };
-
+let showDownload = true;
+if (ITCH_CONFIG.ITCH_LESSONS && typeof window.getScratchItchConfig === 'function'){
+    const configs = window.getScratchItchConfig();
+    showDownload = configs.canDownload;
+}
 const alerts = [
     {
         alertId: 'createSuccess',
@@ -128,7 +133,7 @@ const alerts = [
         alertId: 'savingError',
         clearList: ['createSuccess', 'creating', 'createCopySuccess', 'creatingCopy',
             'createRemixSuccess', 'creatingRemix', 'saveSuccess', 'saving'],
-        showDownload: true,
+        showDownload,
         showSaveNow: true,
         closeButton: false,
         content: (

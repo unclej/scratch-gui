@@ -376,13 +376,13 @@ GUIComponent.propTypes = {
     blocksTabVisible: PropTypes.bool,
     canCreateCopy: PropTypes.bool,
     canCreateNew: PropTypes.bool,
+    canDownload: PropTypes.bool,
     canEditTitle: PropTypes.bool,
     canRemix: PropTypes.bool,
     canSave: PropTypes.bool,
     canShare: PropTypes.bool,
-    canUseCloud: PropTypes.bool,
-    canDownload: PropTypes.bool,
     canUpload: PropTypes.bool,
+    canUseCloud: PropTypes.bool,
     cardsVisible: PropTypes.bool,
     children: PropTypes.node,
     costumeLibraryVisible: PropTypes.bool,
@@ -391,11 +391,11 @@ GUIComponent.propTypes = {
     intl: intlShape.isRequired,
     isCreating: PropTypes.bool,
     isFullScreen: PropTypes.bool,
+    isHiddenLessonModal: PropTypes.bool,
+    isLoggedIn: PropTypes.bool,
     isPlayerOnly: PropTypes.bool,
     isRtl: PropTypes.bool,
     isShared: PropTypes.bool,
-    isHiddenLessonModal: PropTypes.bool,
-    isLoggedIn: PropTypes.bool,
     lessonCardVisible: PropTypes.bool,
     loading: PropTypes.bool,
     onActivateCostumesTab: PropTypes.func,
@@ -454,11 +454,14 @@ const mapStateToProps = state => {
     // This is the button's mode, as opposed to the actual current state
     const isLoggedIn = state.session.session.user !== null &&
         typeof state.session.session.user !== 'undefined' &&
+        typeof state.session.session.user.id !== 'undefined' &&
         Object.keys(state.session.session.user).length > 0 && state.session.session.user.id !== 0;
-    const userOwnsProject = state.scratchGui.itchProject.projectUser !== null &&
+    const isNewProject = isLoggedIn && state.scratchGui.projectState.projectId === '0';
+    // eslint-disable-next-line no-console
+    const userOwnsProject = (state.scratchGui.itchProject.projectUser !== null &&
         typeof state.session.session.user !== 'undefined' &&
         typeof state.session.session.user.id !== 'undefined' &&
-        state.session.session.user.id === state.scratchGui.itchProject.projectUser;
+        state.session.session.user.id === state.scratchGui.itchProject.projectUser) || isNewProject;
     const projectInfoPresent = state.scratchGui.itchProject.projectId !== null;
     const isStudent = isLoggedIn && typeof state.session.session.user.role !== 'undefined' &&
         state.session.session.user.role === 'student';
@@ -469,7 +472,14 @@ const mapStateToProps = state => {
         const d = url[i].split('=');
         keyValue[d[0]] = d[1];
     }
-    const backpackHost = keyValue['backpackHost'] ? keyValue['backpackHost'] : ITCH_CONFIG.BACKPACK_HOST;
+    const backpackHost = keyValue.backpackHost ? keyValue.backpackHost : ITCH_CONFIG.BACKPACK_HOST;
+    let canDownload = true;
+    let canUpload = true;
+    if (ITCH_CONFIG.ITCH_LESSONS && typeof window.getScratchItchConfig === 'function'){
+        const configs = window.getScratchItchConfig();
+        canDownload = configs.canDownload;
+        canUpload = configs.canUpload;
+    }
     return {
         isLoggedIn: isLoggedIn,
         stageSizeMode: state.scratchGui.stageSize.stageSize,
@@ -478,8 +488,8 @@ const mapStateToProps = state => {
         canCreateCopy: userOwnsProject && projectInfoPresent && !isSubmitted,
         canCreateNew: isLoggedIn,
         canShare: isLoggedIn && userOwnsProject,
-        canUpload: isLoggedIn && userOwnsProject && !isSubmitted,
-        canDownload: isLoggedIn && (userOwnsProject || !isStudent),
+        canUpload: isLoggedIn && userOwnsProject && !isSubmitted && canUpload,
+        canDownload: isLoggedIn && (userOwnsProject || !isStudent) && canDownload,
         lessonCardVisible: state.scratchGui.studioLessons.visible,
         isHiddenLessonModal: state.scratchGui.studioLessons.minimize,
         backpackVisible: isLoggedIn && userOwnsProject && !isSubmitted,

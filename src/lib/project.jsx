@@ -30,6 +30,7 @@ import {
 import {
     setContent
 } from '../reducers/studioLessons';
+import ITCH_CONFIG from '../../itch.config';
 /* import JSZip from 'jszip'; */
 const ItchProject = function (WrappedComponent){
     class Project extends React.Component {
@@ -90,7 +91,7 @@ const ItchProject = function (WrappedComponent){
             if (this.props.canUpdate &&
                 process.env.NODE_ENV === 'production' &&
                 typeof window === 'object' &&
-                this.props.needsUpdate){
+                this.props.projectChanged){
                 window.onbeforeunload = () => true;
             } else {
                 window.onbeforeunload = null;
@@ -128,15 +129,21 @@ const ItchProject = function (WrappedComponent){
             return new Promise((resolve, reject) => {
                 if (!projectId) return reject('No project Id');
                 const uri = storage.getShareUrl(projectId);
+                const data = ITCH_CONFIG.ITCH_LESSONS ? {
+                    form: {},
+                    headers: {
+                        Authorization: `Bearer ${storage.getToken()}`
+                    }
+                } : {form: {}};
                 request.post(uri,
-                    {form: {}},
+                    data,
                     (error, response, body) => {
                         const project = JSON.parse(body);
                         if (!project.error && project.hash_link){
                             return resolve(project.hash_link);
                         }
                         return reject('Something goes wrong while we sharing your project');
-                        
+
                     });
             });
         }
@@ -144,14 +151,16 @@ const ItchProject = function (WrappedComponent){
             if (!this.props.canUpdate){
                 return false;
             }
-            if (this.props.needsUpdate){
+            if (this.props.projectChanged){
                 this.props.onSetProjectName(this.props.projectName);
                 this.props.autoUpdateProject();
                 return;
             }
-            const thumbnail = this.props.thumbnail;
-            if (thumbnail.content !== thumbnail.updatingContent && thumbnail.updatingContent !== ''){
-                this.saveThumbnail(thumbnail);
+            if (this.props.projectChanged) {
+                const thumbnail = this.props.thumbnail;
+                if (thumbnail.content !== thumbnail.updatingContent && thumbnail.updatingContent !== '') {
+                    this.saveThumbnail(thumbnail);
+                }
             }
         }
         takeThumbnail (directUpdate) {
@@ -279,7 +288,7 @@ const ItchProject = function (WrappedComponent){
                         x: t.x,
                         y: t.y
                     };
-                    
+
                     assetList = assetList.concat(t.costumes.map(c => {
                         if (_this.assetList[c.md5] !== c.name){
                             assetNameHasChanged = true;
@@ -396,30 +405,30 @@ const ItchProject = function (WrappedComponent){
             }
             const height = canvas.height;
             const width = canvas.width;
-        
+
             try {
                 data = context.getImageData(0, 0, width, height);
             } catch (e) {
             /* security error, img on diff domain */// alert('x');
                 return defaultRGB;
             }
-        
+
             const length = data.data.length;
-        
+
             while ((i += blockSize * 4) < length) {
                 ++count;
                 rgb.r += data.data[i];
                 rgb.g += data.data[i + 1];
                 rgb.b += data.data[i + 2];
             }
-        
+
             // ~~ used to floor values
             rgb.r = ~~(rgb.r / count);
             rgb.g = ~~(rgb.g / count);
             rgb.b = ~~(rgb.b / count);
-        
+
             return rgb;
-        
+
         }
         saveThumbnail (thumbnail) {
             const _this = this;
@@ -477,7 +486,7 @@ const ItchProject = function (WrappedComponent){
                 projectName,
                 onSetProjectName,
                 onSetForUpdate,
-                needsUpdate,
+                projectChanged,
                 thumbnail,
                 onSetThumbnail,
                 baseUrl,
@@ -504,7 +513,6 @@ const ItchProject = function (WrappedComponent){
         isStudent: PropTypes.bool,
         lessons: PropTypes.arrayOf(PropTypes.shape),
         loadingState: PropTypes.oneOf(LoadingStates),
-        needsUpdate: PropTypes.bool,
         onSetForUpdate: PropTypes.func,
         onSetProjectName: PropTypes.func,
         onSetThumbnail: PropTypes.func,
@@ -512,6 +520,7 @@ const ItchProject = function (WrappedComponent){
         onShared: PropTypes.func,
         onSharing: PropTypes.func,
         projectAssets: PropTypes.arrayOf(PropTypes.string),
+        projectChanged: PropTypes.bool,
         projectError: PropTypes.func,
         projectHost: PropTypes.string,
         projectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
@@ -555,7 +564,7 @@ const ItchProject = function (WrappedComponent){
             savedProjectName: state.scratchGui.projectAssets.savedProjectName,
             projectName: state.scratchGui.projectTitle,
             vm: state.scratchGui.vm,
-            needsUpdate: state.scratchGui.projectState.needsUpdate,
+            projectChanged: state.scratchGui.projectChanged,
             thumbnail: state.scratchGui.projectAssets.thumbnail,
             baseUrl: state.scratchGui.itchProject.baseUrl,
             lessons: state.scratchGui.studioLessons.content,

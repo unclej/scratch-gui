@@ -317,14 +317,18 @@ const reducer = function (state, action) {
         // projectId has changed. This prevents re-fetching projects unnecessarily.
         if (state.loadingState === LoadingState.SHOWING_WITH_ID) {
             if (state.projectId !== action.projectId) {
-                window.location.hash = `#${action.projectId}`;
+                if (!ITCH_CONFIG.ITCH_LESSONS){
+                    window.location.hash = `#${action.projectId}`;
+                }
                 return Object.assign({}, state, {
                     loadingState: LoadingState.SHOWING_WITH_ID,
                     projectId: action.projectId
                 });
             }
         } else { // allow any other states to transition to fetching project
-            window.location.hash = `#${action.projectId}`;
+            if (!ITCH_CONFIG.ITCH_LESSONS) {
+                window.location.hash = `#${action.projectId}`;
+            }
             return Object.assign({}, state, {
                 loadingState: LoadingState.SHOWING_WITH_ID,
                 projectId: action.projectId
@@ -589,17 +593,17 @@ const setProjectIdAndState = (id, loadingState) => ({
 
 const requestProjectUpload = loadingState => {
     switch (loadingState) {
-        case LoadingState.SHOWING_WITH_ID:
-            return {
-                type: START_UPDATING_BEFORE_FILE_UPLOAD
-            };
-        case LoadingState.NOT_LOADED:
-        case LoadingState.SHOWING_WITHOUT_ID:
-            return {
-                type: START_LOADING_VM_FILE_UPLOAD
-            };
-        default:
-            break;
+    case LoadingState.SHOWING_WITH_ID:
+        return {
+            type: START_UPDATING_BEFORE_FILE_UPLOAD
+        };
+    case LoadingState.NOT_LOADED:
+    case LoadingState.SHOWING_WITHOUT_ID:
+        return {
+            type: START_LOADING_VM_FILE_UPLOAD
+        };
+    default:
+        break;
     }
 };
 
@@ -612,7 +616,7 @@ const manualUpdateProject = () => ({
 
 });
 const updateProject = () => ({
-    type: START_UPDATING
+    type: START_AUTO_UPDATING
 });
 
 const saveProjectAsCopy = () => ({
