@@ -1,5 +1,6 @@
 const CLOSE_LESSONS = 'scratch-gui/studioLessons/CLOSE_LESSONS';
 const VIEW_LESSONS = 'scratch-gui/studioLessons/VIEW_LESSONS';
+const SHRINK_EXPAND_LESSONS = 'scratch-gui/studioLessons/SHRINK_EXPAND_LESSONS';
 const ACTIVATE_LESSON = 'scratch-gui/studioLessons/ACTIVATE_LESSON';
 const NEXT_STEP = 'scratch-gui/studioLessons/NEXT_STEP';
 const PREV_STEP = 'scratch-gui/studioLessons/PREV_STEP';
@@ -15,6 +16,7 @@ const initialState = {
     x: 300,
     y: 85,
     dragging: false,
+    expanded: true,
     lessonName: '',
     step: null
 };
@@ -82,6 +84,11 @@ const reducer = function (state, action) {
         return Object.assign({}, state, {
             dragging: false
         });
+
+    case SHRINK_EXPAND_LESSONS:
+        return Object.assign({}, state, {
+            expanded: !state.expanded
+        });
     default:
         return state;
     }
@@ -102,6 +109,10 @@ const activateLesson = function (step, callback) {
 
 const viewLessons = function () {
     return {type: VIEW_LESSONS};
+};
+
+const shrinkExpandLessons = function () {
+    return {type: SHRINK_EXPAND_LESSONS};
 };
 
 const closeLessons = function () {
@@ -134,6 +145,7 @@ export {
     initialState as studioLessonsInitialState,
     activateLesson,
     viewLessons,
+    shrinkExpandLessons,
     closeLessons,
     nextStep,
     prevStep,

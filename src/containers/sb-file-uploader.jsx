@@ -5,7 +5,6 @@ import {connect} from 'react-redux';
 import {defineMessages, injectIntl, intlShape} from 'react-intl';
 import xhr from 'xhr';
 
-import analytics from '../lib/analytics';
 import log from '../lib/log';
 import sharedMessages from '../lib/shared-messages';
 import storage from '../lib/storage';
@@ -105,20 +104,27 @@ class SBFileUploader extends React.Component {
             intl,
             isShowingWithoutId,
             loadingState,
-            projectChanged
+            projectChanged,
+            userOwnsProject
         } = this.props;
 
         const thisFileInput = e.target;
         if (thisFileInput.files) { // Don't attempt to load if no file was selected
             this.fileToUpload = thisFileInput.files[0];
-
-            // Allow upload to continue only after confirmation if the project
-            // has changed and is not showing with ID. If it has an ID, this operation
-            // does not currently overwrite that project, so it is safe to do without confirmation.
-            const uploadAllowed = (isShowingWithoutId && projectChanged) ?
-                confirm(intl.formatMessage(sharedMessages.replaceProjectWarning)) : // eslint-disable-line no-alert
-                true;
-            if (uploadAllowed) this.props.requestProjectUpload(loadingState);
+            // If user owns the project, or user has changed the project,
+            // we must confirm with the user that they really intend to replace it.
+            // (If they don't own the project and haven't changed it, no need to confirm.)
+            let uploadAllowed = true;
+            if (userOwnsProject || (projectChanged && isShowingWithoutId)) {
+                uploadAllowed = confirm( // eslint-disable-line no-alert
+                    intl.formatMessage(sharedMessages.replaceProjectWarning)
+                );
+            }
+            if (uploadAllowed) {
+                this.props.requestProjectUpload(loadingState);
+            } else {
+                this.props.closeFileMenu();
+            }
         }
     }
     // called when file upload raw data is available in the reader
@@ -138,13 +144,6 @@ class SBFileUploader extends React.Component {
                 const filename = this.fileToUpload && this.fileToUpload.name;
                 this.props.vm.loadProject(this.reader.result)
                     .then(() => {
-                        analytics.event({
-                            category: 'project',
-                            action: 'Import Project File',
-                            nonInteraction: true
-                        });
-                        // Remove the hash if any (without triggering a hash change event or a reload)
-
                         this.props.onLoadingFinished(this.props.loadingState, true, this.props.canSave, projectId);
                         // Reset the file input after project is loaded
                         // This is necessary in case the user wants to reload a project
@@ -243,6 +242,7 @@ SBFileUploader.propTypes = {
     canSave: PropTypes.bool, // eslint-disable-line react/no-unused-prop-types
     children: PropTypes.func,
     className: PropTypes.string,
+    closeFileMenu: PropTypes.func,
     intl: intlShape.isRequired,
     isLoadingUpload: PropTypes.bool,
     isShowingWithoutId: PropTypes.bool,
@@ -260,6 +260,7 @@ SBFileUploader.propTypes = {
     projectChanged: PropTypes.bool,
     projectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     requestProjectUpload: PropTypes.func,
+    userOwnsProject: PropTypes.bool,
     vm: PropTypes.shape({
         loadProject: PropTypes.func
     })
@@ -285,6 +286,7 @@ const mapStateToProps = state => {
 };
 
 const mapDispatchToProps = dispatch => ({
+    closeFileMenu: () => dispatch(closeFileMenu()),
     onLoadingFinished: (loadingState, success, canSave, projectId) => {
         dispatch(onLoadedProject(loadingState, canSave, success, projectId));
         dispatch(closeLoadingProject());

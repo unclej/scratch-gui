@@ -11,7 +11,6 @@ const DONE_LOADING_VM_WITHOUT_ID = 'scratch-gui/project-state/DONE_LOADING_VM_WI
 const DONE_REMIXING = 'scratch-gui/project-state/DONE_REMIXING';
 const DONE_UPDATING = 'scratch-gui/project-state/DONE_UPDATING';
 const DONE_UPDATING_BEFORE_COPY = 'scratch-gui/project-state/DONE_UPDATING_BEFORE_COPY';
-const DONE_UPDATING_BEFORE_FILE_UPLOAD = 'scratch-gui/project-state/DONE_UPDATING_BEFORE_FILE_UPLOAD';
 const DONE_UPDATING_BEFORE_NEW = 'scratch-gui/project-state/DONE_UPDATING_BEFORE_NEW';
 const RETURN_TO_SHOWING = 'scratch-gui/project-state/RETURN_TO_SHOWING';
 const SET_PROJECT_ID = 'scratch-gui/project-state/SET_PROJECT_ID';
@@ -220,14 +219,6 @@ const reducer = function (state, action) {
             });
         }
         return state;
-    case DONE_UPDATING_BEFORE_FILE_UPLOAD:
-        if (state.loadingState === LoadingState.UPDATING_BEFORE_FILE_UPLOAD) {
-            return Object.assign({}, state, {
-                loadingState: LoadingState.LOADING_VM_FILE_UPLOAD
-
-            });
-        }
-        return state;
     case START_AUTO_UPDATING:
         if (state.loadingState === LoadingState.SHOWING_WITH_ID) {
             return Object.assign({}, state, {
@@ -392,13 +383,6 @@ const reducer = function (state, action) {
             });
         }
         return state;
-    case START_UPDATING_BEFORE_FILE_UPLOAD:
-        if (state.loadingState === LoadingState.SHOWING_WITH_ID) {
-            return Object.assign({}, state, {
-                loadingState: LoadingState.UPDATING_BEFORE_FILE_UPLOAD
-            });
-        }
-        return state;
     case START_ERROR:
         // fatal errors: there's no correct editor state for us to show
         if ([
@@ -426,7 +410,6 @@ const reducer = function (state, action) {
             LoadingState.MANUAL_UPDATING,
             LoadingState.REMIXING,
             LoadingState.UPDATING_BEFORE_COPY,
-            LoadingState.UPDATING_BEFORE_FILE_UPLOAD,
             LoadingState.UPDATING_BEFORE_NEW
         ].includes(state.loadingState)) {
             return Object.assign({}, state, {
@@ -558,10 +541,6 @@ const doneUpdatingProject = loadingState => {
         return {
             type: DONE_UPDATING_BEFORE_COPY
         };
-    case LoadingState.UPDATING_BEFORE_FILE_UPLOAD:
-        return {
-            type: DONE_UPDATING_BEFORE_FILE_UPLOAD
-        };
     case LoadingState.UPDATING_BEFORE_NEW:
         return {
             type: DONE_UPDATING_BEFORE_NEW
@@ -593,11 +572,8 @@ const setProjectIdAndState = (id, loadingState) => ({
 
 const requestProjectUpload = loadingState => {
     switch (loadingState) {
-    case LoadingState.SHOWING_WITH_ID:
-        return {
-            type: START_UPDATING_BEFORE_FILE_UPLOAD
-        };
     case LoadingState.NOT_LOADED:
+    case LoadingState.SHOWING_WITH_ID:
     case LoadingState.SHOWING_WITHOUT_ID:
         return {
             type: START_LOADING_VM_FILE_UPLOAD

@@ -5,15 +5,18 @@ import Draggable from 'react-draggable';
 
 import styles from './lesson-cards.css';
 
-import nextIcon from './icon--next.svg';
-import prevIcon from './icon--prev.svg';
+import shrinkIcon from '../cards/icon--shrink.svg';
+import expandIcon from '../cards/icon--expand.svg';
 
 import helpIcon from '../menu-bar/lessons.png';
 import closeIcon from '../close-button/icon--close.svg';
 import ReactPlayer from 'react-player';
 import YouTubePlayer from 'react-player/lib/players/YouTube';
-const LessonCardHeader = ({onCloseCards, totalSteps, step}) => (
-    <div className={styles.headerButtons}>
+import classNames from "classnames";
+import rightArrow from "../cards/icon--next.svg";
+import leftArrow from "../cards/icon--prev.svg";
+const LessonCardHeader = ({onCloseCards, totalSteps, step, expanded, onShrinkExpandLessons}) => (
+    <div className={expanded ? styles.headerButtons : classNames(styles.headerButtons, styles.headerButtonsHidden)}>
         <div
             className={styles.allButton}
         >
@@ -38,19 +41,42 @@ const LessonCardHeader = ({onCloseCards, totalSteps, step}) => (
                     ))}
             </div>
         ) : null}
-        <div
-            className={styles.removeButton}
-            onClick={onCloseCards}
-        >
-            <FormattedMessage
-                defaultMessage="Close"
-                description="Title for button to close how-to card"
-                id="gui.cards.close"
-            />
-            <img
-                className={styles.closeIcon}
-                src={closeIcon}
-            />
+        <div className={styles.headerButtonsRight}>
+            <div
+                className={styles.shrinkExpandButton}
+                onClick={onShrinkExpandLessons}
+            >
+                <img
+                    draggable={false}
+                    src={expanded ? shrinkIcon : expandIcon}
+                />
+                {expanded ?
+                    <FormattedMessage
+                        defaultMessage="Shrink"
+                        description="Title for button to shrink how-to card"
+                        id="gui.cards.shrink"
+                    /> :
+                    <FormattedMessage
+                        defaultMessage="Expand"
+                        description="Title for button to expand how-to card"
+                        id="gui.cards.expand"
+                    />
+                }
+            </div>
+            <div
+                className={styles.removeButton}
+                onClick={onCloseCards}
+            >
+                <FormattedMessage
+                    defaultMessage="Close"
+                    description="Title for button to close how-to card"
+                    id="gui.cards.close"
+                />
+                <img
+                    className={styles.closeIcon}
+                    src={closeIcon}
+                />
+            </div>
         </div>
     </div>
 );
@@ -75,6 +101,7 @@ const VideoStep = ({video, dragging}) => (
 );
 
 VideoStep.propTypes = {
+    /*expanded: PropTypes.bool.isRequired,*/
     dragging: PropTypes.bool.isRequired,
     video: PropTypes.string.isRequired
 };
@@ -99,7 +126,7 @@ ImageStep.propTypes = {
     title: PropTypes.node.isRequired
 };
 
-const LessonStep = ({step, dragging, lessonName/* , autoPlayVideo */}) => (
+const LessonStep = ({step, dragging, lessonName, expanded/* , autoPlayVideo */}) => (
     <Fragment>
         <div className={styles.lessonName}>{lessonName}</div>
         <div className={styles.lessonContentBody}>
@@ -181,6 +208,7 @@ const LessonStep = ({step, dragging, lessonName/* , autoPlayVideo */}) => (
 );
 LessonStep.propTypes = {
     /* autoPlayVideo: PropTypes.bool, */
+    expanded: PropTypes.bool.isRequired,
     dragging: PropTypes.bool,
     lessonName: PropTypes.string,
     step: PropTypes.shape({
@@ -190,32 +218,32 @@ LessonStep.propTypes = {
         content: PropTypes.array
     })
 };
-const NextPrevButtons = ({onNextStep, onPrevStep}) => (
+const NextPrevButtons = ({onNextStep, onPrevStep, expanded, isRtl}) => (
     <Fragment>
         {onNextStep ? (
             <div>
-                <div className={styles.rightCard} />
+                <div className={expanded ? (isRtl ? styles.leftCard : styles.rightCard) : styles.hidden} />
                 <div
-                    className={styles.rightButton}
+                    className={expanded ? (isRtl ? styles.leftButton : styles.rightButton) : styles.hidden}
                     onClick={onNextStep}
                 >
                     <img
                         draggable={false}
-                        src={nextIcon}
+                        src={isRtl ? leftArrow : rightArrow}
                     />
                 </div>
             </div>
         ) : null}
         {onPrevStep ? (
             <div>
-                <div className={styles.leftCard} />
+                <div className={expanded ? (isRtl ? styles.rightCard : styles.leftCard) : styles.hidden} />
                 <div
-                    className={styles.leftButton}
+                    className={expanded ? (isRtl ? styles.rightButton : styles.leftButton) : styles.hidden}
                     onClick={onPrevStep}
                 >
                     <img
                         draggable={false}
-                        src={prevIcon}
+                        src={isRtl ? rightArrow : leftArrow}
                     />
                 </div>
             </div>
@@ -224,10 +252,14 @@ const NextPrevButtons = ({onNextStep, onPrevStep}) => (
 );
 
 NextPrevButtons.propTypes = {
+    expanded: PropTypes.bool.isRequired,
+    isRtl: PropTypes.bool,
     onNextStep: PropTypes.func,
     onPrevStep: PropTypes.func
 };
 LessonCardHeader.propTypes = {
+    onShrinkExpandLessons: PropTypes.func.isRequired,
+    expanded: PropTypes.bool.isRequired,
     onCloseCards: PropTypes.func.isRequired,
     step: PropTypes.number,
     totalSteps: PropTypes.number
@@ -235,22 +267,41 @@ LessonCardHeader.propTypes = {
 
 
 const LessonCards = props => {
-    if (props.activeLessonId === null) {
+    const {
+        activeLessonId,
+        x,
+        y,
+        isRtl,
+        onDrag,
+        onStartDrag,
+        onEndDrag,
+        expanded,
+        onCloseCards,
+        dragging,
+        lessonName,
+        step,
+        onNextStep,
+        onPrevStep,
+        onShrinkExpandLessons,
+    } = props;
+    if (activeLessonId === null) {
         return (<Draggable
             bounds="parent"
-            position={{x: props.x, y: props.y}}
-            onDrag={props.onDrag}
-            onStart={props.onStartDrag}
-            onStop={props.onEndDrag}
+            position={{x: x, y: y}}
+            onDrag={onDrag}
+            onStart={onStartDrag}
+            onStop={onEndDrag}
         >
             <div className={styles.cardContainer}>
                 <div className={styles.card}>
                     <LessonCardHeader
-                        step={props.step}
+                        onShrinkExpandLessons={onShrinkExpandLessons}
+                        expanded={expanded}
+                        step={step}
                         totalSteps={0}
-                        onCloseCards={props.onCloseCards}
+                        onCloseCards={onCloseCards}
                     />
-                    <div className={styles.stepBody} >
+                    <div className={expanded ? styles.stepBody : styles.hidden} >
                         <FormattedMessage
                             defaultMessage="No Lessons here"
                             description="Message to notify users that we don't have any lesson here"
@@ -265,30 +316,35 @@ const LessonCards = props => {
     return (
         <Draggable
             bounds="parent"
-            position={{x: props.x, y: props.y}}
-            onDrag={props.onDrag}
-            onStart={props.onStartDrag}
-            onStop={props.onEndDrag}
+            position={{x: x, y: y}}
+            onDrag={onDrag}
+            onStart={onStartDrag}
+            onStop={onEndDrag}
         >
 
             <div className={styles.cardContainer}>
                 <div className={styles.card}>
                     <LessonCardHeader
-                        step={props.step}
+                        onShrinkExpandLessons={onShrinkExpandLessons}
+                        expanded={expanded}
+                        step={step}
                         totalSteps={steps.length}
-                        onCloseCards={props.onCloseCards}
+                        onCloseCards={onCloseCards}
                     />
-                    <div className={styles.stepBody}>
+                    <div className={expanded ? styles.stepBody : styles.hidden}>
                         <LessonStep
                             /* autoPlayVideo={!((!props.autoPlayVideo && props.step === 0))} */
-                            dragging={props.dragging}
-                            lessonName={props.lessonName}
-                            step={steps[props.step]}
+                            dragging={dragging}
+                            expanded={expanded}
+                            lessonName={lessonName}
+                            step={steps[step]}
                         />
                     </div>
                     <NextPrevButtons
-                        onNextStep={props.step < steps.length - 1 ? props.onNextStep : null}
-                        onPrevStep={props.step > 0 ? props.onPrevStep : null}
+                        expanded={expanded}
+                        isRtl={isRtl}
+                        onNextStep={step < steps.length - 1 ? onNextStep : null}
+                        onPrevStep={step > 0 ? onPrevStep : null}
                     />
                 </div>
             </div>
@@ -297,6 +353,8 @@ const LessonCards = props => {
 };
 
 LessonCards.propTypes = {
+    expanded: PropTypes.bool.isRequired,
+    isRtl: PropTypes.bool.isRequired,
     activeLessonId: PropTypes.number,
     /* autoPlayVideo: PropTypes.bool, */
     content: PropTypes.arrayOf(
@@ -310,6 +368,7 @@ LessonCards.propTypes = {
     dragging: PropTypes.bool.isRequired,
     lessonName: PropTypes.string,
     onCloseCards: PropTypes.func.isRequired,
+    onShrinkExpandLessons: PropTypes.func.isRequired,
     onDrag: PropTypes.func,
     onEndDrag: PropTypes.func,
     onNextStep: PropTypes.func,

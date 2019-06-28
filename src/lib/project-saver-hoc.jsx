@@ -6,9 +6,11 @@ import {connect} from 'react-redux';
 import VM from 'scratch-vm';
 import xhr from 'xhr';
 
+import collectMetadata from '../lib/collect-metadata';
 import log from '../lib/log';
 import storage from '../lib/storage';
 import dataURItoBlob from '../lib/data-uri-to-blob';
+import saveProjectToServer from '../lib/save-project-to-server';
 
 import {
     showAlertWithTimeout,
@@ -26,6 +28,7 @@ import {
     getIsAnyCreatingNewState,
     getIsCreatingCopy,
     getIsCreatingNew,
+    getIsLoading,
     getIsManualUpdating,
     getIsRemixing,
     getIsShowingWithId,
@@ -44,7 +47,6 @@ import {
     setThumbnailData
 } from '../reducers/project-assets';
 import ITCH_CONFIG from '../../itch.config';
-import {Base64} from 'js-base64';
 
 /**
  * Higher Order Component to provide behavior for saving projects.
@@ -60,6 +62,7 @@ const ProjectSaverHOC = function (WrappedComponent) {
         constructor (props) {
             super(props);
             bindAll(this, [
+                'getProjectThumbnail',
                 'leavePageConfirm',
                 'tryToAutoSave'
             ]);
@@ -70,8 +73,21 @@ const ProjectSaverHOC = function (WrappedComponent) {
                 // but then it'd be hard to turn this listening off in our tests
                 window.onbeforeunload = e => this.leavePageConfirm(e);
             }
+
+            // Allow the GUI consumer to pass in a function to receive a trigger
+            // for triggering thumbnail or whole project saves.
+            // These functions are called with null on unmount to prevent stale references.
+            this.props.onSetProjectThumbnailer(this.getProjectThumbnail);
+            this.props.onSetProjectSaver(this.tryToAutoSave);
         }
         componentDidUpdate (prevProps) {
+            if (!this.props.isAnyCreatingNewState && prevProps.isAnyCreatingNewState) {
+                this.reportTelemetryEvent('projectWasCreated');
+            }
+            if (!this.props.isLoading && prevProps.isLoading) {
+                this.reportTelemetryEvent('projectDidLoad');
+            }
+
             if (this.props.projectChanged && !prevProps.projectChanged) {
                 this.scheduleAutoSave();
             }
@@ -120,6 +136,9 @@ const ProjectSaverHOC = function (WrappedComponent) {
             // i.e. if another of this component has been mounted before this one gets unmounted
             // which happens when going from project to editor view.
             // window.onbeforeunload = undefined; // eslint-disable-line no-undefined
+            // Remove project thumbnailer function since the components are unmounting
+            this.props.onSetProjectThumbnailer(null);
+            this.props.onSetProjectSaver(null);
         }
         leavePageConfirm (e) {
             if (this.props.projectChanged) {
@@ -300,23 +319,23 @@ const ProjectSaverHOC = function (WrappedComponent) {
                     });
                 });
             })
-                .then(response => {
-                    if (response.error === false){
-                        this.props.onSetProjectUnchanged();
-                        const id = response.projectID.toString();
-                        if (id) {
-                            this.storeProjectThumbnail(id);
-                        }
-                        return response;
+            .then(response => {
+                if (response.error === false){
+                    this.props.onSetProjectUnchanged();
+                    const id = response.projectID.toString();
+                    if (id) {
+                        this.storeProjectThumbnail(id);
                     }
-                    throw response.message;
+                    return response;
+                }
+                throw response.message;
 
 
-                })
-                .catch(err => {
-                    log.error(err);
-                    throw err; // pass the error up the chain
-                });
+            })
+            .catch(err => {
+                log.error(err);
+                throw err; // pass the error up the chain
+            });
         }
 
         /**
@@ -326,9 +345,7 @@ const ProjectSaverHOC = function (WrappedComponent) {
          */
         storeProjectThumbnail (projectId) {
             try {
-                this.props.vm.postIOData('video', {forceTransparentPreview: true});
-                this.props.vm.renderer.requestSnapshot(dataURI => {
-                    this.props.vm.postIOData('video', {forceTransparentPreview: false});
+                this.getProjectThumbnail(dataURI => {
                     let image = dataURItoBlob(dataURI);
                     let headers = {
                         'Content-Type': 'image/png'
@@ -340,9 +357,7 @@ const ProjectSaverHOC = function (WrappedComponent) {
                         image = dataURI;
                     }
                     this.updateProjectThmubnail(projectId, image, headers);
-
                 });
-                this.props.vm.renderer.draw();
             } catch (e) {
                 log.error('Project thumbnail save error', e);
                 // This is intentionally fire/forget because a failure
@@ -361,8 +376,27 @@ const ProjectSaverHOC = function (WrappedComponent) {
                 opts.body = blob;
             }
             xhr(opts, (err, response) => {
-
             });
+        }
+        getProjectThumbnail (callback) {
+            this.props.vm.postIOData('video', {forceTransparentPreview: true});
+            this.props.vm.renderer.requestSnapshot(dataURI => {
+                this.props.vm.postIOData('video', {forceTransparentPreview: false});
+                callback(dataURI);
+            });
+            this.props.vm.renderer.draw();
+        }
+
+        /**
+         * Report a telemetry event.
+         * @param {string} event - one of `projectWasCreated`, `projectDidLoad`, `projectDidSave`, `projectWasUploaded`
+         */
+        // TODO make a telemetry HOC and move this stuff there
+        reportTelemetryEvent (event) {
+            if (this.props.onProjectTelemetryEvent) {
+                const metadata = collectMetadata(this.props.vm, this.props.reduxProjectTitle, this.props.locale);
+                this.props.onProjectTelemetryEvent(event, metadata);
+            }
         }
         render () {
             const {
@@ -373,6 +407,7 @@ const ProjectSaverHOC = function (WrappedComponent) {
                 isCreatingNew,
                 projectChanged,
                 isAnyCreatingNewState,
+                isLoading,
                 isManualUpdating,
                 isRemixing,
                 isShowingSaveable,
@@ -386,6 +421,8 @@ const ProjectSaverHOC = function (WrappedComponent) {
                 onProjectError,
                 onRemixing,
                 onSetProjectUnchanged,
+                onSetProjectThumbnailer,
+                onSetProjectSaver,
                 onShowAlert,
                 onShowCopySuccessAlert,
                 onShowRemixSuccessAlert,
@@ -394,6 +431,7 @@ const ProjectSaverHOC = function (WrappedComponent) {
                 onShowSaveSuccessAlert,
                 onShowSavingAlert,
                 onUpdatedProject,
+                onUpdateProjectData,
                 onUpdateProjectThumbnail,
                 reduxProjectId,
                 reduxProjectTitle,
@@ -426,6 +464,7 @@ const ProjectSaverHOC = function (WrappedComponent) {
     }
 
     ProjectSaverComponent.propTypes = {
+        autoSaveIntervalSecs: PropTypes.number.isRequired,
         autoSaveTimeoutId: PropTypes.number,
         canCreateNew: PropTypes.bool,
         canSave: PropTypes.bool,
@@ -433,6 +472,7 @@ const ProjectSaverHOC = function (WrappedComponent) {
         isCreating: PropTypes.bool,
         isCreatingCopy: PropTypes.bool,
         isCreatingNew: PropTypes.bool,
+        isLoading: PropTypes.bool,
         isManualUpdating: PropTypes.bool,
         isRemixing: PropTypes.bool,
         isServerUpdating: PropTypes.bool,
@@ -443,15 +483,20 @@ const ProjectSaverHOC = function (WrappedComponent) {
         isUpdating: PropTypes.bool,
         loadingState: PropTypes.oneOf(LoadingStates),
         loggedInUser: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+        locale: PropTypes.string.isRequired,
         onAutoUpdateProject: PropTypes.func,
         /* onCloseAlert: PropTypes.func, */
         onCreateProject: PropTypes.func,
         onCreatedProject: PropTypes.func,
         onOpenALert: PropTypes.func,
         onProjectError: PropTypes.func,
+        onProjectTelemetryEvent: PropTypes.func,
         onRemixing: PropTypes.func,
         onSetForUpdate: PropTypes.func,
         onSetThumbnail: PropTypes.func,
+        onSetProjectSaver: PropTypes.func.isRequired,
+        onSetProjectThumbnailer: PropTypes.func.isRequired,
+        onSetProjectUnchanged: PropTypes.func.isRequired,
         onShowAlert: PropTypes.func,
         onShowCopySuccessAlert: PropTypes.func,
         onShowCreatingCopyAlert: PropTypes.func,
@@ -460,6 +505,7 @@ const ProjectSaverHOC = function (WrappedComponent) {
         onShowSaveSuccessAlert: PropTypes.func,
         onShowSavingAlert: PropTypes.func,
         onUpdateProject: PropTypes.func,
+        onUpdateProjectData: PropTypes.func.isRequired,
         onUpdateProjectThumbnail: PropTypes.func,
         onUpdatedProject: PropTypes.func,
         projectAssets: PropTypes.arrayOf(PropTypes.string),
@@ -475,7 +521,16 @@ const ProjectSaverHOC = function (WrappedComponent) {
     };
     ProjectSaverComponent.defaultProps = {
         autoSaveIntervalSecs: 60,
-        onRemixing: () => {}
+        onRemixing: () => {},
+        setAutoSaveTimeoutId: PropTypes.func.isRequired,
+        vm: PropTypes.instanceOf(VM).isRequired
+    };
+    ProjectSaverComponent.defaultProps = {
+        autoSaveIntervalSecs: 120,
+        onRemixing: () => {},
+        onSetProjectThumbnailer: () => {},
+        onSetProjectSaver: () => {},
+        onUpdateProjectData: saveProjectToServer
     };
     const mapStateToProps = (state, ownProps) => {
         const loadingState = state.scratchGui.projectState.loadingState;
@@ -487,6 +542,7 @@ const ProjectSaverHOC = function (WrappedComponent) {
         return {
             autoSaveTimeoutId: state.scratchGui.timeout.autoSaveTimeoutId,
             isAnyCreatingNewState: getIsAnyCreatingNewState(loadingState),
+            isLoading: getIsLoading(loadingState),
             isCreatingCopy: getIsCreatingCopy(loadingState),
             isCreatingNew: getIsCreatingNew(loadingState),
             isRemixing: getIsRemixing(loadingState),
@@ -496,6 +552,7 @@ const ProjectSaverHOC = function (WrappedComponent) {
             isUpdating: getIsUpdating(loadingState),
             isManualUpdating: getIsManualUpdating(loadingState),
             loadingState: loadingState,
+            locale: state.locales.locale,
             projectChanged: state.scratchGui.projectChanged,
             reduxProjectId: state.scratchGui.projectState.projectId,
             reduxProjectTitle: state.scratchGui.projectTitle,

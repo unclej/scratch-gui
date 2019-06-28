@@ -83,12 +83,15 @@ class Backpack extends React.Component {
     }
     handleDrop (dragInfo) {
         let payloader = null;
+        let presaveAsset = null;
         switch (dragInfo.dragType) {
         case DragConstants.COSTUME:
             payloader = costumePayload;
+            presaveAsset = dragInfo.payload.asset;
             break;
         case DragConstants.SOUND:
             payloader = soundPayload;
+            presaveAsset = dragInfo.payload.asset;
             break;
         case DragConstants.SPRITE:
             payloader = spritePayload;
@@ -102,6 +105,19 @@ class Backpack extends React.Component {
         // Creating the payload is async, so set loading before starting
         this.setState({loading: true}, () => {
             payloader(dragInfo.payload, this.props.vm)
+                .then(payload => {
+                    // Force the asset to save to the asset server before storing in backpack
+                    // Ensures any asset present in the backpack is also on the asset server
+                    if (presaveAsset && !presaveAsset.clean) {
+                        return storage.store(
+                            presaveAsset.assetType,
+                            presaveAsset.dataFormat,
+                            presaveAsset.data,
+                            presaveAsset.assetId
+                        ).then(() => payload);
+                    }
+                    return payload;
+                })
                 .then(payload => saveBackpackObject({
                     host: this.props.host,
                     token: this.props.token,
@@ -227,10 +243,12 @@ Backpack.propTypes = {
 };
 
 const getTokenAndUsername = state => {
+    console.log(state.session);
     // Look for the session state provided by scratch-www
     if (state.session && state.session.session && state.session.session.user) {
+        const token = state.session.session.user.token ? state.session.session.user.token : storage.getToken();
         return {
-            token: state.session.session.user.token,
+            token,
             username: state.session.session.user.id.toString()
         };
     }

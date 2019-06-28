@@ -99,22 +99,37 @@ const ProjectFetcherHOC = function (WrappedComponent) {
             }
         }
         setConfigItchLessons (props) {
-            const configs = window.getScratchItchConfig();
-            const loggedInUserId = 0;
-            storage.setLoggedInUser(loggedInUserId);
-            this.props.setEditingUserId(loggedInUserId);
-            this.props.setStudioId(configs.courseId);
-            storage.setLoggedInStudioId(configs.courseId);
-            storage.setToken(configs.token);
-            this.props.setCsrfToken(configs.token);
-            this.props.setAssetHost(props.assetHost);
-            storage.setAssetHost(props.assetHost);
-            const projectHost = this.PROJECT_SERVER ? this.PROJECT_SERVER : props.projectHost;
-            this.props.setProjectHost(projectHost);
-            storage.setProjectHost(projectHost);
-            if (configs.starterProjectId) {
-                storage.setStarterProjectId(configs.starterProjectId);
+            if(typeof window.getScratchItchConfig === 'function') {
+                const configs = window.getScratchItchConfig();
+                const loggedInUserId = 0;
+                storage.setLoggedInUser(loggedInUserId);
+                this.props.setEditingUserId(loggedInUserId);
+                this.props.setStudioId(configs.courseId);
+                storage.setLoggedInStudioId(configs.courseId);
+                storage.setToken(configs.token);
+                this.props.setCsrfToken(configs.token);
+                this.props.setAssetHost(props.assetHost);
+                storage.setAssetHost(props.assetHost);
+                const projectHost = this.PROJECT_SERVER ? this.PROJECT_SERVER : props.projectHost;
+                this.props.setProjectHost(projectHost);
+                storage.setProjectHost(projectHost);
+                if (configs.starterProjectId) {
+                    storage.setStarterProjectId(configs.starterProjectId);
+                }
+            } else {
+                let loggedInUserId = 0;
+                let loggedInStudioId = 0;
+                storage.setLoggedInUser(loggedInUserId);
+                this.props.setEditingUserId(loggedInUserId);
+                this.props.setStudioId(loggedInStudioId);
+                storage.setLoggedInStudioId(loggedInStudioId);
+                this.props.setAssetHost(props.assetHost);
+                storage.setAssetHost(props.assetHost);
+                const projectHost = this.PROJECT_SERVER ? this.PROJECT_SERVER : props.projectHost;
+                this.props.setProjectHost(projectHost);
+                storage.setProjectHost(projectHost);
             }
+
         }
         setConfigs (props) {
             let loggedInUserId = 0;
@@ -405,10 +420,12 @@ const ProjectFetcherHOC = function (WrappedComponent) {
         assetHost: PropTypes.string,
         canSave: PropTypes.bool,
         intl: intlShape.isRequired,
+        isCreatingNew: PropTypes.bool,
         isFetchingWithId: PropTypes.bool,
         isFetchingWithoutId: PropTypes.bool,
         isLoadingProject: PropTypes.bool,
         isLoggedIn: PropTypes.bool,
+        isShowingProject: PropTypes.bool,
         loadingState: PropTypes.oneOf(LoadingStates),
         onActivateTab: PropTypes.func,
         onChangeLanguage: PropTypes.func.isRequired,
