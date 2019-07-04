@@ -11,6 +11,7 @@ import VM from 'scratch-vm';
 
 import Box from '../box/box.jsx';
 import Button from '../button/button.jsx';
+import CommunityButton from './community-button.jsx';
 import ShareButton from './share-button.jsx';
 import {ComingSoonTooltip} from '../coming-soon/coming-soon.jsx';
 import Divider from '../divider/divider.jsx';
@@ -618,6 +619,7 @@ class MenuBar extends React.Component {
                                 </ProjectWatcher>
                             )
                         )}
+                        {this.props.canRemix ? remixButton : []}
                     </div>
                     <div className={classNames(styles.menuBarItem)}>
                         {this.props.canSave ? itchSaveButton : (this.props.canRemix ? remixButton : [])}
@@ -884,6 +886,7 @@ MenuBar.propTypes = {
     username: PropTypes.string,
     vm: PropTypes.instanceOf(VM).isRequired
 };
+
 MenuBar.defaultProps = {
     onShare: () => {}
 };

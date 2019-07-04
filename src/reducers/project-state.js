@@ -11,6 +11,7 @@ const DONE_LOADING_VM_WITHOUT_ID = 'scratch-gui/project-state/DONE_LOADING_VM_WI
 const DONE_REMIXING = 'scratch-gui/project-state/DONE_REMIXING';
 const DONE_UPDATING = 'scratch-gui/project-state/DONE_UPDATING';
 const DONE_UPDATING_BEFORE_COPY = 'scratch-gui/project-state/DONE_UPDATING_BEFORE_COPY';
+const DONE_UPDATING_BEFORE_FILE_UPLOAD = 'scratch-gui/project-state/DONE_UPDATING_BEFORE_FILE_UPLOAD';
 const DONE_UPDATING_BEFORE_NEW = 'scratch-gui/project-state/DONE_UPDATING_BEFORE_NEW';
 const RETURN_TO_SHOWING = 'scratch-gui/project-state/RETURN_TO_SHOWING';
 const SET_PROJECT_ID = 'scratch-gui/project-state/SET_PROJECT_ID';

@@ -171,7 +171,6 @@ class LibraryComponent extends React.Component {
                     ref={this.setFilteredDataRef}
                 >
                     {this.state.loaded ? this.getFilteredData().map((dataItem, index) => {
-                        console.log(dataItem);
                         const scratchURL = dataItem.md5 ?
                             `https://d3dch2j0kvht3t.cloudfront.net/public/${dataItem.md5}?requestType=html` :
                             dataItem.rawURL;

@@ -108,11 +108,10 @@ const ProjectFetcherHOC = function (WrappedComponent) {
                 storage.setLoggedInStudioId(configs.courseId);
                 storage.setToken(configs.token);
                 this.props.setCsrfToken(configs.token);
-                this.props.setAssetHost(props.assetHost);
-                storage.setAssetHost(props.assetHost);
-                const projectHost = this.PROJECT_SERVER ? this.PROJECT_SERVER : props.projectHost;
-                this.props.setProjectHost(projectHost);
-                storage.setProjectHost(projectHost);
+                this.props.setAssetHost(configs.assetHost);
+                storage.setAssetHost(configs.assetHost);
+                this.props.setProjectHost(configs.projectHost);
+                storage.setProjectHost(configs.projectHost);
                 if (configs.starterProjectId) {
                     storage.setStarterProjectId(configs.starterProjectId);
                 }
@@ -233,7 +232,7 @@ const ProjectFetcherHOC = function (WrappedComponent) {
                 storage
                     .load(storage.AssetType.Project, projectId, storage.DataFormat.JSON)
                     .then(projectAsset => {
-                        const projectData = JSON.parse(projectAsset.data.toString());
+                        const projectData = JSON.parse(new TextDecoder().decode(projectAsset.data));
                         // check language
                         if (projectData.language){
                             const newLocale = projectData.language;

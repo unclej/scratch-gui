@@ -173,7 +173,7 @@ export default {
         ],
         urlId: 'name'
     },
-
+    
     'imagine-if': {
         name: (
             <FormattedMessage
@@ -329,7 +329,7 @@ export default {
         ],
         urlId: 'imagine-if'
     },
-
+    
     'Make-Music': {
         name: (
             <FormattedMessage
@@ -399,7 +399,7 @@ export default {
         ],
         urlId: 'music'
     },
-
+ 
     'Tell-A-Story': {
         name: (
             <FormattedMessage
@@ -510,8 +510,9 @@ export default {
             ]
         }
         ],
-        urlId: 'animate-an-adventure-game'
+        urlId: 'tell-a-story'
     },
+    
     'Chase-Game': {
         name: (
             <FormattedMessage
@@ -709,7 +710,7 @@ export default {
         ],
         urlId: 'animate-a-character'
     },
-
+       
     'Make-A-Game': {
         name: (
             <FormattedMessage
@@ -796,7 +797,7 @@ export default {
         ],
         urlId: 'clicker-game'
     },
-
+    
     'make-it-fly': {
         name: (
             <FormattedMessage
@@ -926,7 +927,7 @@ export default {
         ],
         urlId: 'make-it-fly'
     },
-
+    
     'pong': {
         name: (
             <FormattedMessage
@@ -1238,7 +1239,7 @@ export default {
         ],
         urlId: 'video-sensing'
     },
-
+    
     'cartoon-network': {
         name: (
             <FormattedMessage
@@ -1370,7 +1371,7 @@ export default {
         ],
         urlId: 'add-a-sprite'
     },
-
+    
     'add-a-backdrop': {
         name: (
             <FormattedMessage
@@ -1402,7 +1403,7 @@ export default {
         }],
         urlId: 'add-a-backdrop'
     },
-
+    
     'change-size': {
         name: (
             <FormattedMessage
@@ -1432,7 +1433,7 @@ export default {
         }],
         urlId: 'change-size'
     },
-
+    
     'glide-around': {
         name: (
             <FormattedMessage
@@ -1537,7 +1538,7 @@ export default {
         }],
         urlId: 'record-a-sound'
     },
-
+    
     'spin-video': {
         name: (
             <FormattedMessage
@@ -1576,7 +1577,7 @@ export default {
         }],
         urlId: 'make-it-spin'
     },
-
+    
     'hide-and-show': {
         name: (
             <FormattedMessage
@@ -1675,7 +1676,7 @@ export default {
         }],
         urlId: 'arrow-keys'
     },
-
+    
     'add-effects': {
         name: (
             <FormattedMessage
@@ -1706,7 +1707,7 @@ export default {
         }],
         urlId: 'add-effects'
     },
-
+    
     'wedo2-getting-started': {
         steps: [{
             video: '4im7iizv47'
@@ -1714,7 +1715,7 @@ export default {
         urlId: 'wedo',
         hidden: true
     },
-
+    
     'ev3-getting-started': {
         steps: [{
             video: 'qgu78c5y7d'
@@ -1722,7 +1723,7 @@ export default {
         urlId: 'ev3',
         hidden: true
     },
-
+    
     'whats-new': {
         steps: [{
             video: 'mtqymxg0qq'

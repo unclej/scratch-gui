@@ -103,8 +103,7 @@ class Storage extends ScratchStorage {
         this.assetHost = assetHost;
     }
     getAssetGetConfig (asset) {
-        const time = Date.now();
-        return `${this.assetHost}${asset.assetId}.${asset.dataFormat}?time=${time}`;
+        return `${this.assetHost}${asset.assetId}.${asset.dataFormat}`;
     }
     getAssetUpdateConfig (md5){
         return `${this.projectHost}project/assets/${md5}`;

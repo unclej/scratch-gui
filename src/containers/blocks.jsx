@@ -188,7 +188,9 @@ class Blocks extends React.Component {
     }
     componentWillUnmount () {
         this.detachVM();
-        this.workspace.dispose();
+        if (this.workspace) {
+            this.workspace.dispose();
+        }
         clearTimeout(this.toolboxUpdateTimeout);
     }
     requestToolboxUpdate () {
