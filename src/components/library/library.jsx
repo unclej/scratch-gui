@@ -170,11 +170,7 @@ class LibraryComponent extends React.Component {
                     })}
                     ref={this.setFilteredDataRef}
                 >
-                    {this.state.loaded ? this.getFilteredData().map((dataItem, index) => {
-                        const scratchURL = dataItem.md5 ?
-                            `https://d3dch2j0kvht3t.cloudfront.net/public/${dataItem.md5}?requestType=html` :
-                            dataItem.rawURL;
-                        return (
+                    {this.state.loaded ? this.getFilteredData().map((dataItem, index) => (
                             <LibraryItem
                                 bluetoothRequired={dataItem.bluetoothRequired}
                                 collaborator={dataItem.collaborator}
@@ -184,7 +180,7 @@ class LibraryComponent extends React.Component {
                                 featured={dataItem.featured}
                                 hidden={dataItem.hidden}
                                 iconMd5={dataItem.md5}
-                                iconRawURL={scratchURL}
+                                iconRawURL={dataItem.rawURL}
                                 icons={dataItem.json && dataItem.json.costumes}
                                 id={index}
                                 insetIconURL={dataItem.insetIconURL}
@@ -195,9 +191,7 @@ class LibraryComponent extends React.Component {
                                 onMouseLeave={this.handleMouseLeave}
                                 onSelect={this.handleSelect}
                             />
-                        )
-
-                    }) : (
+                        )) : (
                         <div className={styles.spinnerWrapper}>
                             <Spinner
                                 large
