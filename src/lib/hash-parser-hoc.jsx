@@ -5,11 +5,18 @@ import {connect} from 'react-redux';
 
 import {
     defaultProjectId,
+    getIsFetchingWithId,
     getIsFetchingWithoutId,
     getIsShowingWithoutId,
     setProjectId
 } from '../reducers/project-state';
 import ITCH_CONFIG from '../../itch.config';
+import storage from "./storage";
+import {
+    setCsrfToken,
+    setEditingUserId,
+    setStudioId
+} from "../reducers/itch-project";
 
 /* Higher Order Component to get the project id from location.hash
  * @param {React.Component} WrappedComponent: component to render
@@ -21,12 +28,14 @@ const HashParserHOC = function (WrappedComponent) {
             super(props);
             bindAll(this, [
                 'handleHashChange',
-                'updateProjectIdFromConfigs'
+                'updateProjectIdFromConfigs',
+                'updateProjectFromConfigs'
             ]);
         }
         componentDidMount () {
             if (typeof window.getScratchItchConfig === 'function') {
                 window.updateScratchProjectId = this.updateProjectIdFromConfigs;
+                window.updateProjectFromConfigs = this.updateProjectFromConfigs;
                 this.updateProjectIdFromConfigs();
             } else {
                 window.addEventListener('hashchange', this.handleHashChange);
@@ -73,10 +82,29 @@ const HashParserHOC = function (WrappedComponent) {
                 this.setState({hideIntro: true});
             }
         }
+        updateProjectFromConfigs (){
+            const configs = window.getScratchItchConfig();
+            const loggedInUserId = 0;
+            const hashProjectId = configs && configs.projectId ? configs.projectId : defaultProjectId;
+            storage.setLoggedInUser(loggedInUserId);
+            this.props.setEditingUserId(loggedInUserId);
+            this.props.setStudioId(configs.courseId);
+            storage.setLoggedInStudioId(configs.courseId);
+            storage.setToken(configs.token);
+            this.props.setCsrfToken(configs.token);
+            if (configs.starterProjectId) {
+                storage.setStarterProjectId(configs.starterProjectId);
+            }
+            if (hashProjectId !== defaultProjectId && !this.props.isFetchingWithoutId) {
+                this.setState({hideIntro: true});
+            }
+            this.props.setProjectId(hashProjectId.toString());
+        }
         render () {
             const {
                 /* eslint-disable no-unused-vars */
                 isFetchingWithoutId: isFetchingWithoutIdProp,
+                isFetchingWithId: isFetchingWithIdProp,
                 reduxProjectId,
                 setProjectId: setProjectIdProp,
                 /* eslint-enable no-unused-vars */
@@ -91,7 +119,11 @@ const HashParserHOC = function (WrappedComponent) {
     }
     HashParserComponent.propTypes = {
         isFetchingWithoutId: PropTypes.bool,
+        isFetchingWithId: PropTypes.bool,
         isShowingWithoutId: PropTypes.bool,
+        setCsrfToken: PropTypes.func,
+        setEditingUserId: PropTypes.func,
+        setStudioId: PropTypes.func,
         reduxProjectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
         setProjectId: PropTypes.func
     };
@@ -99,6 +131,7 @@ const HashParserHOC = function (WrappedComponent) {
         const loadingState = state.scratchGui.projectState.loadingState;
         return {
             isFetchingWithoutId: getIsFetchingWithoutId(loadingState),
+            isFetchingWithId: getIsFetchingWithId(loadingState),
             isShowingWithoutId: getIsShowingWithoutId(loadingState),
             reduxProjectId: state.scratchGui.projectState.projectId
         };
@@ -106,7 +139,10 @@ const HashParserHOC = function (WrappedComponent) {
     const mapDispatchToProps = dispatch => ({
         setProjectId: projectId => {
             dispatch(setProjectId(projectId));
-        }
+        },
+        setStudioId: stdId => dispatch(setStudioId(stdId)),
+        setEditingUserId: userId => dispatch(setEditingUserId(userId)),
+        setCsrfToken: token => dispatch(setCsrfToken(token)),
     });
     // Allow incoming props to override redux-provided props. Used to mock in tests.
     const mergeProps = (stateProps, dispatchProps, ownProps) => Object.assign(

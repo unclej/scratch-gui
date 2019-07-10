@@ -88,7 +88,7 @@ const ProjectFetcherHOC = function (WrappedComponent) {
             if (prevProps.assetHost !== this.props.assetHost) {
                 storage.setAssetHost(this.props.assetHost);
             }
-            if (this.props.isFetchingWithId && !prevProps.isFetchingWithId && !prevProps.isFetchingWithoutId) {
+            if ((this.props.isFetchingWithId && !prevProps.isFetchingWithId && !prevProps.isFetchingWithoutId) || (this.props.isFetchingWithId && prevProps.isFetchingWithoutId)) {
                 this.fetchProject(this.props.reduxProjectId, this.props.loadingState);
             }
             if (this.props.isShowingProject && !prevProps.isShowingProject) {
@@ -210,7 +210,8 @@ const ProjectFetcherHOC = function (WrappedComponent) {
                     .then(projectAsset => {
                         if (this.props.isLoggedIn){
                             if (ITCH_CONFIG.ITCH_LESSONS){
-                                this.createItchLessonProject(this, projectAsset);
+                                // this.createItchLessonProject(this, projectAsset);
+                                this.props.onFetchedProjectData(projectAsset.data, loadingState);
                             } else {
                                 this.createItchProject(this, projectAsset);
                             }

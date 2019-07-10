@@ -3,19 +3,19 @@ const UPDATE_SESSION = 'scratch-gui/session/UPDATE_SESSION';
 const initialState = {
     session: {
         user: {
-            id: 41620062,
+            id: 0,
             banned: false,
-            username: 'ptoska',
-            token: '45bb4c94bccd49c1875477e5a5bc8485:qSx_8wRgzgRvhPA-ckpBikBZjyI',
-            thumbnailUrl: '//cdn2.scratch.mit.edu/get_image/user/default_32x32.png',
-            dateJoined: '2019-02-22T16:04:53',
-            email: 'toskapasho@gmail.com'
+            username: 'Guest',
+            token: '',
+            thumbnailUrl: '',
+            dateJoined: '',
+            email: ''
         },
         permissions: {
             admin: false,
             scratcher: false,
             new_scratcher: true,
-            social: true,
+            social: false,
             educator: false,
             educator_invitee: false,
             student: false
