@@ -619,7 +619,6 @@ class MenuBar extends React.Component {
                                 </ProjectWatcher>
                             )
                         )}
-                        {this.props.canRemix ? remixButton : []}
                     </div>
                     <div className={classNames(styles.menuBarItem)}>
                         {this.props.canSave ? itchSaveButton : (this.props.canRemix ? remixButton : [])}
