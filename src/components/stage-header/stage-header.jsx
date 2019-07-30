@@ -18,6 +18,7 @@ import unFullScreenIcon from './icon--unfullscreen.svg';
 import closeIcon from './close_black.svg';
 import windowFullScreenIcon from './up_arrow.svg';
 import windowExitFullScreenIcon from './down_arrow.svg';
+import ITCH_CONFIG from '../../../itch.config';
 
 import scratchLogo from '../menu-bar/scratch-logo.svg';
 import styles from './stage-header.css';
@@ -72,6 +73,21 @@ const StageHeaderComponent = function (props) {
 
     let header = null;
     const isIpad = (navigator.userAgent.match(/iPad/i) !== null);
+    const seeProjectPageButton = !ITCH_CONFIG.ITCH_LESSONS ? (
+        <Button
+            className={styles.projectButton}
+            onClick={onSetProjectPageFromUnFull}
+            onKeyPress={onKeyPress}
+        >
+            <img
+                alt="See Project Page"
+                className={styles.stageButtonIcon}
+                draggable={false}
+                src={closeIcon}
+                title="See Project Page"
+            />
+        </Button>
+    ) : null;
     const windowFullscreenControl = isIpad ? ([]) : (
         <Button
             className={classNames(
@@ -196,21 +212,9 @@ const StageHeaderComponent = function (props) {
                             />
                         </Button>
                         {windowFullscreenControl}
-                        <Button
-                            className={styles.projectButton}
-                            onClick={onSetProjectPageFromUnFull}
-                            onKeyPress={onKeyPress}
-                        >
-                            <img
-                                alt="See Project Page"
-                                className={styles.stageButtonIcon}
-                                draggable={false}
-                                src={closeIcon}
-                                title="See Project Page"
-                            />
-                        </Button>
+                        {seeProjectPageButton}
                     </div>
-             
+
                 ) : (
                     <div className={styles.stageSizeRow}>
                         {stageControls}
@@ -228,28 +232,15 @@ const StageHeaderComponent = function (props) {
                                 />
                             </Button>
                             {windowFullscreenControl}
-                            <Button
-                                className={styles.projectButton}
-                                onClick={onSetProjectPageFromFull}
-                                onKeyPress={onKeyPress}
-                                id="scratch-header-set-project-page-btn"
-                            >
-                                <img
-                                    alt="See Project Page"
-                                    className={styles.stageButtonIcon}
-                                    draggable={false}
-                                    src={closeIcon}
-                                    title="See Project Page"
-                                />
-                            </Button>
+                            {seeProjectPageButton}
                         </div>
                     </div>
-                
+
                 ))}
             </Box>
         </Box>
     );
-    
+
     /* if (isProjectPage) {
         header = (
             <Box className={styles.stageHeaderWrapperOverlay}>
@@ -309,7 +300,7 @@ const StageHeaderComponent = function (props) {
             </Box>
         );
     } else {
-        
+
         header = (
             <Box className={styles.stageHeaderWrapper}>
                 <Box className={styles.stageMenuWrapper}>

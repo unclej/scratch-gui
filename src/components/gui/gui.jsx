@@ -142,7 +142,6 @@ const GUIComponent = props => {
 
     return (<MediaQuery minWidth={layout.fullSizeMinWidth}>{isFullSize => {
         const stageSize = resolveStageSize(stageSizeMode, isFullSize);
-
         return isPlayerOnly ? (
             <StageWrapper
                 isFullScreen={isFullScreen}
@@ -474,27 +473,34 @@ const mapStateToProps = state => {
         const d = url[i].split('=');
         keyValue[d[0]] = d[1];
     }
-    const backpackHost = keyValue.backpackHost ? keyValue.backpackHost : ITCH_CONFIG.BACKPACK_HOST;
+    let backpackHost = keyValue.backpackHost ? keyValue.backpackHost : ITCH_CONFIG.BACKPACK_HOST;
     let canDownload = true;
     let canUpload = true;
+    let isPreview = false;
+    let backpackVisible = true;
+    let isWizard = false;
     if (ITCH_CONFIG.ITCH_LESSONS && typeof window.getScratchItchConfig === 'function'){
         const configs = window.getScratchItchConfig();
         canDownload = configs.canDownload;
         canUpload = configs.canUpload;
+        isPreview = configs.isPreview;
+        isWizard = configs.isWizard;
+        backpackVisible = configs.backpackVisible;
+        backpackHost = configs.backpackHost;
     }
     return {
         isLoggedIn: isLoggedIn,
         stageSizeMode: state.scratchGui.stageSize.stageSize,
-        canSave: isLoggedIn && userOwnsProject && !isSubmitted,
-        canRemix: isLoggedIn && !userOwnsProject && !isSubmitted,
-        canCreateCopy: userOwnsProject && projectInfoPresent && !isSubmitted,
-        canCreateNew: isLoggedIn,
-        canShare: isLoggedIn && userOwnsProject,
-        canUpload: isLoggedIn && userOwnsProject && !isSubmitted && canUpload,
+        canSave: isLoggedIn && userOwnsProject && !isSubmitted && !isPreview,
+        canRemix: isLoggedIn && !userOwnsProject && !isSubmitted && !isPreview,
+        canCreateCopy: userOwnsProject && projectInfoPresent && !isSubmitted && !isPreview,
+        canCreateNew: isLoggedIn && !isPreview,
+        canShare: isLoggedIn && userOwnsProject && !isPreview,
+        canUpload: isLoggedIn && userOwnsProject && !isSubmitted && canUpload && !isPreview,
         canDownload: isLoggedIn && (userOwnsProject || !isStudent) && canDownload,
-        lessonCardVisible: state.scratchGui.studioLessons.visible,
+        lessonCardVisible: state.scratchGui.studioLessons.visible && (!isWizard || isPreview),
         isHiddenLessonModal: state.scratchGui.studioLessons.minimize,
-        backpackVisible: isLoggedIn && userOwnsProject && !isSubmitted,
+        backpackVisible: isLoggedIn && userOwnsProject && !isSubmitted && !isPreview && backpackVisible,
         backpackHost
     };
 };

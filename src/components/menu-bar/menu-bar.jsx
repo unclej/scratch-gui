@@ -82,6 +82,7 @@ import sharedMessages from '../../lib/shared-messages';
 
 import {onSharing} from '../../reducers/itch-project';
 import lessonIcon from './lessons.png';
+import ITCH_CONFIG from "../../../itch.config";
 
 const ariaMessages = defineMessages({
     language: {
@@ -566,7 +567,7 @@ class MenuBar extends React.Component {
                         <FormattedMessage {...ariaMessages.tutorials} />
                     </div>
                     <Divider className={classNames(styles.divider)} />
-                    {this.props.canShare ? itchLessonButton : []}
+                    {this.props.canSeeItchLessons ? itchLessonButton : null}
                     {this.props.canEditTitle ? (
                         <div className={classNames(styles.menuBarItem, styles.growable)}>
                             <MenuBarItemTooltip
@@ -660,7 +661,8 @@ class MenuBar extends React.Component {
                         this.props.username ? (
                             // ************ user is logged in ************
                             <React.Fragment>
-                                <div className={classNames(styles.menuBarItem, styles.feedbackButtonWrapper)}>
+                                { this.props.feedbackVisible  && (
+                                 <div className={classNames(styles.menuBarItem, styles.feedbackButtonWrapper)}>
                                     <a
                                         className={styles.feedbackLink}
                                         href="https://docs.google.com/forms/d/e/1FAIpQLScRjrOVVgR47D3-vHYUaR5EWr1B148pv4d9L8sfg2tMV3lOGQ/viewform"
@@ -679,6 +681,7 @@ class MenuBar extends React.Component {
                                         </Button>
                                     </a>
                                 </div>
+                                )}
                                 {/* <MenuBarItemTooltip id="mystuff">
                                     <div
                                         className={classNames(
@@ -707,47 +710,7 @@ class MenuBar extends React.Component {
                                     onLogOut={this.props.onLogOut}
                                 />
                             </React.Fragment>
-                        ) : (
-                            // ********* user not logged in, but a session exists
-                            // ********* so they can choose to log in
-                            {/* <React.Fragment>
-                                <div
-                                    className={classNames(
-                                        styles.menuBarItem,
-                                        styles.hoverable
-                                    )}
-                                    key="join"
-                                    onMouseUp={this.props.onOpenRegistration}
-                                >
-                                    <FormattedMessage
-                                        defaultMessage="Join Scratch"
-                                        description="Link for creating a Scratch account"
-                                        id="gui.menuBar.joinScratch"
-                                    />
-                                </div>
-                                <div
-                                    className={classNames(
-                                        styles.menuBarItem,
-                                        styles.hoverable
-                                    )}
-                                    key="login"
-                                    onMouseUp={this.props.onClickLogin}
-                                >
-                                    <FormattedMessage
-                                        defaultMessage="Sign in"
-                                        description="Link for signing in to your Scratch account"
-                                        id="gui.menuBar.signIn"
-                                    />
-                                    <LoginDropdown
-                                        className={classNames(styles.menuBarMenu)}
-                                        isOpen={this.props.loginMenuOpen}
-                                        isRtl={this.props.isRtl}
-                                        renderLogin={this.props.renderLogin}
-                                        onClose={this.props.onRequestCloseLogin}
-                                    />
-                                </div>
-                            </React.Fragment> */}
-                        )
+                        ) : []
                     ) : (
                         // ******** no login session is available, so don't show login stuff
                         <React.Fragment>
@@ -833,12 +796,14 @@ MenuBar.propTypes = {
     canRemix: PropTypes.bool,
     canSave: PropTypes.bool,
     canShare: PropTypes.bool,
+    canSeeItchLessons: PropTypes.bool,
     canUpload: PropTypes.bool,
     className: PropTypes.string,
     confirmReadyToReplaceProject: PropTypes.func,
     editMenuOpen: PropTypes.bool,
     enableCommunity: PropTypes.bool,
     fileMenuOpen: PropTypes.bool,
+    feedbackVisible: PropTypes.bool,
     intl: intlShape,
     isLoggedIn: PropTypes.bool,
     isManualUpdating: PropTypes.bool,
@@ -894,11 +859,22 @@ const mapStateToProps = (state, ownProps) => {
     const user = state.session && state.session.session && state.session.session.user;
     const saveText = getIsUpdating(loadingState) ? 1 :
         state.scratchGui.projectState.needsUpdate ? 2 : 0;
+
     /**
      * 0 means that is on state saved
      * 1 means that is on state saving
      * 2 means that is on state not saved
      */
+
+    let isWizard = false;
+    let isPreview = false;
+    let feedbackVisible = true;
+    if (ITCH_CONFIG.ITCH_LESSONS && typeof window.getScratchItchConfig === 'function'){
+        const configs = window.getScratchItchConfig();
+        isWizard = configs.isWizard;
+        feedbackVisible = configs.feedbackVisible;
+        isPreview = configs.isPreview;
+    }
     return {
         accountMenuOpen: accountMenuOpen(state),
         fileMenuOpen: fileMenuOpen(state),
@@ -917,7 +893,9 @@ const mapStateToProps = (state, ownProps) => {
         userOwnsProject: ownProps.authorUsername && user &&
             (ownProps.authorUsername === user.username),
         vm: state.scratchGui.vm,
-        projectChanged: state.scratchGui.projectChanged
+        projectChanged: state.scratchGui.projectChanged,
+        canSeeItchLessons: state.scratchGui.studioLessons.content.length > 0 && (!isWizard || isPreview),
+        feedbackVisible: feedbackVisible,
     };
 };
 

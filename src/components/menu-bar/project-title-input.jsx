@@ -11,6 +11,7 @@ import Input from '../forms/input.jsx';
 const BufferedInput = BufferedInputHOC(Input);
 
 import styles from './project-title-input.css';
+import ITCH_CONFIG from "../../../itch.config";
 
 const messages = defineMessages({
     projectTitlePlaceholder: {
@@ -46,7 +47,7 @@ class ProjectTitleInput extends React.Component {
             xhr(opts, (err, response) => {
                 console.log(response, err);
             }); */
-            
+
         }
     }
     render () {
@@ -84,9 +85,14 @@ const mapStateToProps = state => {
         typeof state.session.session.user.id !== 'undefined' &&
         state.session.session.user.id === state.scratchGui.itchProject.projectUser;
     const isSubmitted = state.scratchGui.itchProject.isSubmitted;
+    let isPreview = false;
+    if (ITCH_CONFIG.ITCH_LESSONS && typeof window.getScratchItchConfig === 'function'){
+        const configs = window.getScratchItchConfig();
+        isPreview = configs.isPreview;
+    }
     return {
         projectTitle: state.scratchGui.projectTitle,
-        canEditTitle: userOwnsProject && !isSubmitted,
+        canEditTitle: userOwnsProject && !isSubmitted && !isPreview,
         reduxProjectId: state.scratchGui.projectState.projectId,
     };
 };
