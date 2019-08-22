@@ -1,3 +1,5 @@
+import ITCH_CONFIG from "../../itch.config";
+
 const OPEN_MODAL = 'scratch-gui/modals/OPEN_MODAL';
 const CLOSE_MODAL = 'scratch-gui/modals/CLOSE_MODAL';
 
@@ -15,8 +17,15 @@ const MODAL_TIPS_LIBRARY = 'tipsLibrary';
 
 
 const MODAL_SHARE_PROJECT = 'shareProject';
+const MODAL_PREVIEW_PROJECT = 'previewProject';
 const MODAL_PROJECT_LESSONS = 'projectLessons';
-
+let previewModal = false;
+if (ITCH_CONFIG.ITCH_LESSONS && typeof window.getScratchItchConfig === 'function'){
+    const configs = window.getScratchItchConfig();
+    if(configs.isPreview) {
+        previewModal = true;
+    }
+}
 const initialState = {
     [MODAL_BACKDROP_LIBRARY]: false,
     [MODAL_CAMERA_CAPTURE]: false,
@@ -30,6 +39,7 @@ const initialState = {
     [MODAL_CONNECTION]: false,
     [MODAL_TIPS_LIBRARY]: false,
     [MODAL_SHARE_PROJECT]: false,
+    [MODAL_PREVIEW_PROJECT]: previewModal,
     [MODAL_PROJECT_LESSONS]: false
 };
 
@@ -96,6 +106,9 @@ const openTipsLibrary = function () {
 const openShareProject = function () {
     return openModal(MODAL_SHARE_PROJECT);
 };
+const openPreviewProject = function () {
+    return openModal(MODAL_PREVIEW_PROJECT);
+};
 const openProjectLessons = function () {
     return openModal(MODAL_PROJECT_LESSONS);
 };
@@ -135,6 +148,9 @@ const closeConnectionModal = function () {
 const closeShareProject = function (){
     return closeModal(MODAL_SHARE_PROJECT);
 };
+const closePreviewProject = function (){
+    return closeModal(MODAL_PREVIEW_PROJECT);
+};
 const closeProjectLessons = function (){
     return closeModal(MODAL_PROJECT_LESSONS);
 };
@@ -153,6 +169,7 @@ export {
     openTipsLibrary,
     openConnectionModal,
     openShareProject,
+    openPreviewProject,
     openProjectLessons,
     closeBackdropLibrary,
     closeCameraCapture,
@@ -166,5 +183,6 @@ export {
     closeTipsLibrary,
     closeConnectionModal,
     closeShareProject,
+    closePreviewProject,
     closeProjectLessons
 };

@@ -18,12 +18,17 @@ import styles from './index.css';
 analytics.pageview('/');
 
 const scratchEditor = document.getElementById('scratch-editor');
-window.initScratch = function () {
+window.SCRATCH_INIT = false;
+window.initScratch = function (config, editor) {
+    window.SCRATCH_INIT = true;
+    const scratchEditor = document.getElementById('scratch-editor');
     const appTarget = document.createElement('div');
     appTarget.className = styles.app;
     appTarget.classList.add('only-player-app-screen');
     appTarget.id = 'mainDivApp';
-    if (scratchEditor){
+    if(editor) {
+        editor.appendChild(appTarget);
+    } else if (scratchEditor){
         scratchEditor.appendChild(appTarget);
     } else {
         document.body.appendChild(appTarget);
@@ -44,6 +49,6 @@ window.initScratch = function () {
     }
 
 };
-if (!scratchEditor){
+if (!scratchEditor && !process.env.ITCH_LESSONS){
     window.initScratch();
 }

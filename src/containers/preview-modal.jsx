@@ -3,59 +3,41 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import {connect} from 'react-redux';
 
-import ShareModalComponent from '../components/share-modal/share-modal.jsx';
+import PreviewModalComponent from '../components/preview-modal/preview-modal.jsx';
 
 import {
-    closeShareProject
+    closePreviewProject
 } from '../reducers/modals';
 
-class ShareModal extends React.Component {
+class PreviewModal extends React.Component {
     constructor (props) {
         super(props);
         bindAll(this, [
-            'handleTryIt',
-            'handleCancel'
+            'handleClose'
         ]);
     }
-    handleTryIt () {
-        const textField = document.createElement('textarea');
-        textField.innerText = this.props.hashUrl;
-        document.body.appendChild(textField);
-        textField.select();
-        document.execCommand('copy');
-        textField.remove();
-        this.props.onTryIt();
-    }
-    handleCancel () {
-        this.props.onTryIt();
+    handleClose () {
+        this.props.onClose();
     }
     render () {
         return (
-            <ShareModalComponent
-                hashUrl={this.props.hashUrl}
-                onCancel={this.handleCancel}
-                onTryIt={this.handleTryIt}
+            <PreviewModalComponent
+                onCancel={this.handleClose}
             />
         );
     }
 }
 
-ShareModal.propTypes = {
-    hashUrl: PropTypes.string,
-    onTryIt: PropTypes.func
+PreviewModal.propTypes = {
+    handleClose: PropTypes.func
 };
-
-const mapStateToProps = state => ({
-    hashUrl: state.scratchGui.itchProject.shareUrl
-});
-
 const mapDispatchToProps = dispatch => ({
-    onTryIt: () => {
-        dispatch(closeShareProject());
+    onClose: () => {
+        dispatch(closePreviewProject());
     }
 });
 
 export default connect(
-    mapStateToProps,
+    null,
     mapDispatchToProps
-)(ShareModal);
+)(PreviewModal);

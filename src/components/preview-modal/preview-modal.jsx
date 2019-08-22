@@ -4,32 +4,24 @@ import ReactModal from 'react-modal';
 import Box from '../box/box.jsx';
 import {injectIntl, FormattedMessage} from 'react-intl';
 
-import styles from './share-modal.css';
+import styles from './preview-modal.css';
 
 
-const ShareModal = ({...props}) => (
+const PreviewModal = ({...props}) => (
     <ReactModal
         isOpen
         className={styles.modalContent}
         overlayClassName={styles.modalOverlay}
-        onRequestClose={props.onTryIt}
+        onRequestClose={props.onCancel}
     >
         <Box className={styles.body}>
-            <h2>
+            <h4>
                 <FormattedMessage
-                    defaultMessage="Copy this link and share this project"
+                    defaultMessage="Any changes you make during preview will not be saved"
                     description="Share this project with others"
                     id="gui.shareModal.shareMessage"
                 />
-            </h2>
-            <div className={styles.shareInput}>
-                <a
-                    className={styles.hashLink}
-                    href={props.hashUrl}
-                    rel="noopener noreferrer"
-                    target="_blank"
-                >{props.hashUrl}</a>
-            </div>
+            </h4>
             <Box className={styles.buttonRow}>
                 <button
                     className={styles.noButton}
@@ -41,26 +33,13 @@ const ShareModal = ({...props}) => (
                         id="gui.shareModal.close"
                     />
                 </button>
-                <button
-                    className={styles.okButton}
-                    title="Copy to Clipboard"
-                    onClick={props.onTryIt}
-                >
-                    <FormattedMessage
-                        defaultMessage="Copy to Clipboard"
-                        description="Label for button to copy link"
-                        id="gui.shareModal.copyToClipboard"
-                    />
-                </button>
             </Box>
         </Box>
     </ReactModal>
 );
 
-ShareModal.propTypes = {
-    hashUrl: PropTypes.string,
-    onCancel: PropTypes.func.isRequired,
-    onTryIt: PropTypes.func.isRequired
+PreviewModal.propTypes = {
+    onCancel: PropTypes.func.isRequired
 };
 
-export default injectIntl(ShareModal);
+export default injectIntl(PreviewModal);

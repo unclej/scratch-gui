@@ -68,15 +68,31 @@ const StageHeaderComponent = function (props) {
         onSetProjectPageFromUnFull,
         onSetProjectPageFromFull,
         stageSizeMode,
+        closeProjectPreview,
         vm
     } = props;
 
     let header = null;
     const isIpad = (navigator.userAgent.match(/iPad/i) !== null);
+
     const seeProjectPageButton = !ITCH_CONFIG.ITCH_LESSONS ? (
         <Button
             className={styles.projectButton}
             onClick={onSetProjectPageFromUnFull}
+            onKeyPress={onKeyPress}
+        >
+            <img
+                alt="See Project Page"
+                className={styles.stageButtonIcon}
+                draggable={false}
+                src={closeIcon}
+                title="See Project Page"
+            />
+        </Button>
+    ) : closeProjectPreview ? (
+        <Button
+            className={styles.projectButton}
+            onClick={window.exitFromProjectPreview}
             onKeyPress={onKeyPress}
         >
             <img
@@ -330,13 +346,22 @@ const StageHeaderComponent = function (props) {
     return header;
 };
 
-const mapStateToProps = state => ({
+const mapStateToProps = state => {
     // This is the button's mode, as opposed to the actual current state
-    stageSizeMode: state.scratchGui.stageSize.stageSize
-});
+    let closeProjectPreview = false;
+    if (ITCH_CONFIG.ITCH_LESSONS && typeof window.getScratchItchConfig === 'function'){
+        const configs = window.getScratchItchConfig();
+        closeProjectPreview = configs.closeProjectPreview;
+    }
+    return {
+        stageSizeMode: state.scratchGui.stageSize.stageSize,
+        closeProjectPreview
+    }
+};
 
 StageHeaderComponent.propTypes = {
     intl: intlShape,
+    closeProjectPreview: PropTypes.bool.isRequired,
     isFullScreen: PropTypes.bool.isRequired,
     isPlayerOnly: PropTypes.bool.isRequired,
     isProjectPage: PropTypes.bool.isRequired,

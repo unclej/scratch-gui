@@ -17,6 +17,7 @@ import {
     setEditingUserId,
     setStudioId
 } from "../reducers/itch-project";
+import {openPreviewProject} from "../reducers/modals";
 
 /* Higher Order Component to get the project id from location.hash
  * @param {React.Component} WrappedComponent: component to render
@@ -33,10 +34,11 @@ const HashParserHOC = function (WrappedComponent) {
             ]);
         }
         componentDidMount () {
-            if (typeof window.getScratchItchConfig === 'function') {
+            if (typeof window.getBackPackHost === 'function') {
                 window.updateScratchProjectId = this.updateProjectIdFromConfigs;
                 window.updateProjectFromConfigs = this.updateProjectFromConfigs;
-                this.updateProjectIdFromConfigs();
+                if(typeof window.getScratchItchConfig === 'function')
+                    this.updateProjectIdFromConfigs();
             } else {
                 window.addEventListener('hashchange', this.handleHashChange);
                 this.handleHashChange();
@@ -52,13 +54,7 @@ const HashParserHOC = function (WrappedComponent) {
             }
         }
         componentWillUnmount () {
-            if (typeof window.getScratchItchConfig === 'function') {
-                // eslint-disable-next-line no-undefined
-                window.updateScratchData = undefined;
-            } else {
-                window.removeEventListener('hashchange', this.handleHashChange);
-            }
-
+            window.removeEventListener('hashchange', this.handleHashChange);
         }
         handleHashChange () {
             let hashProjectId;
@@ -99,6 +95,9 @@ const HashParserHOC = function (WrappedComponent) {
                 this.setState({hideIntro: true});
             }
             this.props.setProjectId(hashProjectId.toString());
+            if(configs.isPreview) {
+                this.props.openPreviewProject();
+            }
         }
         render () {
             const {
@@ -107,6 +106,7 @@ const HashParserHOC = function (WrappedComponent) {
                 isFetchingWithId: isFetchingWithIdProp,
                 reduxProjectId,
                 setProjectId: setProjectIdProp,
+                openPreviewProject: openPreviewProjectProp,
                 /* eslint-enable no-unused-vars */
                 ...componentProps
             } = this.props;
@@ -125,7 +125,8 @@ const HashParserHOC = function (WrappedComponent) {
         setEditingUserId: PropTypes.func,
         setStudioId: PropTypes.func,
         reduxProjectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-        setProjectId: PropTypes.func
+        setProjectId: PropTypes.func,
+        openPreviewProject: PropTypes.func
     };
     const mapStateToProps = state => {
         const loadingState = state.scratchGui.projectState.loadingState;
@@ -140,6 +141,7 @@ const HashParserHOC = function (WrappedComponent) {
         setProjectId: projectId => {
             dispatch(setProjectId(projectId));
         },
+        openPreviewProject: () => dispatch(openPreviewProject()),
         setStudioId: stdId => dispatch(setStudioId(stdId)),
         setEditingUserId: userId => dispatch(setEditingUserId(userId)),
         setCsrfToken: token => dispatch(setCsrfToken(token)),

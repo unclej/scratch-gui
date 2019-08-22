@@ -41,6 +41,7 @@ import codeIcon from './icon--code.svg';
 import costumesIcon from './icon--costumes.svg';
 import soundsIcon from './icon--sounds.svg';
 import ShareModal from '../../containers/share-modal.jsx';
+import PreviewModal from '../../containers/preview-modal.jsx';
 import ITCH_CONFIG from '../../../itch.config';
 const messages = defineMessages({
     addExtension: {
@@ -114,6 +115,7 @@ const GUIComponent = props => {
         onTelemetryModalOptIn,
         onTelemetryModalOptOut,
         shareProjectVisible,
+        previewProjectVisible,
         showComingSoon,
         soundsTabVisible,
         stageSizeMode,
@@ -171,6 +173,9 @@ const GUIComponent = props => {
                 ) : null}
                 {shareProjectVisible ? (
                     <ShareModal />
+                ) : null}
+                {previewProjectVisible ? (
+                    <PreviewModal />
                 ) : null}
                 {loading ? (
                     <Loader />
@@ -421,6 +426,7 @@ GUIComponent.propTypes = {
     onUpdateProjectTitle: PropTypes.func,
     renderLogin: PropTypes.func,
     shareProjectVisible: PropTypes.bool,
+    previewProjectVisible: PropTypes.bool,
     showComingSoon: PropTypes.bool,
     soundsTabVisible: PropTypes.bool,
     stageSizeMode: PropTypes.oneOf(Object.keys(STAGE_SIZE_MODES)),
@@ -451,7 +457,7 @@ GUIComponent.defaultProps = {
     stageSizeMode: STAGE_SIZE_MODES.large
 };
 
-const mapStateToProps = state => {
+const mapStateToProps = (state, ownProps) => {
     // This is the button's mode, as opposed to the actual current state
     const isLoggedIn = state.session.session.user !== null &&
         typeof state.session.session.user !== 'undefined' &&

@@ -163,6 +163,7 @@ GUI.propTypes = {
     projectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     projectTitle: PropTypes.string,
     shareProjectVisible: PropTypes.bool,
+    previewProjectVisible: PropTypes.bool,
     telemetryModalVisible: PropTypes.bool,
     vm: PropTypes.instanceOf(VM).isRequired
 };
@@ -207,7 +208,8 @@ const mapStateToProps = state => {
         telemetryModalVisible: state.scratchGui.modals.telemetryModal,
         tipsLibraryVisible: state.scratchGui.modals.tipsLibrary,
         vm: state.scratchGui.vm,
-        shareProjectVisible: state.scratchGui.modals.shareProject
+        shareProjectVisible: state.scratchGui.modals.shareProject,
+        previewProjectVisible: state.scratchGui.modals.previewProject
     };
 };
 
