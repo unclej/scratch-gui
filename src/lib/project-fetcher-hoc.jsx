@@ -3,6 +3,10 @@ import PropTypes from 'prop-types';
 import {intlShape, injectIntl} from 'react-intl';
 import bindAll from 'lodash.bindall';
 import {connect} from 'react-redux';
+import { TextDecoder } from 'text-encoding';
+if (!window['TextDecoder']) {
+    window['TextDecoder'] = TextDecoder;
+}
 
 import {setProjectUnchanged} from '../reducers/project-changed';
 import {
@@ -47,7 +51,7 @@ import {selectLocale} from '../reducers/locales';
 import {
     openProjectLessons
 } from '../reducers/modals';
-import {setContent, activateLesson} from '../reducers/studioLessons';
+import {setContent, activateLesson, closeLessons} from '../reducers/studioLessons';
 /* Higher Order Component to provide behavior for loading projects by id. If
  * there's no id, the default project is loaded.
  * @param {React.Component} WrappedComponent component to receive projectData prop
@@ -270,6 +274,9 @@ const ProjectFetcherHOC = function (WrappedComponent) {
                         ){
                             this.props.setStudioLessonsContent(projectData.lessons);
                             this.props.showLessons(0, null);
+                            if(this.props.isTeacherPreview) {
+                                this.props.hideLessons();
+                            }
                             // this.props.onProjectLessons();
                         }
                         let projectJson;
@@ -401,6 +408,8 @@ const ProjectFetcherHOC = function (WrappedComponent) {
                 onProjectLessons,
                 setStudioLessonsContent,
                 showLessons: showLessonsProp,
+                hideLessons: hideLessonsProp,
+                isTeacherPreview: isTeacherPreviewProp,
                 resetToInitial: resetToInitialProp,
                 onChangeLanguage: onChangeLanguageProp,
                 supportedLocales: supportedLocalesProp,
@@ -421,6 +430,7 @@ const ProjectFetcherHOC = function (WrappedComponent) {
         canSave: PropTypes.bool,
         intl: intlShape.isRequired,
         isCreatingNew: PropTypes.bool,
+        isTeacherPreview: PropTypes.bool,
         isFetchingWithId: PropTypes.bool,
         isFetchingWithoutId: PropTypes.bool,
         isLoadingProject: PropTypes.bool,
@@ -451,6 +461,7 @@ const ProjectFetcherHOC = function (WrappedComponent) {
         setStudioId: PropTypes.func,
         setStudioLessonsContent: PropTypes.func,
         showLessons: PropTypes.func,
+        hideLessons: PropTypes.func,
         supportedLocales: PropTypes.arrayOf(PropTypes.string),
         updateProjectAssets: PropTypes.func
     };
@@ -464,9 +475,17 @@ const ProjectFetcherHOC = function (WrappedComponent) {
             typeof state.session.session.user !== 'undefined' &&
             typeof state.session.session.user.id !== 'undefined' &&
             Object.keys(state.session.session.user).length > 0 && state.session.session.user.id !== 0;
+        let isTeacherPreview = false;
+        if (ITCH_CONFIG.ITCH_LESSONS && typeof window.getScratchItchConfig === 'function'){
+            const configs = window.getScratchItchConfig();
+            if(configs.teacherPreview) {
+                isTeacherPreview = configs.teacherPreview;
+            }
+        }
         return {
             isLoggedIn,
             isCreatingNew: getIsCreatingNew(state.scratchGui.projectState.loadingState),
+            isTeacherPreview,
             isFetchingWithId: getIsFetchingWithId(state.scratchGui.projectState.loadingState),
             isLoadingProject: getIsLoading(state.scratchGui.projectState.loadingState),
             isShowingProject: getIsShowingProject(state.scratchGui.projectState.loadingState),
@@ -502,6 +521,7 @@ const ProjectFetcherHOC = function (WrappedComponent) {
         },
         setStudioLessonsContent: content => dispatch(setContent(content)),
         showLessons: (step, callback) => dispatch(activateLesson(step, callback)),
+        hideLessons: () => dispatch(closeLessons()),
         resetToInitial: (json, name, thumbnail) => dispatch(resetToInitial(json, name, thumbnail)),
         onChangeLanguage: locale => dispatch(selectLocale(locale))
     });

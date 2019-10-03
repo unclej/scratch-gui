@@ -55,12 +55,16 @@ class Storage extends ScratchStorage {
     }
     getProjectGetConfig (projectAsset) {
         if (ITCH_CONFIG.ITCH_LESSONS){
-            return {
+            const config = {
                 url: `${this.projectHost}project/${projectAsset.assetId}/${this.loggedInStudio}/get`,
-                headers: {
-                    Authorization: `Bearer ${this.getToken()}`
-                }
             };
+            const token = this.getToken();
+            if(token) {
+                config.headers= {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+            return config;
         }
 
         return `${this.projectHost}
