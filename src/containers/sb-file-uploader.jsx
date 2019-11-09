@@ -173,7 +173,6 @@ class SBFileUploader extends React.Component {
         }
     }
     createNewProject (){
-        this.props.onShowCreatingAlert();
         const savedVMState = this.props.vm.toJSON();
         const loggedInUser = this.props.loggedInUser;
         let data = {
@@ -185,6 +184,8 @@ class SBFileUploader extends React.Component {
         const headers = {
             'Content-Type': 'application/json'
         };
+        let isFinalOrStarter = false;
+        let projectId = 0;
         if (ITCH_CONFIG.ITCH_LESSONS){
             data = {
                 name: 'Untitled',
@@ -192,28 +193,41 @@ class SBFileUploader extends React.Component {
                 projectJson: savedVMState
             };
             headers.Authorization = `Bearer ${storage.getToken()}`;
+            if (typeof window.getScratchItchConfig === 'function'){
+                const configs = window.getScratchItchConfig();
+                isFinalOrStarter = configs.isStarter || configs.isFinal;
+                projectId = configs.projectId;
+            }
         }
-        const opts = {
-            method: 'post',
-            url: `${storage.projectHost}project/create`,
-            body: JSON.stringify(data),
-            // If we set json:true then the body is double-stringified, so don't
-            headers
-        };
-        return new Promise((resolve, reject) => {
-            xhr(opts, (err, response) => {
-                if (err) return reject(err);
-                let body;
-                try {
-                    // Since we didn't set json: true, we have to parse manually
-                    body = JSON.parse(response.body);
-                } catch (e) {
-                    return reject(e);
-                }
-                body.id = body['content-name'];
-                resolve(body);
+        if(isFinalOrStarter || parseInt(projectId.toString()) !== 0) {
+            return new Promise((resolve) => {
+                resolve({id: projectId, projectID: projectId});
             });
-        });
+        } else {
+            this.props.onShowCreatingAlert();
+            const opts = {
+                method: 'post',
+                url: `${storage.projectHost}project/create`,
+                body: JSON.stringify(data),
+                // If we set json:true then the body is double-stringified, so don't
+                headers
+            };
+            return new Promise((resolve, reject) => {
+                xhr(opts, (err, response) => {
+                    if (err) return reject(err);
+                    let body;
+                    try {
+                        // Since we didn't set json: true, we have to parse manually
+                        body = JSON.parse(response.body);
+                    } catch (e) {
+                        return reject(e);
+                    }
+                    body.id = body['content-name'];
+                    resolve(body);
+                });
+            });
+        }
+
     }
     handleClick () {
         // open filesystem browsing window

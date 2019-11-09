@@ -351,3 +351,6 @@
 .shrink-expand-button:hover, .all-button:hover {
     background-color: $ui-black-transparent;
 }
+p img {
+    max-width: 100%;
+}
