@@ -3,6 +3,10 @@ import PropTypes from 'prop-types';
 import {intlShape, injectIntl} from 'react-intl';
 import bindAll from 'lodash.bindall';
 import {connect} from 'react-redux';
+import { TextDecoder } from 'text-encoding';
+if (!window['TextDecoder']) {
+    window['TextDecoder'] = TextDecoder;
+}
 
 import {setProjectUnchanged} from '../reducers/project-changed';
 import {
@@ -79,7 +83,7 @@ const ProjectFetcherHOC = function (WrappedComponent) {
             }
             this.props.setStudioId(loggedInStudioId);
             storage.setLoggedInStudioId(loggedInStudioId);
-            
+
             if (this.fetchCsrfToken() !== ''){
                 this.props.setCsrfToken(this.fetchCsrfToken());
             }
@@ -197,7 +201,7 @@ const ProjectFetcherHOC = function (WrappedComponent) {
                 storage
                     .load(storage.AssetType.Project, projectId, storage.DataFormat.JSON)
                     .then(projectAsset => {
-                        const projectData = JSON.parse(projectAsset.data.toString());
+                        const projectData = JSON.parse(new TextDecoder().decode(projectAsset.data));
                         // check language
                         if (projectData.language){
                             const newLocale = projectData.language;
