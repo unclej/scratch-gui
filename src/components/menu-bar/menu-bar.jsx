@@ -11,7 +11,6 @@ import VM from 'scratch-vm';
 
 import Box from '../box/box.jsx';
 import Button from '../button/button.jsx';
-import CommunityButton from './community-button.jsx';
 import ShareButton from './share-button.jsx';
 import {ComingSoonTooltip} from '../coming-soon/coming-soon.jsx';
 import Divider from '../divider/divider.jsx';
@@ -71,7 +70,6 @@ import collectMetadata from '../../lib/collect-metadata';
 import styles from './menu-bar.css';
 
 import helpIcon from '../../lib/assets/icon--tutorials.svg';
-import mystuffIcon from './icon--mystuff.png';
 import feedbackIcon from './icon--feedback.svg';
 import profileIcon from './icon--profile.png';
 import remixIcon from './icon--remix.svg';
@@ -81,7 +79,7 @@ import languageIcon from '../language-selector/language-icon.svg';
 import sharedMessages from '../../lib/shared-messages';
 
 import {onSharing} from '../../reducers/itch-project';
-import lessonIcon from './lessons.png';
+import directionIcon from './directions.png';
 import ITCH_CONFIG from "../../../itch.config";
 
 const ariaMessages = defineMessages({
@@ -348,12 +346,12 @@ class MenuBar extends React.Component {
                 <img
                     className={styles.lessonIcon}
                     draggable={false}
-                    src={lessonIcon}
+                    src={directionIcon}
                 />
                 <FormattedMessage
-                    defaultMessage="Lessons"
-                    description="Text for itch lesson button"
-                    id="itchLocale.cards.lessons"
+                    defaultMessage="View directions"
+                    description="Text for itch directions button"
+                    id="itchLocale.cards.directions"
                 />
             </div>
         );
@@ -555,7 +553,7 @@ class MenuBar extends React.Component {
                         </div>
                     </div>
                     <Divider className={classNames(styles.divider)} />
-                    <div
+                    {/*<div
                         aria-label={this.props.intl.formatMessage(ariaMessages.tutorials)}
                         className={classNames(styles.menuBarItem, styles.hoverable)}
                         onClick={this.props.onOpenTipLibrary}
@@ -566,7 +564,7 @@ class MenuBar extends React.Component {
                         />
                         <FormattedMessage {...ariaMessages.tutorials} />
                     </div>
-                    <Divider className={classNames(styles.divider)} />
+                    <Divider className={classNames(styles.divider)} />*/}
                     {this.props.canSeeItchLessons ? itchLessonButton : null}
                     {this.props.canEditTitle ? (
                         <div className={classNames(styles.menuBarItem, styles.growable)}>

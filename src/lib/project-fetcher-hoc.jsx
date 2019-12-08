@@ -257,7 +257,7 @@ const ProjectFetcherHOC = function (WrappedComponent) {
                             project.user_id,
                             this.props.projectHost,
                             this.props.assetHost,
-                            projectData.lessons,
+                            projectData.lessons || [],
                             isSubmitted
                         );
                         this.props.setProjectId(project.id);
@@ -278,6 +278,8 @@ const ProjectFetcherHOC = function (WrappedComponent) {
                                 this.props.hideLessons();
                             }
                             // this.props.onProjectLessons();
+                        } else {
+                            this.props.setStudioLessonsContent([]);
                         }
                         let projectJson;
                         if (typeof project.json !== 'undefined' && typeof project.json !== 'object'){

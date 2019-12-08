@@ -8,7 +8,7 @@ import styles from './lesson-cards.css';
 import shrinkIcon from '../cards/icon--shrink.svg';
 import expandIcon from '../cards/icon--expand.svg';
 
-import helpIcon from '../menu-bar/lessons.png';
+import directionIcon from '../menu-bar/directions.png';
 import closeIcon from '../close-button/icon--close.svg';
 import ReactPlayer from 'react-player';
 import YouTubePlayer from 'react-player/lib/players/YouTube';
@@ -22,12 +22,12 @@ const LessonCardHeader = ({onCloseCards, totalSteps, step, expanded, onShrinkExp
         >
             <img
                 className={styles.helpIcon}
-                src={helpIcon}
+                src={directionIcon}
             />
             <FormattedMessage
-                defaultMessage="Lessons"
-                description="Message for itch lesson button"
-                id="itchLocale.cards.lessons"
+                defaultMessage="View directions"
+                description="Text for itch directions button"
+                id="itchLocale.cards.directions"
             />
         </div>
         {totalSteps > 1 ? (

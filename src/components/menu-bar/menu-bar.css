@@ -232,7 +232,7 @@
   background-image: url("/images/mystuff.png");
 }
 .itch-lesson{
-    margin-left:5px; 
+    margin-left:5px;
 }
 .save-button {
     background: $ui-white;
@@ -241,5 +241,6 @@
     color:$motion-primary;
 }
 .lesson-icon{
-    margin-right:5px; 
+    margin-right:5px;
+    height: 21px;
 }
