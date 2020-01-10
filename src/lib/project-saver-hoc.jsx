@@ -262,9 +262,14 @@ const ProjectSaverHOC = function (WrappedComponent) {
                             format: asset.dataFormat
                         })) : asset.data,
                         asset.assetId
-                    ).then(
-                        () => (asset.clean = true)
-                    )
+                    ).then(response => {
+                        // Asset servers respond with {status: ok} for successful POSTs
+                        if (response.status !== 'Ok') {
+                            // Errors include a `code` property, e.g. "Forbidden"
+                            return Promise.reject(response.code);
+                        }
+                        asset.clean = true;
+                    })
                 )
             ).then(() => {
                 const opts = {

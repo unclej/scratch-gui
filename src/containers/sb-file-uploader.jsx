@@ -4,6 +4,7 @@ import React from 'react';
 import {connect} from 'react-redux';
 import {defineMessages, injectIntl, intlShape} from 'react-intl';
 import xhr from 'xhr';
+import {setProjectTitle} from '../reducers/project-title';
 
 import log from '../lib/log';
 import sharedMessages from '../lib/shared-messages';
@@ -36,13 +37,14 @@ import ITCH_CONFIG from '../../itch.config';
 /**
  * SBFileUploader component passes a file input, load handler and props to its child.
  * It expects this child to be a function with the signature
- *     function (renderFileInput, loadProject) {}
+ *     function (renderFileInput, handleLoadProject) {}
  * The component can then be used to attach project loading functionality
  * to any other component:
  *
- * <SBFileUploader>{(renderFileInput, loadProject) => (
+ * <SBFileUploader>{(className, renderFileInput, handleLoadProject) => (
  *     <MyCoolComponent
- *         onClick={loadProject}
+ *         className={className}
+ *         onClick={handleLoadProject}
  *     >
  *         {renderFileInput()}
  *     </MyCoolComponent>
@@ -274,6 +276,7 @@ SBFileUploader.propTypes = {
     projectChanged: PropTypes.bool,
     projectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     requestProjectUpload: PropTypes.func,
+    onReceivedProjectTitle: PropTypes.func,
     userOwnsProject: PropTypes.bool,
     vm: PropTypes.shape({
         loadProject: PropTypes.func
@@ -313,7 +316,8 @@ const mapDispatchToProps = dispatch => ({
     onShowCreatingAlert: () => showAlertWithTimeout(dispatch, 'creating'),
     onShowCreateSuccessAlert: () => showAlertWithTimeout(dispatch, 'createSuccess'),
     onLoadingStarted: () => dispatch(openLoadingProject()),
-    onsetProjectId: projectId => dispatch(setProjectId(projectId))
+    onsetProjectId: projectId => dispatch(setProjectId(projectId)),
+    onReceivedProjectTitle: title => dispatch(setProjectTitle(title))
 });
 
 // Allow incoming props to override redux-provided props. Used to mock in tests.

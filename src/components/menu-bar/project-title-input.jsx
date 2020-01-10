@@ -1,9 +1,9 @@
 import classNames from 'classnames';
 import {connect} from 'react-redux';
 import PropTypes from 'prop-types';
-import bindAll from 'lodash.bindall';
 import React from 'react';
 import {defineMessages, intlShape, injectIntl} from 'react-intl';
+import {setProjectTitle} from '../../reducers/project-title';
 import {setProjectChanged} from '../../reducers/project-changed';
 
 import BufferedInputHOC from '../forms/buffered-input-hoc.jsx';
@@ -21,59 +21,31 @@ const messages = defineMessages({
     }
 });
 
-class ProjectTitleInput extends React.Component {
-    constructor (props) {
-        super(props);
-        bindAll(this, [
-            'handleUpdateProjectTitle'
-        ]);
-    }
-    // call onUpdateProjectTitle if it is defined (only defined when gui
-    // is used within scratch-www)
-    handleUpdateProjectTitle (newTitle) {
-        if (this.props.onUpdateProjectTitle) {
-            this.props.onUpdateProjectTitle(newTitle);
-            this.props.onProjectChanged();
-            /* const opts = {
-                method: 'post',
-                url: `${storage.projectHost}project/${this.props.reduxProjectId}/update-title`,
-                body: JSON.stringify({title: newTitle}),
-                // If we set json:true then the body is double-stringified, so don't
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                withCredentials: false
-            };
-            xhr(opts, (err, response) => {
-                console.log(response, err);
-            }); */
-
-        }
-    }
-    render () {
-        return (
-            <BufferedInput
-                className={classNames(styles.titleField, this.props.className)}
-                disabled={!this.props.canEditTitle}
-                maxLength="100"
-                placeholder={this.props.intl.formatMessage(messages.projectTitlePlaceholder)}
-                tabIndex="0"
-                type="text"
-                value={this.props.projectTitle}
-                onSubmit={this.handleUpdateProjectTitle}
-            />
-        );
-    }
-}
+const ProjectTitleInput = ({
+    className,
+    intl,
+    onSubmit,
+    projectTitle
+}) => (
+    <BufferedInput
+        className={classNames(styles.titleField, className)}
+        maxLength="100"
+        placeholder={intl.formatMessage(messages.projectTitlePlaceholder)}
+        tabIndex="0"
+        type="text"
+        value={projectTitle}
+        onSubmit={onSubmit}
+    />
+);
 
 ProjectTitleInput.propTypes = {
     canEditTitle: PropTypes.bool,
     className: PropTypes.string,
     intl: intlShape.isRequired,
-    onUpdateProjectTitle: PropTypes.func,
     onProjectChanged: PropTypes.func,
-    projectTitle: PropTypes.string,
     reduxProjectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    onSubmit: PropTypes.func,
+    projectTitle: PropTypes.string
 };
 
 const mapStateToProps = state => {
@@ -98,7 +70,11 @@ const mapStateToProps = state => {
 };
 
 const mapDispatchToProps  = dispatch => ({
-    onProjectChanged: () => dispatch(setProjectChanged()),
+    onSubmit: title => {
+        dispatch(setProjectTitle(title));
+        dispatch(setProjectChanged())
+    },
+    onProjectChanged: () => dispatch(setProjectChanged())
 });
 
 export default injectIntl(connect(

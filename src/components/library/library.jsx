@@ -38,12 +38,13 @@ class LibraryComponent extends React.Component {
             'handleFilterClear',
             'handleMouseEnter',
             'handleMouseLeave',
+            'handlePlayingEnd',
             'handleSelect',
             'handleTagClick',
             'setFilteredDataRef'
         ]);
         this.state = {
-            selectedItem: null,
+            playingItem: null,
             filterQuery: '',
             selectedTag: ALL_TAG.tag,
             loaded: false
@@ -54,6 +55,7 @@ class LibraryComponent extends React.Component {
         setTimeout(() => {
             this.setState({loaded: true});
         });
+        if (this.props.setStopHandler) this.props.setStopHandler(this.handlePlayingEnd);
     }
     componentDidUpdate (prevProps, prevState) {
         if (prevState.filterQuery !== this.state.filterQuery ||
@@ -69,22 +71,58 @@ class LibraryComponent extends React.Component {
         this.props.onRequestClose();
     }
     handleTagClick (tag) {
-        this.setState({
-            filterQuery: '',
-            selectedTag: tag.toLowerCase()
-        });
+        if (this.state.playingItem === null) {
+            this.setState({
+                filterQuery: '',
+                selectedTag: tag.toLowerCase()
+            });
+        } else {
+            this.props.onItemMouseLeave(this.getFilteredData()[[this.state.playingItem]]);
+            this.setState({
+                filterQuery: '',
+                playingItem: null,
+                selectedTag: tag.toLowerCase()
+            });
+        }
     }
     handleMouseEnter (id) {
-        if (this.props.onItemMouseEnter) this.props.onItemMouseEnter(this.getFilteredData()[id]);
+        // don't restart if mouse over already playing item
+        if (this.props.onItemMouseEnter && this.state.playingItem !== id) {
+            this.props.onItemMouseEnter(this.getFilteredData()[id]);
+            this.setState({
+                playingItem: id
+            });
+        }
     }
     handleMouseLeave (id) {
-        if (this.props.onItemMouseLeave) this.props.onItemMouseLeave(this.getFilteredData()[id]);
+        if (this.props.onItemMouseLeave) {
+            this.props.onItemMouseLeave(this.getFilteredData()[id]);
+            this.setState({
+                playingItem: null
+            });
+        }
+    }
+    handlePlayingEnd () {
+        if (this.state.playingItem !== null) {
+            this.setState({
+                playingItem: null
+            });
+        }
     }
     handleFilterChange (event) {
-        this.setState({
-            filterQuery: event.target.value,
-            selectedTag: ALL_TAG.tag
-        });
+        if (this.state.playingItem === null) {
+            this.setState({
+                filterQuery: event.target.value,
+                selectedTag: ALL_TAG.tag
+            });
+        } else {
+            this.props.onItemMouseLeave(this.getFilteredData()[[this.state.playingItem]]);
+            this.setState({
+                filterQuery: event.target.value,
+                playingItem: null,
+                selectedTag: ALL_TAG.tag
+            });
+        }
     }
     handleFilterClear () {
         this.setState({filterQuery: ''});
@@ -171,27 +209,29 @@ class LibraryComponent extends React.Component {
                     ref={this.setFilteredDataRef}
                 >
                     {this.state.loaded ? this.getFilteredData().map((dataItem, index) => (
-                            <LibraryItem
-                                bluetoothRequired={dataItem.bluetoothRequired}
-                                collaborator={dataItem.collaborator}
-                                description={dataItem.description}
-                                disabled={dataItem.disabled}
-                                extensionId={dataItem.extensionId}
-                                featured={dataItem.featured}
-                                hidden={dataItem.hidden}
-                                iconMd5={dataItem.md5}
-                                iconRawURL={dataItem.rawURL}
-                                icons={dataItem.json && dataItem.json.costumes}
-                                id={index}
-                                insetIconURL={dataItem.insetIconURL}
-                                internetConnectionRequired={dataItem.internetConnectionRequired}
-                                key={`item_${index}`}
-                                name={dataItem.name}
-                                onMouseEnter={this.handleMouseEnter}
-                                onMouseLeave={this.handleMouseLeave}
-                                onSelect={this.handleSelect}
-                            />
-                        )) : (
+                        <LibraryItem
+                            bluetoothRequired={dataItem.bluetoothRequired}
+                            collaborator={dataItem.collaborator}
+                            description={dataItem.description}
+                            disabled={dataItem.disabled}
+                            extensionId={dataItem.extensionId}
+                            featured={dataItem.featured}
+                            hidden={dataItem.hidden}
+                            iconMd5={dataItem.md5}
+                            iconRawURL={dataItem.rawURL}
+                            icons={dataItem.json && dataItem.json.costumes}
+                            id={index}
+                            insetIconURL={dataItem.insetIconURL}
+                            internetConnectionRequired={dataItem.internetConnectionRequired}
+                            isPlaying={this.state.playingItem === index}
+                            key={`item_${index}`}
+                            name={dataItem.name}
+                            showPlayButton={this.props.showPlayButton}
+                            onMouseEnter={this.handleMouseEnter}
+                            onMouseLeave={this.handleMouseLeave}
+                            onSelect={this.handleSelect}
+                        />
+                    )) : (
                         <div className={styles.spinnerWrapper}>
                             <Spinner
                                 large
@@ -227,12 +267,15 @@ LibraryComponent.propTypes = {
     onItemMouseLeave: PropTypes.func,
     onItemSelected: PropTypes.func,
     onRequestClose: PropTypes.func,
+    setStopHandler: PropTypes.func,
+    showPlayButton: PropTypes.bool,
     tags: PropTypes.arrayOf(PropTypes.shape(TagButton.propTypes)),
     title: PropTypes.string.isRequired
 };
 
 LibraryComponent.defaultProps = {
-    filterable: true
+    filterable: true,
+    showPlayButton: false
 };
 
 export default injectIntl(LibraryComponent);

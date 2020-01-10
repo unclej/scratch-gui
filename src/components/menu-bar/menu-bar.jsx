@@ -181,7 +181,7 @@ class MenuBar extends React.Component {
             'handleKeyPress',
             'handleLanguageMouseUp',
             'handleRestoreOption',
-            'handleSaveToComputer',
+            'getSaveToComputerHandler',
             'restoreOptionMessage',
             'handleItchLesson'
         ]);
@@ -247,7 +247,7 @@ class MenuBar extends React.Component {
             event.preventDefault();
         }
     }
-    handleSaveToComputer (downloadProjectCallback) {
+    getSaveToComputerHandler (downloadProjectCallback) {
         return () => {
             this.props.onRequestCloseFile();
             downloadProjectCallback();
@@ -394,11 +394,11 @@ class MenuBar extends React.Component {
                                     [styles.clickable]: typeof this.props.onClickLogo !== 'undefined'
                                 })}
                                 draggable={false}
-                                src={scratchLogo}
+                                src={this.props.logo}
                                 onClick={this.props.onClickLogo}
                             />
                         </div> */}
-                        <div
+                        {(this.props.canChangeLanguage) && (<div
                             className={classNames(styles.menuBarItem, styles.hoverable, styles.languageMenu)}
                         >
                             <div>
@@ -412,7 +412,7 @@ class MenuBar extends React.Component {
                                 />
                             </div>
                             <LanguageSelector label={this.props.intl.formatMessage(ariaMessages.language)} />
-                        </div>
+                        </div>)}
 
                         {(this.props.canSave ||
                             this.props.canCreateCopy ||
@@ -574,7 +574,6 @@ class MenuBar extends React.Component {
                             >
                                 <ProjectTitleInput
                                     className={classNames(styles.titleFieldGrowable)}
-                                    onUpdateProjectTitle={this.props.onUpdateProjectTitle}
                                 />
                             </MenuBarItemTooltip>
                         </div>
@@ -787,10 +786,12 @@ MenuBar.propTypes = {
     authorThumbnailUrl: PropTypes.string,
     authorUsername: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
     autoUpdateProject: PropTypes.func,
+    canChangeLanguage: PropTypes.bool,
     canCreateCopy: PropTypes.bool,
     canCreateNew: PropTypes.bool,
     canDownload: PropTypes.bool,
     canEditTitle: PropTypes.bool,
+    canManageFiles: PropTypes.bool,
     canRemix: PropTypes.bool,
     canSave: PropTypes.bool,
     canShare: PropTypes.bool,
@@ -812,6 +813,7 @@ MenuBar.propTypes = {
     languageMenuOpen: PropTypes.bool,
     locale: PropTypes.string.isRequired,
     loginMenuOpen: PropTypes.bool,
+    logo: PropTypes.string,
     onClickAccount: PropTypes.func,
     onClickEdit: PropTypes.func,
     onClickFile: PropTypes.func,
@@ -850,6 +852,7 @@ MenuBar.propTypes = {
 };
 
 MenuBar.defaultProps = {
+    //logo: scratchLogo,
     onShare: () => {}
 };
 const mapStateToProps = (state, ownProps) => {
