@@ -8,6 +8,7 @@ const DRAG_LESSONS = 'scratch-gui/studioLessons/DRAG_LESSONS';
 const START_DRAG = 'scratch-gui/studioLessons/START_DRAG';
 const END_DRAG = 'scratch-gui/studioLessons/END_DRAG';
 const SET_LESSON_CONTENT = 'scratch-gui/studioLessons/SET_LESSON_CONTENT';
+const RESET_TO_INITIAL = 'scratch-gui/studioLessons/RESET_TO_INITIAL';
 
 const initialState = {
     visible: false,
@@ -89,6 +90,8 @@ const reducer = function (state, action) {
         return Object.assign({}, state, {
             expanded: !state.expanded
         });
+    case RESET_TO_INITIAL:
+        return initialState;
     default:
         return state;
     }
@@ -138,7 +141,9 @@ const startDrag = function () {
 const endDrag = function () {
     return {type: END_DRAG};
 };
-
+const resetToInitialStudioLessons = function () {
+    return { type: RESET_TO_INITIAL};
+};
 
 export {
     reducer as default,
@@ -152,5 +157,6 @@ export {
     dragLessons,
     startDrag,
     endDrag,
-    setContent
+    setContent,
+    resetToInitialStudioLessons
 };

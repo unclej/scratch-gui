@@ -170,16 +170,14 @@ const reducer = function (state, action) {
     case DONE_LOADING_VM_WITH_ID:
         if (state.loadingState === LoadingState.LOADING_VM_WITH_ID) {
             return Object.assign({}, state, {
-                loadingState: LoadingState.SHOWING_WITH_ID,
-                projectId: action.projectId
+                loadingState: LoadingState.SHOWING_WITH_ID
             });
         }
         return state;
     case DONE_LOADING_VM_TO_SAVE:
         if (state.loadingState === LoadingState.LOADING_VM_FILE_UPLOAD) {
             return Object.assign({}, state, {
-                loadingState: LoadingState.AUTO_UPDATING,
-                projectId: action.projectId
+                loadingState: LoadingState.AUTO_UPDATING
             });
         }
         return state;
@@ -485,7 +483,7 @@ const onFetchedProjectData = (projectData, loadingState) => {
     }
 };
 
-const onLoadedProject = (loadingState, canSave, success, projectId) => {
+const onLoadedProject = (loadingState, canSave, success) => {
     if (success) {
         /* if(window.self !== window.top){
             const url = window.location.search.substring(1).split('&');
@@ -500,17 +498,15 @@ const onLoadedProject = (loadingState, canSave, success, projectId) => {
                 keyValue.baseUrl)
             );
         } */
-        switch (loadingState) {
+    switch (loadingState) {
         case LoadingState.LOADING_VM_WITH_ID:
             return {
-                type: DONE_LOADING_VM_WITH_ID,
-                projectId
+                type: DONE_LOADING_VM_WITH_ID
             };
         case LoadingState.LOADING_VM_FILE_UPLOAD:
             if (canSave) {
                 return {
-                    type: DONE_LOADING_VM_TO_SAVE,
-                    projectId
+                    type: DONE_LOADING_VM_TO_SAVE
                 };
             }
             return {

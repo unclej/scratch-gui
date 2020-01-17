@@ -471,7 +471,9 @@ class MenuBar extends React.Component {
                                     {this.props.canUpload || this.props.canDownload ? (
                                         <MenuSection>
                                             {this.props.canUpload ? (
-                                                <SBFileUploader onUpdateProjectTitle={this.props.onUpdateProjectTitle}>
+                                                <SBFileUploader
+                                                    canSave={this.props.canSave}
+                                                    userOwnsProject={this.props.userOwnsProject}>
                                                     {(className, renderFileInput, loadProject) => (
                                                         <MenuItem
                                                             className={className}
@@ -876,6 +878,10 @@ const mapStateToProps = (state, ownProps) => {
         feedbackVisible = configs.feedbackVisible;
         isPreview = configs.isPreview;
     }
+    const userOwnsProject = state.scratchGui.itchProject.projectUser !== null &&
+        typeof state.session.session.user !== 'undefined' &&
+        typeof state.session.session.user.id !== 'undefined' &&
+        state.session.session.user.id === state.scratchGui.itchProject.projectUser;
     return {
         accountMenuOpen: accountMenuOpen(state),
         fileMenuOpen: fileMenuOpen(state),
@@ -891,8 +897,7 @@ const mapStateToProps = (state, ownProps) => {
         sessionExists: state.session && typeof state.session.session !== 'undefined',
         username: user ? user.username : null,
         saveText,
-        userOwnsProject: ownProps.authorUsername && user &&
-            (ownProps.authorUsername === user.username),
+        userOwnsProject,
         vm: state.scratchGui.vm,
         projectChanged: state.scratchGui.projectChanged,
         canSeeItchLessons: state.scratchGui.studioLessons.content.length > 0 && (!isWizard || isPreview),

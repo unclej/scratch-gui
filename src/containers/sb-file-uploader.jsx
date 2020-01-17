@@ -132,45 +132,65 @@ class SBFileUploader extends React.Component {
     // called when file upload raw data is available in the reader
     onload () {
         if (this.reader) {
+
+            this.props.onLoadingStarted();
+            const filename = this.fileToUpload && this.fileToUpload.name;
+            this.props.vm.loadProject(this.reader.result)
+                .then(() => {
+                    this.props.onLoadingFinished(this.props.loadingState, true, this.props.canSave/*, projectId*/);
+                    // Reset the file input after project is loaded
+                    // This is necessary in case the user wants to reload a project
+                    if (filename) {
+                        const uploadedProjectTitle = this.getProjectTitleFromFilename(filename);
+                        this.props.onReceivedProjectTitle(uploadedProjectTitle);
+                    }
+                    /*this.props.onShowCreateSuccessAlert();*/
+                    this.resetFileInput();
+                })
+                .catch(error => {
+                    log.warn(error);
+                    alert(this.props.intl.formatMessage(messages.loadError)); // eslint-disable-line no-alert
+                    this.props.onLoadingFinished(this.props.loadingState, this.props.canSave, false);
+                    // Reset the file input after project is loaded
+                    // This is necessary in case the user wants to reload a project
+                    this.resetFileInput();
+                });
+            /*this.props.vm.loadProject(this.reader.result)
+                .then(() => {
+                    this.props.onLoadingFinished(this.props.loadingState, true);
+                    // Reset the file input after project is loaded
+                    // This is necessary in case the user wants to reload a project
+                    if (filename) {
+                        const uploadedProjectTitle = this.getProjectTitleFromFilename(filename);
+                        this.props.onReceivedProjectTitle(uploadedProjectTitle);
+                    }
+                    this.resetFileInput();
+                })
+                .catch(error => {
+                    log.warn(error);
+                    alert(this.props.intl.formatMessage(messages.loadError)); // eslint-disable-line no-alert
+                    this.props.onLoadingFinished(this.props.loadingState, false);
+                    // Reset the file input after project is loaded
+                    // This is necessary in case the user wants to reload a project
+                    this.resetFileInput();
+                });*/
             // create a new project first
-            return this.createNewProject().then(response => {
-                /* window.location.hash = `#${response.projectID}`; */
+            /*return this.createNewProject().then(response => {
+                /!* window.location.hash = `#${response.projectID}`; *!/
                 const projectId = response.projectID.toString();
-                /* this.props.onsetProjectId(projectId) */
+                /!* this.props.onsetProjectId(projectId) *!/
                 try { // Can fail e.g. when GUI is loaded from static file (integration tests)
-                    history.replaceState({}, document.title, `${document.location.pathname}${document.location.search}#${projectId}`);
+                    //history.replaceState({}, document.title, `${document.location.pathname}${document.location.search}#${projectId}`);
                 } catch {
                     // No fallback, just do not trigger promise catch below
                 }
-                this.props.onLoadingStarted();
-                const filename = this.fileToUpload && this.fileToUpload.name;
-                this.props.vm.loadProject(this.reader.result)
-                    .then(() => {
-                        this.props.onLoadingFinished(this.props.loadingState, true, this.props.canSave, projectId);
-                        // Reset the file input after project is loaded
-                        // This is necessary in case the user wants to reload a project
-                        if (filename) {
-                            const uploadedProjectTitle = this.getProjectTitleFromFilename(filename);
-                            this.props.onUpdateProjectTitle(uploadedProjectTitle);
-                        }
-                        this.props.onShowCreateSuccessAlert();
-                        this.resetFileInput();
-                    })
-                    .catch(error => {
-                        log.warn(error);
-                        alert(this.props.intl.formatMessage(messages.loadError)); // eslint-disable-line no-alert
-                        this.props.onLoadingFinished(this.props.loadingState, this.props.canSave, false);
-                        // Reset the file input after project is loaded
-                        // This is necessary in case the user wants to reload a project
-                        this.resetFileInput();
-                    });
             })
                 .catch(err => {
                     this.props.onShowAlert('creatingError');
                     this.props.onProjectError(err);
                     this.props.onLoadingFinished(this.props.loadingState, this.props.canSave, false);
                     this.resetFileInput();
-                });
+                });*/
 
         }
     }
@@ -304,8 +324,8 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => ({
     closeFileMenu: () => dispatch(closeFileMenu()),
-    onLoadingFinished: (loadingState, success, canSave, projectId) => {
-        dispatch(onLoadedProject(loadingState, canSave, success, projectId));
+    onLoadingFinished: (loadingState, success, canSave) => {
+        dispatch(onLoadedProject(loadingState, canSave, success));
         dispatch(closeLoadingProject());
         dispatch(closeFileMenu());
     },

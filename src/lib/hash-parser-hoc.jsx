@@ -10,6 +10,9 @@ import {
     getIsShowingWithoutId,
     setProjectId
 } from '../reducers/project-state';
+import {
+    resetToInitialStudioLessons
+} from '../reducers/studioLessons';
 import ITCH_CONFIG from '../../itch.config';
 import storage from "./storage";
 import {
@@ -94,8 +97,9 @@ const HashParserHOC = function (WrappedComponent) {
             if (hashProjectId !== defaultProjectId && !this.props.isFetchingWithoutId) {
                 this.setState({hideIntro: true});
             }
+            this.props.resetToInitialStudioLessons();
             this.props.setProjectId(hashProjectId.toString());
-            if(configs.isPreview) {
+            if(configs.isPreview && configs.openPreviewProjectModal) {
                 this.props.openPreviewProject();
             }
         }
@@ -107,6 +111,7 @@ const HashParserHOC = function (WrappedComponent) {
                 reduxProjectId,
                 setProjectId: setProjectIdProp,
                 openPreviewProject: openPreviewProjectProp,
+                resetToInitialStudioLessons: resetToInitialStudioLessonsProp,
                 /* eslint-enable no-unused-vars */
                 ...componentProps
             } = this.props;
@@ -126,7 +131,8 @@ const HashParserHOC = function (WrappedComponent) {
         setStudioId: PropTypes.func,
         reduxProjectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
         setProjectId: PropTypes.func,
-        openPreviewProject: PropTypes.func
+        openPreviewProject: PropTypes.func,
+        resetToInitialStudioLessons: PropTypes.func
     };
     const mapStateToProps = state => {
         const loadingState = state.scratchGui.projectState.loadingState;
@@ -145,6 +151,7 @@ const HashParserHOC = function (WrappedComponent) {
         setStudioId: stdId => dispatch(setStudioId(stdId)),
         setEditingUserId: userId => dispatch(setEditingUserId(userId)),
         setCsrfToken: token => dispatch(setCsrfToken(token)),
+        resetToInitialStudioLessons: () => dispatch(resetToInitialStudioLessons())
     });
     // Allow incoming props to override redux-provided props. Used to mock in tests.
     const mergeProps = (stateProps, dispatchProps, ownProps) => Object.assign(
