@@ -129,7 +129,7 @@ ImageStep.propTypes = {
 const LessonStep = ({step, dragging, lessonName, expanded/* , autoPlayVideo */}) => (
     <Fragment>
         <div className={styles.lessonName}>{lessonName}</div>
-        <div className={styles.lessonContentBody + ' ql-editor'} style={{paddingLeft: 0}}>
+        <div className={styles.lessonContentBody + ' ql-editor'}>
             {step.content.map((dataItem, index) => {
                 if (dataItem.type === 'text'){
                     let text = dataItem.text;
