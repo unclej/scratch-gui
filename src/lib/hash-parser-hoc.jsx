@@ -86,17 +86,20 @@ const HashParserHOC = function (WrappedComponent) {
             const loggedInUserId = 0;
             const hashProjectId = configs && configs.projectId ? configs.projectId : defaultProjectId;
             storage.setLoggedInUser(loggedInUserId);
-            this.props.setEditingUserId(loggedInUserId);
-            this.props.setStudioId(configs.courseId);
             storage.setLoggedInStudioId(configs.courseId);
             storage.setToken(configs.token);
-            this.props.setCsrfToken(configs.token);
             if (configs.starterProjectId) {
                 storage.setStarterProjectId(configs.starterProjectId);
+            }
+            if(configs.projectData) {
+                storage.setProjectData(configs.projectData);
             }
             if (hashProjectId !== defaultProjectId && !this.props.isFetchingWithoutId) {
                 this.setState({hideIntro: true});
             }
+            this.props.setCsrfToken(configs.token);
+            this.props.setEditingUserId(loggedInUserId);
+            this.props.setStudioId(configs.courseId);
             this.props.resetToInitialStudioLessons();
             this.props.setProjectId(hashProjectId.toString());
             if(configs.isPreview && configs.openPreviewProjectModal) {

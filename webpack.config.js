@@ -13,6 +13,8 @@ var postcssVars = require('postcss-simple-vars');
 var postcssImport = require('postcss-import');
 
 const STATIC_PATH = process.env.STATIC_PATH || '/static';
+const PUBLIC_PATH = `${process.env.PUBLIC_PATH}/` || '/';
+console.log(process.env.ITCH_LESSONS);
 
 const base = {
     mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
@@ -30,7 +32,8 @@ const base = {
     output: {
         library: 'GUI',
         filename: '[name].js',
-        chunkFilename: 'chunks/[name].js'
+        chunkFilename: 'chunks/[name].js',
+        publicPath: PUBLIC_PATH
     },
     externals: {
         React: 'react',
@@ -144,6 +147,7 @@ module.exports = [
                 'process.env.DEBUG': Boolean(process.env.DEBUG),
                 'process.env.GA_ID': '"' + (process.env.GA_ID || 'UA-000000-01') + '"',
                 'process.env.ITCH_LESSONS': (Boolean(process.env.ITCH_LESSONS) || false),
+                'process.env.PUBLIC_PATH': '"' + (process.env.PUBLIC_PATH || '/') + '"',
                 'process.env.SENTRY_CONFIG': '"' + (process.env.SENTRY_CONFIG || 'https://db27ae4ad5bc4bde90f03cd56521b330@sentry.io/1218798') + '"'
             }),
             new HtmlWebpackPlugin({

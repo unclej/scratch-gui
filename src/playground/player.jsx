@@ -19,13 +19,16 @@ if (process.env.NODE_ENV === 'production' && typeof window === 'object') {
 
 import styles from './player.css';
 
-const Player = ({isPlayerOnly, onSeeInside, projectId}) => (
+const Player = ({isPlayerOnly, onSeeInside, projectId, showFullScreenAnd}) => (
     <Box className={classNames(isPlayerOnly ? styles.stageOnly : styles.editor)}>
         <GUI
             canEditTitle
             enableCommunity
             isPlayerOnly={isPlayerOnly}
             projectId={projectId}
+            canSave={false}
+            showBranding={false}
+            showOtherButtons={false}
         />
     </Box>
 );
@@ -61,10 +64,19 @@ const appTarget = document.createElement('div');
 appTarget.classList.add('only-player-app-screen');
 appTarget.id = 'mainDivApp';
 const scratchEditor = document.getElementById('scratch-editor');
-if(scratchEditor){
-    scratchEditor.appendChild(appTarget);
-} else {
-    document.body.appendChild(appTarget);
+window.SCRATCH_INIT = false;
+window.initScratch = function (config, editor) {
+    window.SCRATCH_INIT = true;
+    if (editor) {
+        editor.appendChild(appTarget);
+    } else if (scratchEditor) {
+        scratchEditor.appendChild(appTarget);
+    } else {
+        document.body.appendChild(appTarget);
+    }
+};
+if (!scratchEditor && !process.env.ITCH_LESSONS) {
+    window.initScratch();
 }
 
-ReactDOM.render(<WrappedPlayer isPlayerOnly />, appTarget);
+ReactDOM.render(<WrappedPlayer isPlayerOnly isFullScreen />, appTarget);

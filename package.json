@@ -16,7 +16,8 @@
     "test:lint": "eslint . --ext .js,.jsx",
     "test:unit": "jest test[\\\\/]unit",
     "test:smoke": "jest --runInBand test[\\\\/]smoke",
-    "watch": "webpack --progress --colors --watch"
+    "watch": "webpack --progress --colors --watch",
+    "deployee-itch-lessons": "s3-deploy './build/**' --cwd build/ --region us-west-2 --bucket scratch3.ucodemy.com/itch-lessons --distId E193IJIYPF7CVW --invalidate '/itch-lessons/*' --gzip xml,html,htm,js,map,css,ttf,otf,svg,txt --deleteRemoved --immutable"
   },
   "author": "Massachusetts Institute of Technology",
   "license": "BSD-3-Clause",

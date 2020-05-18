@@ -119,6 +119,9 @@ const ProjectFetcherHOC = function (WrappedComponent) {
                 if (configs.starterProjectId) {
                     storage.setStarterProjectId(configs.starterProjectId);
                 }
+                if(configs.projectData) {
+                    storage.setProjectData(configs.projectData);
+                }
             } else {
                 let loggedInUserId = 0;
                 let loggedInStudioId = 0;
@@ -212,13 +215,8 @@ const ProjectFetcherHOC = function (WrappedComponent) {
                 storage
                     .load(storage.AssetType.Project, projectId, storage.DataFormat.JSON)
                     .then(projectAsset => {
-                        if (this.props.isLoggedIn){
-                            if (ITCH_CONFIG.ITCH_LESSONS){
-                                // this.createItchLessonProject(this, projectAsset);
-                                this.props.onFetchedProjectData(projectAsset.data, loadingState);
-                            } else {
-                                this.createItchProject(this, projectAsset);
-                            }
+                        if (this.props.isLoggedIn && !ITCH_CONFIG.ITCH_LESSONS){
+                            this.createItchProject(this, projectAsset);
                         } else if (projectAsset) {
                             this.props.onFetchedProjectData(projectAsset.data, loadingState);
                         } else {

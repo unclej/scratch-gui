@@ -69,7 +69,8 @@ const StageHeaderComponent = function (props) {
         onSetProjectPageFromFull,
         stageSizeMode,
         closeProjectPreview,
-        vm
+        vm,
+        showOtherButtons = true
     } = props;
 
     let header = null;
@@ -89,7 +90,7 @@ const StageHeaderComponent = function (props) {
                 title="See Project Page"
             />
         </Button>
-    ) : closeProjectPreview ? (
+    ) : closeProjectPreview && showOtherButtons ? (
         <Button
             className={styles.projectButton}
             onClick={window.exitFromProjectPreview}
@@ -105,6 +106,7 @@ const StageHeaderComponent = function (props) {
         </Button>
     ) : null;
     const windowFullscreenControl = isIpad ? ([]) : (
+        showOtherButtons ? (
         <Button
             className={classNames(
                 styles.stageFullscreenButton
@@ -133,6 +135,7 @@ const StageHeaderComponent = function (props) {
 
             )}
         </Button>
+        ) : null
     );
     const stageControls =
         isPlayerOnly ? (
@@ -184,7 +187,7 @@ const StageHeaderComponent = function (props) {
                 style={isFullScreen ? {width: stageDimensions.width} : ''}
             >
                 <Controls vm={vm} />
-                {isProjectPage ? (
+                {isProjectPage && showOtherButtons ? (
                     <div
                         className={styles.rightButtons}
                     >
@@ -209,7 +212,7 @@ const StageHeaderComponent = function (props) {
                             />
                         </Button>
                     </div>
-                ) : (isFullScreen ? (
+                ) : (isFullScreen && showOtherButtons ? (
                     <div
                         className={styles.rightButtons}
                     >
@@ -231,7 +234,7 @@ const StageHeaderComponent = function (props) {
                         {seeProjectPageButton}
                     </div>
 
-                ) : (
+                ) : ( showOtherButtons ? (
                     <div className={styles.stageSizeRow}>
                         {stageControls}
                         <div className={styles.rightButtons}>
@@ -252,7 +255,7 @@ const StageHeaderComponent = function (props) {
                         </div>
                     </div>
 
-                ))}
+                ) : null))}
             </Box>
         </Box>
     );

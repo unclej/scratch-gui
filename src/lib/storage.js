@@ -3,6 +3,7 @@ import ScratchStorage from 'scratch-storage';
 import ITCH_CONFIG from '../../itch.config';
 
 import defaultProject from './default-project';
+import { defaultProjectId } from "../reducers/project-state";
 
 /**
  * Wrapper for ScratchStorage which adds default web sources.
@@ -47,21 +48,37 @@ class Storage extends ScratchStorage {
     setProjectHost (projectHost) {
         this.projectHost = projectHost;
     }
+    setProjectData (projectData) {
+        this.projectData = projectData;
+    }
     setToken (token) {
         this.token = token;
     }
     getToken () {
         return this.token;
     }
+    getProjectData () {
+        return this.token;
+    }
+    getLoggedInStudioId () {
+        return this.loggedInStudio;
+    }
     getProjectGetConfig (projectAsset) {
         if (ITCH_CONFIG.ITCH_LESSONS){
             const config = {
-                url: `${this.projectHost}project/${projectAsset.assetId}/${this.loggedInStudio}/get`,
+                url: `${this.projectHost}project/${projectAsset.assetId}/${this.getLoggedInStudioId()}/get`,
             };
             const token = this.getToken();
             if(token) {
                 config.headers= {
                     Authorization: `Bearer ${token}`
+                }
+            }
+            if (typeof window.getScratchItchConfig === 'function') {
+                const data = window.getScratchItchConfig();
+                const projectData = data.projectData;
+                if(projectData) {
+                    config.url = `${config.url}?projectData=${projectData}`;
                 }
             }
             return config;

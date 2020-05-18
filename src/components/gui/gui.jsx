@@ -125,6 +125,7 @@ const GUIComponent = props => {
         telemetryModalVisible,
         tipsLibraryVisible,
         vm,
+        showOtherButtons = true,
         ...componentProps
     } = omit(props, 'dispatch');
     if (children) {
@@ -154,6 +155,7 @@ const GUIComponent = props => {
                 loading={loading}
                 stageSize={STAGE_SIZE_MODES.large}
                 vm={vm}
+                showOtherButtons={showOtherButtons}
             >
                 {alertsVisible ? (
                     <Alerts className={styles.alertsContainer} />
@@ -353,6 +355,7 @@ const GUIComponent = props => {
 
                         <Box className={classNames(styles.stageAndTargetWrapper, styles[stageSize])}>
                             <StageWrapper
+                                showOtherButtons={showOtherButtons}
                                 isRendererSupported={isRendererSupported}
                                 isRtl={isRtl}
                                 stageSize={stageSize}
@@ -493,6 +496,7 @@ const mapStateToProps = (state, ownProps) => {
     let isPreview = false;
     let backpackVisible = true;
     let isWizard = false;
+    let basePath = './';
     if (ITCH_CONFIG.ITCH_LESSONS && typeof window.getScratchItchConfig === 'function'){
         const configs = window.getScratchItchConfig();
         canDownload = configs.canDownload;
@@ -501,6 +505,7 @@ const mapStateToProps = (state, ownProps) => {
         isWizard = configs.isWizard;
         backpackVisible = configs.backpackVisible;
         backpackHost = configs.backpackHost;
+        basePath = ITCH_CONFIG.BASE_PATH;
     }
     return {
         isLoggedIn: isLoggedIn,
@@ -515,7 +520,8 @@ const mapStateToProps = (state, ownProps) => {
         lessonCardVisible: state.scratchGui.studioLessons.visible && (!isWizard || isPreview),
         isHiddenLessonModal: state.scratchGui.studioLessons.minimize,
         backpackVisible: isLoggedIn && userOwnsProject && !isSubmitted && !isPreview && backpackVisible,
-        backpackHost
+        backpackHost,
+        basePath
     };
 };
 

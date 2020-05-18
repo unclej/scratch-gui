@@ -33,6 +33,9 @@ class StageHeader extends React.Component {
         const {
             ...props
         } = this.props;
+        if(!props.showBranding){
+            props.showBranding = false;
+        }
         return (
             <StageHeaderComponent
                 {...props}

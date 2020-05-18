@@ -158,7 +158,7 @@ GUI.defaultProps = {
     onVmInit: (/* vm */) => {}
 };
 
-const mapStateToProps = state => {
+const mapStateToProps = (state, props) => {
     const loadingState = state.scratchGui.projectState.loadingState;
     let isWizard = false;
     if (ITCH_CONFIG.ITCH_LESSONS && typeof window.getScratchItchConfig === 'function'){
