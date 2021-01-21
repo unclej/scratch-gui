@@ -331,7 +331,10 @@ const mapDispatchToProps = dispatch => ({
     },
     onCreatedProject: (projectId, loadingState) => dispatch(doneCreatingProject(projectId, loadingState)),
     onShowAlert: alertType => dispatch(showStandardAlert(alertType)),
-    onProjectError: error => dispatch(projectError(error)),
+    onProjectError: error => {
+        console.log(error, 'sb-file-uploader');
+        return dispatch(projectError(error))
+    },
     requestProjectUpload: loadingState => dispatch(requestProjectUpload(loadingState)),
     onShowCreatingAlert: () => showAlertWithTimeout(dispatch, 'creating'),
     onShowCreateSuccessAlert: () => showAlertWithTimeout(dispatch, 'createSuccess'),

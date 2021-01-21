@@ -235,75 +235,88 @@ const ProjectFetcherHOC = function (WrappedComponent) {
                 storage
                     .load(storage.AssetType.Project, projectId, storage.DataFormat.JSON)
                     .then(projectAsset => {
-                        const projectData = JSON.parse(new TextDecoder().decode(projectAsset.data));
-                        // check language
-                        if (projectData.language){
-                            const newLocale = projectData.language;
-                            if (newLocale !== 'en' && this.props.supportedLocales.includes(newLocale)){
-                                this.props.onChangeLanguage(newLocale);
-                                document.documentElement.lang = newLocale;
-                            }
-                        }
-                        const project = projectData.project;
-                        const user = projectData.user;
-                        const shareUrl = projectData.hash_link;
-                        this.props.setSession({user});
-                        this.props.setProjectTitle((project.name === 'Untitled') ? '' : project.name);
-                        const isSubmitted = (project.submit_of && project.submit_of !== 0);
-                        this.props.setProjectData(
-                            project.id,
-                            project.user_id,
-                            this.props.projectHost,
-                            this.props.assetHost,
-                            projectData.lessons || [],
-                            isSubmitted
-                        );
-                        this.props.setProjectId(project.id);
-                        if (shareUrl && shareUrl !== ''){
-                            this.props.setShareUrl(shareUrl);
-                        } else {
-                            this.props.setShareUrl(null);
-                        }
-                        // check if project has lessons
-                        if (
-                            projectData.lessons &&
-                            projectData.lessons instanceof Array &&
-                            projectData.lessons.length > 0
-                        ){
-                            this.props.setStudioLessonsContent(projectData.lessons);
-                            this.props.showLessons(0, null);
-                            if(this.props.isTeacherPreview) {
-                                this.props.hideLessons();
-                            }
-                            // this.props.onProjectLessons();
-                        } else {
-                            this.props.setStudioLessonsContent([]);
-                        }
-                        let projectJson;
-                        if (typeof project.json !== 'undefined' && typeof project.json !== 'object'){
-                            projectJson = JSON.parse(project.json);
-                        } else {
-                            projectJson = project.json;
-                        }
-                        this.props.resetToInitial(projectJson, project.name, project.thumbnail);
-                        if (typeof projectJson.targets !== 'undefined'){
-                            for (let i = 0; i < projectJson.targets.length; i++){
-                                if (
-                                    typeof projectJson.targets[i].variables['`jEk@4|i[#Fk?(8x)AV.-my variable'] !==
-                                    'undefined' &&
-                                    projectJson.targets[i].variables['`jEk@4|i[#Fk?(8x)AV.-my variable'].type === ''){
-                                    delete projectJson.targets[i].variables['`jEk@4|i[#Fk?(8x)AV.-my variable'];
+
+                        try {
+                            const projectData = JSON.parse(new TextDecoder().decode(projectAsset.data));
+                            // check language
+                            if (projectData.language) {
+                                const newLocale = projectData.language;
+                                if (newLocale !== 'en' && this.props.supportedLocales.includes(newLocale)) {
+                                    this.props.onChangeLanguage(newLocale);
+                                    document.documentElement.lang = newLocale;
                                 }
                             }
-                            this.storeAssets(projectJson.targets);
-                        }
-                        project.json = JSON.stringify(projectJson);
-                        const projectNameTextInput = document.getElementById('projectNameTextInput');
-                        if (projectNameTextInput){
-                            projectNameTextInput.value = (project.name === 'Untitled') ? '' : project.name;
-                        }
-                        if (project.json) {
-                            this.props.onFetchedProjectData(project.json, loadingState);
+                            const project = projectData.project || {};
+                            const user = projectData.user;
+                            const shareUrl = projectData.hash_link;
+                            this.props.setSession({user});
+                            this.props.setProjectTitle((project.name === 'Untitled') ? '' : project.name);
+                            const isSubmitted = (project.submit_of && project.submit_of !== 0);
+                            this.props.setProjectData(
+                                project.id,
+                                project.user_id,
+                                this.props.projectHost,
+                                this.props.assetHost,
+                                projectData.lessons || [],
+                                isSubmitted
+                            );
+                            this.props.setProjectId(project.id);
+                            if (shareUrl && shareUrl !== '') {
+                                this.props.setShareUrl(shareUrl);
+                            } else {
+                                this.props.setShareUrl(null);
+                            }
+                            // check if project has lessons
+                            if (
+                                projectData.lessons &&
+                                projectData.lessons instanceof Array &&
+                                projectData.lessons.length > 0
+                            ) {
+                                this.props.setStudioLessonsContent(projectData.lessons);
+                                this.props.showLessons(0, null);
+                                if (this.props.isTeacherPreview) {
+                                    this.props.hideLessons();
+                                }
+                                // this.props.onProjectLessons();
+                            } else {
+                                this.props.setStudioLessonsContent([]);
+                            }
+                            let projectJson;
+                            if (typeof project.json !== 'undefined' && typeof project.json !== 'object') {
+                                projectJson = JSON.parse(project.json);
+                            } else {
+                                projectJson = project.json;
+                            }
+                            this.props.resetToInitial(projectJson, project.name, project.thumbnail);
+                            if (typeof projectJson.targets !== 'undefined') {
+                                let hasStage = false;
+                                for (let i = 0; i < projectJson.targets.length; i++) {
+                                    if ( typeof projectJson.targets[i].variables['`jEk@4|i[#Fk?(8x)AV.-my variable'] !== 'undefined' &&
+                                        projectJson.targets[i].variables['`jEk@4|i[#Fk?(8x)AV.-my variable'] &&
+                                        projectJson.targets[i].variables['`jEk@4|i[#Fk?(8x)AV.-my variable'].type === '') {
+                                        delete projectJson.targets[i].variables['`jEk@4|i[#Fk?(8x)AV.-my variable'];
+                                    }
+                                    if(projectJson.targets[i].isStage) {
+                                        if(!hasStage) {
+                                            hasStage = true;
+                                        } else {
+                                            projectJson.targets[i].isStage = false;
+                                        }
+                                    }
+                                }
+                                this.storeAssets(projectJson.targets);
+                            }
+                            project.json = JSON.stringify(projectJson);
+                            const projectNameTextInput = document.getElementById('projectNameTextInput');
+                            if (projectNameTextInput) {
+                                projectNameTextInput.value = (project.name === 'Untitled') ? '' : project.name;
+                            }
+                            if (project.json) {
+                                this.props.onFetchedProjectData(project.json, loadingState);
+                            }
+                        } catch (e) {
+                            console.log(e);
+                            log.error(e);
                         }
                     })
                     /* .then(() => {
@@ -497,7 +510,10 @@ const ProjectFetcherHOC = function (WrappedComponent) {
     };
     const mapDispatchToProps = dispatch => ({
         onActivateTab: tab => dispatch(activateTab(tab)),
-        onError: error => dispatch(projectError(error)),
+        onError: error => {
+            console.log(error, 'project-fetcher-hoc');
+            return dispatch(projectError(error))
+        },
         onFetchedProjectData: (projectData, loadingState) =>
             dispatch(onFetchedProjectData(projectData, loadingState)),
         setProjectId: projectId => dispatch(setProjectId(projectId)),

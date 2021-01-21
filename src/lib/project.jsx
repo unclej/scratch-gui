@@ -65,6 +65,7 @@ const ItchProject = function (WrappedComponent){
                             this.props.onShared(url); // reset state to SHARED
                         })
                         .catch(err => {
+                            console.log(err);
                             // NOTE: should throw up a notice for user
                             this.props.projectError(`Sharing the project failed with error: ${err}`);
                         });
@@ -577,7 +578,10 @@ const ItchProject = function (WrappedComponent){
         onSharing: (projectId, loadingState) => dispatch(onSharing(projectId, loadingState)),
         onShareProject: () => dispatch(openShareProject()),
         autoUpdateProject: () => dispatch(serverAutoUpdateProject()),
-        projectError: errStr => dispatch(projectError(errStr)),
+        projectError: errStr => {
+            console.log(errStr, 'project');
+            return dispatch(projectError(errStr))
+        },
         onSetProjectName: name => dispatch(setProjectName(name)),
         onSetForUpdate: update => dispatch(setNeedsUpdate(update)),
         onSetThumbnail: thumbnail => dispatch(setThumbnailData(thumbnail)),

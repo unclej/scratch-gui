@@ -373,12 +373,12 @@ const Cards = props => {
                                             title={content[activeDeckId].name}
                                         />
                                     )
-                                ) : (
+                                ) : (steps[step] ? (
                                     <ImageStep
                                         image={translateImage(steps[step].image, locale)}
                                         title={steps[step].title}
                                     />
-                                )
+                                ): null)
                             )}
                             {steps[step].trackingPixel && steps[step].trackingPixel}
                         </div>

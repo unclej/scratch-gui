@@ -12,9 +12,9 @@ var autoprefixer = require('autoprefixer');
 var postcssVars = require('postcss-simple-vars');
 var postcssImport = require('postcss-import');
 
-const STATIC_PATH = process.env.STATIC_PATH || '/static';
-const PUBLIC_PATH = `${process.env.PUBLIC_PATH}/` || '/';
-console.log(process.env.ITCH_LESSONS);
+const STATIC_PATH = process.env.STATIC_PATH ? process.env.STATIC_PATH : 'http://localhost:8601/static';
+const PUBLIC_PATH = process.env.PUBLIC_PATH ? `${process.env.PUBLIC_PATH}/` : '/';
+console.log(process.env.ITCH_LESSONS, STATIC_PATH, PUBLIC_PATH);
 
 const base = {
     mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
@@ -102,6 +102,10 @@ const base = {
     },
     plugins: []
 };
+
+if (!process.env.CI) {
+    base.plugins.push(new webpack.ProgressPlugin());
+}
 
 module.exports = [
     // to run editor examples

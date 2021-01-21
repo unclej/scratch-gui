@@ -181,6 +181,7 @@ const ProjectSaverHOC = function (WrappedComponent) {
                 .catch(err => {
                     // Always show the savingError alert because it gives the
                     // user the chance to download or retry the save manually.
+                    console.log(err);
                     this.props.onShowAlert('savingError');
                     this.props.onProjectError(err);
                 });
@@ -197,6 +198,7 @@ const ProjectSaverHOC = function (WrappedComponent) {
                 .catch(err => {
                     this.props.onShowAlert('creatingError');
                     this.props.onProjectError(err);
+                    console.log(err);
                 });
         }
         createCopyToStorage () {
@@ -212,6 +214,7 @@ const ProjectSaverHOC = function (WrappedComponent) {
                 // eslint-disable-next-line no-unused-vars
                 .catch(err => {
                     this.props.onShowAlert('creatingError');
+                    console.log(err);
                     /* this.props.onProjectError(err); */
                 });
         }
@@ -227,6 +230,7 @@ const ProjectSaverHOC = function (WrappedComponent) {
                 })
                 .catch(err => {
                     this.props.onShowAlert('creatingError');
+                    console.log(err);
                     /* this.props.onProjectError(err); */
                 });
         }
@@ -331,6 +335,7 @@ const ProjectSaverHOC = function (WrappedComponent) {
                     if (id) {
                         this.storeProjectThumbnail(id);
                     }
+                    this.reportTelemetryEvent('projectDidSave');
                     return response;
                 }
                 throw response.message;
@@ -398,9 +403,15 @@ const ProjectSaverHOC = function (WrappedComponent) {
          */
         // TODO make a telemetry HOC and move this stuff there
         reportTelemetryEvent (event) {
-            if (this.props.onProjectTelemetryEvent) {
-                const metadata = collectMetadata(this.props.vm, this.props.reduxProjectTitle, this.props.locale);
-                this.props.onProjectTelemetryEvent(event, metadata);
+            try {
+                if (this.props.onProjectTelemetryEvent) {
+                    const metadata = collectMetadata(this.props.vm, this.props.reduxProjectTitle, this.props.locale);
+                    this.props.onProjectTelemetryEvent(event, metadata);
+                }
+            } catch (e) {
+                log.error('Telemetry error', event, e);
+                // This is intentionally fire/forget because a failure
+                // to report telemetry should not block saving
             }
         }
         render () {
@@ -573,7 +584,10 @@ const ProjectSaverHOC = function (WrappedComponent) {
         onAutoUpdateProject: () => dispatch(autoUpdateProject()),
         onCreatedProject: (projectId, loadingState) => dispatch(doneCreatingProject(projectId, loadingState)),
         onCreateProject: () => dispatch(createProject()),
-        onProjectError: error => dispatch(projectError(error)),
+        onProjectError: error => {
+            console.log(error, 'project-saver-hoc');
+            return dispatch(projectError(error))
+        },
         onSetProjectUnchanged: () => dispatch(setProjectUnchanged()),
         onShowAlert: alertType => dispatch(showStandardAlert(alertType)),
         onShowCopySuccessAlert: () => showAlertWithTimeout(dispatch, 'createCopySuccess'),

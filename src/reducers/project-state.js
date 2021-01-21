@@ -20,7 +20,7 @@ const SET_PROJECT_ID_AND_STATE = 'scratch-gui/project-state/SET_PROJECT_ID_AND_S
 const START_CREATING_NEW = 'scratch-gui/project-state/START_CREATING_NEW';
 const START_ERROR = 'scratch-gui/project-state/START_ERROR';
 const START_FETCHING_NEW = 'scratch-gui/project-state/START_FETCHING_NEW';
-const START_LOADING_VM_FILE_UPLOAD = 'scratch-gui/project-state/START_LOADING_FILE_UPLOAD';
+const START_LOADING_VM_FILE_UPLOAD = 'scratch-gui/project-state/START_LOADING_VM_FILE_UPLOAD';
 const START_MANUAL_UPDATING = 'scratch-gui/project-state/START_MANUAL_UPDATING';
 const START_REMIXING = 'scratch-gui/project-state/START_REMIXING';
 const START_UPDATING_BEFORE_CREATING_COPY = 'scratch-gui/project-state/START_UPDATING_BEFORE_CREATING_COPY';
@@ -484,45 +484,39 @@ const onFetchedProjectData = (projectData, loadingState) => {
 };
 
 const onLoadedProject = (loadingState, canSave, success) => {
-    if (success) {
-        /* if(window.self !== window.top){
-            const url = window.location.search.substring(1).split('&');
-            const keyValue = {};
-            for (let i = 0; i < url.length; i++){
-                const d = url[i].split('=');
-                keyValue[d[0]] = d[1];
-            }
-            parent.postMessage(['checkIfProjectPage', [true]], (
-                (typeof keyValue.baseUrl === 'undefined') ?
-                (ITCH_CONFIG.BASE_URL + ITCH_CONFIG.BASE_URL_EXTENSION) :
-                keyValue.baseUrl)
-            );
-        } */
+    console.log(loadingState, canSave, success);
+
     switch (loadingState) {
-        case LoadingState.LOADING_VM_WITH_ID:
-            return {
-                type: DONE_LOADING_VM_WITH_ID
-            };
-        case LoadingState.LOADING_VM_FILE_UPLOAD:
-            if (canSave) {
-                return {
-                    type: DONE_LOADING_VM_TO_SAVE
-                };
-            }
-            return {
-                type: DONE_LOADING_VM_WITHOUT_ID
-            };
-        case LoadingState.LOADING_VM_NEW_DEFAULT:
-            return {
-                type: DONE_LOADING_VM_WITHOUT_ID
-            };
-        default:
-            return;
+    case LoadingState.LOADING_VM_WITH_ID:
+        if (success) {
+            return {type: DONE_LOADING_VM_WITH_ID};
         }
+        // failed to load project; just keep showing current project
+        return {type: RETURN_TO_SHOWING};
+    case LoadingState.LOADING_VM_FILE_UPLOAD:
+        if (success) {
+            if (canSave) {
+                return {type: DONE_LOADING_VM_TO_SAVE};
+            }
+            return {type: DONE_LOADING_VM_WITHOUT_ID};
+        }
+        // failed to load project; just keep showing current project
+        return {type: RETURN_TO_SHOWING};
+    case LoadingState.LOADING_VM_NEW_DEFAULT:
+        if (success) {
+            return {type: DONE_LOADING_VM_WITHOUT_ID};
+        }
+        console.log('here');
+        // failed to load default project; show error
+        return {type: START_ERROR};
+    default:
+        if (success) {
+            return {type: DONE_LOADING_VM_WITHOUT_ID};
+        }
+        console.log('here');
+        // failed to load default project; show error
+        return {type: START_ERROR};
     }
-    return {
-        type: RETURN_TO_SHOWING
-    };
 };
 
 const doneUpdatingProject = loadingState => {
@@ -547,10 +541,13 @@ const doneUpdatingProject = loadingState => {
     }
 };
 
-const projectError = error => ({
-    type: START_ERROR,
-    error: error
-});
+const projectError = error => {
+    console.log(error);
+    return {
+        type: START_ERROR,
+        error: error
+    }
+};
 
 const setProjectId = id => ({
     type: SET_PROJECT_ID,
