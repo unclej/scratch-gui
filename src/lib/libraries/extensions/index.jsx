@@ -1,3 +1,4 @@
+/* eslint-disable no-warning-comments */
 import React from 'react';
 import {FormattedMessage} from 'react-intl';
 

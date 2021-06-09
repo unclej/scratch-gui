@@ -1,3 +1,4 @@
+/* eslint-disable no-warning-comments */
 import React from 'react';
 import PropTypes from 'prop-types';
 import bindAll from 'lodash.bindall';
@@ -245,9 +246,10 @@ Backpack.propTypes = {
 const getTokenAndUsername = state => {
     // Look for the session state provided by scratch-www
     if (state.session && state.session.session && state.session.session.user) {
+        const token = state.session.session.user.token ? state.session.session.user.token : storage.getToken();
         return {
-            token: state.session.session.user.token,
-            username: state.session.session.user.username
+            token,
+            username: state.session.session.user.id.toString()
         };
     }
     // Otherwise try to pull testing params out of the URL, or return nulls

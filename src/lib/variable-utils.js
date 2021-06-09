@@ -1,3 +1,4 @@
+/* eslint-disable no-warning-comments */
 // Utility functions for updating variables in the VM
 // TODO (VM#1145) these should be moved to top-level VM API
 const getVariable = (vm, targetId, variableId) => {

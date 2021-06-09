@@ -1,3 +1,4 @@
+/* eslint-disable no-warning-comments */
 /**
  * @fileoverview
  * Utility function to look up whether a translated video exists for a locale.

@@ -12,7 +12,8 @@ var autoprefixer = require('autoprefixer');
 var postcssVars = require('postcss-simple-vars');
 var postcssImport = require('postcss-import');
 
-const STATIC_PATH = process.env.STATIC_PATH || '/static';
+const STATIC_PATH = process.env.STATIC_PATH ? process.env.STATIC_PATH : 'http://localhost:8601/static';
+const PUBLIC_PATH = process.env.PUBLIC_PATH ? `${process.env.PUBLIC_PATH}/` : '/';
 
 const base = {
     mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
@@ -22,10 +23,20 @@ const base = {
         host: '0.0.0.0',
         port: process.env.PORT || 8601
     },
+    node: {
+        fs: 'empty',
+        net: 'empty',
+        tls: 'empty'
+    },
     output: {
         library: 'GUI',
         filename: '[name].js',
-        chunkFilename: 'chunks/[name].js'
+        chunkFilename: 'chunks/[name].js',
+        publicPath: PUBLIC_PATH
+    },
+    externals: {
+        React: 'react',
+        ReactDOM: 'react-dom'
     },
     resolve: {
         symlinks: false
@@ -109,6 +120,10 @@ module.exports = [
             path: path.resolve(__dirname, 'build'),
             filename: '[name].js'
         },
+        externals: {
+            React: 'react',
+            ReactDOM: 'react-dom'
+        },
         module: {
             rules: base.module.rules.concat([
                 {
@@ -131,9 +146,12 @@ module.exports = [
         },
         plugins: base.plugins.concat([
             new webpack.DefinePlugin({
-                'process.env.NODE_ENV': '"' + process.env.NODE_ENV + '"',
+                'process.env.NODE_ENV': '"' + (process.env.NODE_ENV || 'local') + '"',
                 'process.env.DEBUG': Boolean(process.env.DEBUG),
-                'process.env.GA_ID': '"' + (process.env.GA_ID || 'UA-000000-01') + '"'
+                'process.env.GA_ID': '"' + (process.env.GA_ID || 'UA-000000-01') + '"',
+                'process.env.ITCH_LESSONS': (Boolean(process.env.ITCH_LESSONS) || false),
+                'process.env.PUBLIC_PATH': '"' + (process.env.PUBLIC_PATH || '/') + '"',
+                'process.env.SENTRY_CONFIG': '"' + (process.env.SENTRY_CONFIG || 'https://db27ae4ad5bc4bde90f03cd56521b330@sentry.io/1218798') + '"'
             }),
             new HtmlWebpackPlugin({
                 chunks: ['lib.min', 'gui'],
@@ -192,8 +210,8 @@ module.exports = [
                 publicPath: `${STATIC_PATH}/`
             },
             externals: {
-                'react': 'react',
-                'react-dom': 'react-dom'
+                React: 'react',
+                ReactDOM: 'react-dom'
             },
             module: {
                 rules: base.module.rules.concat([

@@ -1,3 +1,4 @@
+/* eslint-disable no-warning-comments */
 // TODO: access `BlockType` and `ArgumentType` without reaching into VM
 // Should we move these into a new extension support module or something?
 import ArgumentType from 'scratch-vm/src/extension-support/argument-type';

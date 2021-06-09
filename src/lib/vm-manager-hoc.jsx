@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import bindAll from 'lodash.bindall';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -54,7 +55,7 @@ const vmManagerHOC = function (WrappedComponent) {
         loadProject () {
             return this.props.vm.loadProject(this.props.projectData)
                 .then(() => {
-                    this.props.onLoadedProject(this.props.loadingState, this.props.canSave);
+                    this.props.onLoadedProject(this.props.loadingState, this.props.canSave, true, this.props.projectId);
                     // Wrap in a setTimeout because skin loading in
                     // the renderer can be async.
                     setTimeout(() => this.props.onSetProjectUnchanged());
@@ -71,6 +72,7 @@ const vmManagerHOC = function (WrappedComponent) {
                     }
                 })
                 .catch(e => {
+                    console.log(e);
                     this.props.onError(e);
                 });
         }
@@ -136,9 +138,12 @@ const vmManagerHOC = function (WrappedComponent) {
     };
 
     const mapDispatchToProps = dispatch => ({
-        onError: error => dispatch(projectError(error)),
-        onLoadedProject: (loadingState, canSave) =>
-            dispatch(onLoadedProject(loadingState, canSave, true)),
+        onError: error => {
+            console.log(error, 'vm-manager-hoc');
+            return dispatch(projectError(error));
+        },
+        onLoadedProject: (loadingState, canSave, success, projectId) =>
+            dispatch(onLoadedProject(loadingState, canSave, success, projectId)),
         onSetProjectUnchanged: () => dispatch(setProjectUnchanged())
     });
 

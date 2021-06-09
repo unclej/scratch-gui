@@ -1,7 +1,10 @@
+/* eslint-disable no-warning-comments */
 import bindAll from 'lodash.bindall';
 import PropTypes from 'prop-types';
 import React from 'react';
 import {injectIntl} from 'react-intl';
+
+import storage from '../lib/storage';
 
 import LibraryItemComponent from '../components/library-item/library-item.jsx';
 
@@ -106,7 +109,7 @@ class LibraryItem extends React.PureComponent {
     render () {
         const iconMd5 = this.curIconMd5();
         const iconURL = iconMd5 ?
-            `https://cdn.assets.scratch.mit.edu/internalapi/asset/${iconMd5}/get/` :
+            `${storage.assetHost}${iconMd5}?requestType=html` :
             this.props.iconRawURL;
         return (
             <LibraryItemComponent

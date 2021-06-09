@@ -1,3 +1,5 @@
+/* eslint-disable jest/no-disabled-tests */
+/* eslint-disable no-warning-comments */
 import React from 'react';
 import {mountWithIntl, componentWithIntl} from '../../helpers/intl-helpers.jsx';
 import SoundEditor from '../../../src/components/sound-editor/sound-editor';

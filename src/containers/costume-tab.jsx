@@ -1,3 +1,4 @@
+/* eslint-disable no-warning-comments */
 import PropTypes from 'prop-types';
 import React from 'react';
 import bindAll from 'lodash.bindall';
@@ -6,6 +7,7 @@ import VM from 'scratch-vm';
 
 import AssetPanel from '../components/asset-panel/asset-panel.jsx';
 import PaintEditorWrapper from './paint-editor-wrapper.jsx';
+import CameraModal from './camera-modal.jsx';
 import {connect} from 'react-redux';
 import {handleFileUpload, costumeUpload} from '../lib/file-uploader.js';
 import errorBoundaryHOC from '../lib/error-boundary-hoc.jsx';
@@ -15,6 +17,8 @@ import sharedMessages from '../lib/shared-messages';
 import downloadBlob from '../lib/download-blob';
 
 import {
+    closeCameraCapture,
+    openCameraCapture,
     openCostumeLibrary,
     openBackdropLibrary
 } from '../reducers/modals';
@@ -31,6 +35,7 @@ import addLibraryBackdropIcon from '../components/asset-panel/icon--add-backdrop
 import addLibraryCostumeIcon from '../components/asset-panel/icon--add-costume-lib.svg';
 import fileUploadIcon from '../components/action-menu/icon--file-upload.svg';
 import paintIcon from '../components/action-menu/icon--paint.svg';
+import cameraIcon from '../components/action-menu/icon--camera.svg';
 import surpriseIcon from '../components/action-menu/icon--surprise.svg';
 import searchIcon from '../components/action-menu/icon--search.svg';
 
@@ -67,6 +72,11 @@ let messages = defineMessages({
         defaultMessage: 'Upload Costume',
         description: 'Button to add a costume by uploading a file in the editor tab',
         id: 'gui.costumeTab.addFileCostume'
+    },
+    addCameraCostumeMsg: {
+        defaultMessage: 'Camera',
+        description: 'Button to use the camera to create a costume costume in the editor tab',
+        id: 'gui.costumeTab.addCameraCostume'
     }
 });
 
@@ -86,6 +96,7 @@ class CostumeTab extends React.Component {
             'handleSurpriseBackdrop',
             'handleFileUploadClick',
             'handleCostumeUpload',
+            'handleCameraBuffer',
             'handleDrop',
             'setFileInput'
         ]);
@@ -208,6 +219,14 @@ class CostumeTab extends React.Component {
             }, this.props.onCloseImporting);
         }, this.props.onCloseImporting);
     }
+    handleCameraBuffer (buffer) {
+        const storage = this.props.vm.runtime.storage;
+        const targetId = this.props.vm.editingTarget.id;
+        costumeUpload(buffer, 'image/png', storage, vmCostumes => {
+            vmCostumes[0].name = this.props.intl.formatMessage(messages.costume, {index: 1});
+            this.handleNewCostume(vmCostumes, false, targetId);
+        });
+    }
     handleFileUploadClick () {
         this.fileInput.click();
     }
@@ -246,8 +265,11 @@ class CostumeTab extends React.Component {
             dispatchUpdateRestore, // eslint-disable-line no-unused-vars
             intl,
             isRtl,
+            onNewCostumeFromCameraClick,
             onNewLibraryBackdropClick,
             onNewLibraryCostumeClick,
+            cameraModalVisible,
+            onRequestCloseCameraModal,
             vm
         } = this.props;
 
@@ -277,6 +299,11 @@ class CostumeTab extends React.Component {
                         title: intl.formatMessage(addLibraryMessage),
                         img: addLibraryIcon,
                         onClick: addLibraryFunc
+                    },
+                    {
+                        title: intl.formatMessage(messages.addCameraCostumeMsg),
+                        img: cameraIcon,
+                        onClick: onNewCostumeFromCameraClick
                     },
                     {
                         title: intl.formatMessage(addFileMessage),
@@ -320,20 +347,29 @@ class CostumeTab extends React.Component {
                     /> :
                     null
                 }
+                {cameraModalVisible ? (
+                    <CameraModal
+                        onClose={onRequestCloseCameraModal}
+                        onNewCostume={this.handleCameraBuffer}
+                    />
+                ) : null}
             </AssetPanel>
         );
     }
 }
 
 CostumeTab.propTypes = {
+    cameraModalVisible: PropTypes.bool,
     dispatchUpdateRestore: PropTypes.func,
     editingTarget: PropTypes.string,
     intl: intlShape,
     isRtl: PropTypes.bool,
     onActivateSoundsTab: PropTypes.func.isRequired,
     onCloseImporting: PropTypes.func.isRequired,
+    onNewCostumeFromCameraClick: PropTypes.func.isRequired,
     onNewLibraryBackdropClick: PropTypes.func.isRequired,
     onNewLibraryCostumeClick: PropTypes.func.isRequired,
+    onRequestCloseCameraModal: PropTypes.func.isRequired,
     onShowImporting: PropTypes.func.isRequired,
     sprites: PropTypes.shape({
         id: PropTypes.shape({
@@ -357,7 +393,8 @@ const mapStateToProps = state => ({
     isRtl: state.locales.isRtl,
     sprites: state.scratchGui.targets.sprites,
     stage: state.scratchGui.targets.stage,
-    dragging: state.scratchGui.assetDrag.dragging
+    dragging: state.scratchGui.assetDrag.dragging,
+    cameraModalVisible: state.scratchGui.modals.cameraCapture
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -369,6 +406,12 @@ const mapDispatchToProps = dispatch => ({
     onNewLibraryCostumeClick: e => {
         e.preventDefault();
         dispatch(openCostumeLibrary());
+    },
+    onNewCostumeFromCameraClick: () => {
+        dispatch(openCameraCapture());
+    },
+    onRequestCloseCameraModal: () => {
+        dispatch(closeCameraCapture());
     },
     dispatchUpdateRestore: restoreState => {
         dispatch(setRestore(restoreState));

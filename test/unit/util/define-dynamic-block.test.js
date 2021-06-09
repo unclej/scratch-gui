@@ -1,3 +1,4 @@
+/* eslint-disable no-warning-comments */
 import defineDynamicBlock from '../../../src/lib/define-dynamic-block';
 
 import BlockType from 'scratch-vm/src/extension-support/block-type';

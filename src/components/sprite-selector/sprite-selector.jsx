@@ -1,3 +1,4 @@
+/* eslint-disable no-warning-comments */
 import PropTypes from 'prop-types';
 import React from 'react';
 import {defineMessages, injectIntl, intlShape} from 'react-intl';

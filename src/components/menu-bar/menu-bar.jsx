@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unused-prop-types */
 import classNames from 'classnames';
 import {connect} from 'react-redux';
 import {compose} from 'redux';
@@ -11,31 +12,38 @@ import VM from 'scratch-vm';
 
 import Box from '../box/box.jsx';
 import Button from '../button/button.jsx';
-import CommunityButton from './community-button.jsx';
 import ShareButton from './share-button.jsx';
 import {ComingSoonTooltip} from '../coming-soon/coming-soon.jsx';
 import Divider from '../divider/divider.jsx';
 import LanguageSelector from '../../containers/language-selector.jsx';
 import SaveStatus from './save-status.jsx';
+import SBFileUploader from '../../containers/sb-file-uploader.jsx';
 import ProjectWatcher from '../../containers/project-watcher.jsx';
 import MenuBarMenu from './menu-bar-menu.jsx';
 import {MenuItem, MenuSection} from '../menu/menu.jsx';
 import ProjectTitleInput from './project-title-input.jsx';
 import AuthorInfo from './author-info.jsx';
 import AccountNav from '../../containers/account-nav.jsx';
-import LoginDropdown from './login-dropdown.jsx';
+/* import LoginDropdown from './login-dropdown.jsx'; */
 import SB3Downloader from '../../containers/sb3-downloader.jsx';
 import DeletionRestorer from '../../containers/deletion-restorer.jsx';
 import TurboMode from '../../containers/turbo-mode.jsx';
 import MenuBarHOC from '../../containers/menu-bar-hoc.jsx';
 
-import {openTipsLibrary} from '../../reducers/modals';
+import {
+    openTipsLibrary
+} from '../../reducers/modals';
+import {
+    activateLesson,
+    viewLessons
+} from '../../reducers/studioLessons';
 import {setPlayer} from '../../reducers/mode';
 import {
     autoUpdateProject,
     getIsUpdating,
     getIsShowingProject,
     manualUpdateProject,
+    getIsManualUpdating,
     requestNewProject,
     remixProject,
     saveProjectAsCopy
@@ -65,17 +73,18 @@ import collectMetadata from '../../lib/collect-metadata';
 
 import styles from './menu-bar.css';
 
-import helpIcon from '../../lib/assets/icon--tutorials.svg';
-import mystuffIcon from './icon--mystuff.png';
+import feedbackIcon from './icon--feedback.svg';
 import profileIcon from './icon--profile.png';
 import remixIcon from './icon--remix.svg';
 import dropdownCaret from './dropdown-caret.svg';
 import languageIcon from '../language-selector/language-icon.svg';
 import aboutIcon from './icon--about.svg';
 
-import scratchLogo from './scratch-logo.svg';
-
 import sharedMessages from '../../lib/shared-messages';
+
+import {onSharing} from '../../reducers/itch-project';
+import directionIcon from './directions.png';
+import ITCH_CONFIG from '../../../itch.config';
 
 const ariaMessages = defineMessages({
     language: {
@@ -87,6 +96,26 @@ const ariaMessages = defineMessages({
         id: 'gui.menuBar.tutorialsLibrary',
         defaultMessage: 'Tutorials',
         description: 'accessibility text for the tutorials button'
+    },
+    itchLessons: {
+        id: 'itchLocale.menuBar.itchLessons',
+        defaultMessage: 'Lessons from iTCH',
+        description: 'accessibility text for the lessons button'
+    },
+    saveNow: {
+        id: 'gui.menuBar.saveNowLink',
+        defaultMessage: 'Save Now',
+        description: 'Title bar link for saving now'
+    },
+    saving: {
+        id: 'itchLocale.menuBar.projectIsSaving',
+        defaultMessage: 'Saving...',
+        description: 'accessibility text save button on saving state'
+    },
+    saved: {
+        id: 'gui.alerts.savesuccess',
+        defaultMessage: 'Project saved.',
+        description: 'Message indicating that project was successfully saved'
     }
 });
 
@@ -215,16 +244,10 @@ class MenuBar extends React.Component {
             waitForUpdate(false); // immediately transition to project page
         }
     }
-    handleClickShare (waitForUpdate) {
+    handleClickShare () {
         if (!this.props.isShared) {
-            if (this.props.canShare) { // save before transitioning to project page
+            if (this.props.canShare) {
                 this.props.onShare();
-            }
-            if (this.props.canSave) { // save before transitioning to project page
-                this.props.autoUpdateProject();
-                waitForUpdate(true); // queue the transition to project page
-            } else {
-                waitForUpdate(false); // immediately transition to project page
             }
         }
     }
@@ -255,6 +278,10 @@ class MenuBar extends React.Component {
         if (!this.props.languageMenuOpen) {
             this.props.onClickLanguage(e);
         }
+    }
+    handleItchLesson () {
+        /* this.props.onProjectLessons(0, null); */
+        this.props.onViewLessons();
     }
     restoreOptionMessage (deletedItem) {
         switch (deletedItem) {
@@ -377,8 +404,49 @@ class MenuBar extends React.Component {
                 {remixMessage}
             </Button>
         );
+        const itchLessonButton = (
+            <div
+                aria-label={this.props.intl.formatMessage(ariaMessages.itchLessons)}
+                className={classNames(styles.menuBarItem, styles.hoverable)}
+                onClick={this.handleItchLesson}
+            >
+                <img
+                    className={styles.lessonIcon}
+                    draggable={false}
+                    src={directionIcon}
+                />
+                <FormattedMessage
+                    defaultMessage="View directions"
+                    description="Text for itch directions button"
+                    id="itchLocale.cards.directions"
+                />
+            </div>
+        );
+        const itchSaveButton = (
+            <Button
+                className={classNames(styles.saveButton)}
+                disabled={this.props.isUpdating}
+                onClick={this.props.onClickSave}
+            >
+                {
+                    this.props.projectChanged ? this.props.intl.formatMessage(ariaMessages.saveNow) :
+                        (this.props.isUpdating ? this.props.intl.formatMessage(ariaMessages.saving) :
+                            this.props.intl.formatMessage(ariaMessages.saved)
+                        )
+                }
+            </Button>
+
+        );
+        /* const remixButton = (
+            <Button
+                className={classNames(styles.shareButton)}
+                onClick={this.handleClickRemix}
+            >
+                {remixMessage}
+            </Button>
+        ); */
         // Show the About button only if we have a handler for it (like in the desktop app)
-        const aboutButton = this.buildAboutMenu(this.props.onClickAbout);
+        // const aboutButton = this.buildAboutMenu(this.props.onClickAbout);
         return (
             <Box
                 className={classNames(
@@ -388,7 +456,7 @@ class MenuBar extends React.Component {
             >
                 <div className={styles.mainMenu}>
                     <div className={styles.fileGroup}>
-                        <div className={classNames(styles.menuBarItem)}>
+                        {/* <div className={classNames(styles.menuBarItem)}>
                             <img
                                 alt="Scratch"
                                 className={classNames(styles.scratchLogo, {
@@ -398,7 +466,7 @@ class MenuBar extends React.Component {
                                 src={this.props.logo}
                                 onClick={this.props.onClickLogo}
                             />
-                        </div>
+                        </div> */}
                         {(this.props.canChangeLanguage) && (<div
                             className={classNames(styles.menuBarItem, styles.hoverable, styles.languageMenu)}
                         >
@@ -414,7 +482,14 @@ class MenuBar extends React.Component {
                             </div>
                             <LanguageSelector label={this.props.intl.formatMessage(ariaMessages.language)} />
                         </div>)}
-                        {(this.props.canManageFiles) && (
+
+                        {(this.props.canSave ||
+                            this.props.canCreateCopy ||
+                            this.props.canRemix ||
+                            this.props.canCreateNew ||
+                            this.props.canUpload ||
+                            this.props.canDownload
+                        ) && this.props.canManageFiles && (
                             <div
                                 className={classNames(styles.menuBarItem, styles.hoverable, {
                                     [styles.active]: this.props.fileMenuOpen
@@ -432,52 +507,78 @@ class MenuBar extends React.Component {
                                     place={this.props.isRtl ? 'left' : 'right'}
                                     onRequestClose={this.props.onRequestCloseFile}
                                 >
-                                    <MenuSection>
-                                        <MenuItem
-                                            isRtl={this.props.isRtl}
-                                            onClick={this.handleClickNew}
-                                        >
-                                            {newProjectMessage}
-                                        </MenuItem>
-                                    </MenuSection>
-                                    {(this.props.canSave || this.props.canCreateCopy || this.props.canRemix) && (
+                                    {(this.props.canSave ||
+                                    this.props.canCreateCopy ||
+                                    this.props.canRemix ||
+                                    this.props.canCreateNew) && (
                                         <MenuSection>
-                                            {this.props.canSave && (
+                                            {this.props.canCreateNew ? (
+                                                <MenuItem
+                                                    isRtl={this.props.isRtl}
+                                                    onClick={this.handleClickNew}
+                                                >
+                                                    {newProjectMessage}
+                                                </MenuItem>
+                                            ) : []}
+                                            {this.props.canSave ? (
                                                 <MenuItem onClick={this.handleClickSave}>
                                                     {saveNowMessage}
                                                 </MenuItem>
-                                            )}
-                                            {this.props.canCreateCopy && (
+                                            ) : []}
+                                            {this.props.canCreateCopy ? (
                                                 <MenuItem onClick={this.handleClickSaveAsCopy}>
                                                     {createCopyMessage}
                                                 </MenuItem>
-                                            )}
-                                            {this.props.canRemix && (
+                                            ) : []}
+                                            {this.props.canRemix ? (
                                                 <MenuItem onClick={this.handleClickRemix}>
                                                     {remixMessage}
                                                 </MenuItem>
-                                            )}
+                                            ) : []}
                                         </MenuSection>
                                     )}
-                                    <MenuSection>
-                                        <MenuItem
-                                            onClick={this.props.onStartSelectingFileUpload}
-                                        >
-                                            {this.props.intl.formatMessage(sharedMessages.loadFromComputerTitle)}
-                                        </MenuItem>
-                                        <SB3Downloader>{(className, downloadProjectCallback) => (
-                                            <MenuItem
-                                                className={className}
-                                                onClick={this.getSaveToComputerHandler(downloadProjectCallback)}
-                                            >
-                                                <FormattedMessage
-                                                    defaultMessage="Save to your computer"
-                                                    description="Menu bar item for downloading a project to your computer" // eslint-disable-line max-len
-                                                    id="gui.menuBar.downloadToComputer"
-                                                />
-                                            </MenuItem>
-                                        )}</SB3Downloader>
-                                    </MenuSection>
+                                    {this.props.canUpload || this.props.canDownload ? (
+                                        <MenuSection>
+                                            {this.props.canUpload ? (
+                                                <SBFileUploader
+                                                    canSave={this.props.canSave}
+                                                    userOwnsProject={this.props.userOwnsProject}
+                                                >
+                                                    {(className, renderFileInput, loadProject) => (
+                                                        <MenuItem
+                                                            className={className}
+                                                            onClick={loadProject}
+                                                        >
+                                                            {
+                                                                this.props.intl.formatMessage(
+                                                                    sharedMessages.loadFromComputerTitle
+                                                                )
+                                                            }
+                                                            {renderFileInput()}
+                                                        </MenuItem>
+                                                    )}
+                                                </SBFileUploader>
+                                            ) : []}
+                                            {this.props.canDownload ? (
+                                                <SB3Downloader>{(className, downloadProjectCallback) => (
+                                                    <MenuItem
+                                                        className={className}
+                                                        onClick={this.handleSaveToComputer(downloadProjectCallback)}
+                                                    >
+                                                        <FormattedMessage
+                                                            defaultMessage="Save to your computer"
+                                                            description={
+                                                                `Menu bar item for downloading 
+                                                                a project to your computer`
+                                                            }
+                                                            id="gui.menuBar.downloadToComputer"
+                                                        />
+                                                    </MenuItem>
+                                                )}</SB3Downloader>
+                                            ) : []}
+                                        </MenuSection>
+                                    ) : null}
+
                                 </MenuBarMenu>
                             </div>
                         )}
@@ -531,7 +632,7 @@ class MenuBar extends React.Component {
                         </div>
                     </div>
                     <Divider className={classNames(styles.divider)} />
-                    <div
+                    {/* <div
                         aria-label={this.props.intl.formatMessage(ariaMessages.tutorials)}
                         className={classNames(styles.menuBarItem, styles.hoverable)}
                         onClick={this.props.onOpenTipLibrary}
@@ -542,7 +643,8 @@ class MenuBar extends React.Component {
                         />
                         <FormattedMessage {...ariaMessages.tutorials} />
                     </div>
-                    <Divider className={classNames(styles.divider)} />
+                    <Divider className={classNames(styles.divider)} />*/}
+                    {this.props.canSeeItchLessons ? itchLessonButton : null}
                     {this.props.canEditTitle ? (
                         <div className={classNames(styles.menuBarItem, styles.growable)}>
                             <MenuBarItemTooltip
@@ -563,8 +665,19 @@ class MenuBar extends React.Component {
                             username={this.props.authorUsername}
                         />
                     ) : null)}
+                    {/* <div className={classNames(styles.menuBarItem, styles.growable)}>
+                        <MenuBarItemTooltip
+                            enable
+                            id="title-field"
+                        >
+                            <ProjectTitleInput
+                                className={classNames(styles.titleFieldGrowable)}
+                                onUpdateProjectTitle={this.props.onUpdateProjectTitle}
+                            />
+                        </MenuBarItemTooltip>
+                    </div> */}
                     <div className={classNames(styles.menuBarItem)}>
-                        {this.props.canShare ? (
+                        {this.props.canShare && (
                             (this.props.isShowingProject || this.props.isUpdating) && (
                                 <ProjectWatcher onDoneUpdating={this.props.onSeeCommunity}>
                                     {
@@ -576,45 +689,41 @@ class MenuBar extends React.Component {
                                                 onClick={() => {
                                                     this.handleClickShare(waitForUpdate);
                                                 }}
-                                                /* eslint-enable react/jsx-no-bind */
+                                            /* eslint-enable react/jsx-no-bind */
                                             />
                                         )
                                     }
                                 </ProjectWatcher>
                             )
-                        ) : (
-                            this.props.showComingSoon ? (
-                                <MenuBarItemTooltip id="share-button">
-                                    <ShareButton className={styles.menuBarButton} />
-                                </MenuBarItemTooltip>
-                            ) : []
                         )}
                         {this.props.canRemix ? remixButton : []}
                     </div>
-                    <div className={classNames(styles.menuBarItem, styles.communityButtonWrapper)}>
-                        {this.props.enableCommunity ? (
-                            (this.props.isShowingProject || this.props.isUpdating) && (
-                                <ProjectWatcher onDoneUpdating={this.props.onSeeCommunity}>
-                                    {
-                                        waitForUpdate => (
-                                            <CommunityButton
-                                                className={styles.menuBarButton}
-                                                /* eslint-disable react/jsx-no-bind */
-                                                onClick={() => {
-                                                    this.handleClickSeeCommunity(waitForUpdate);
-                                                }}
-                                                /* eslint-enable react/jsx-no-bind */
-                                            />
-                                        )
-                                    }
-                                </ProjectWatcher>
-                            )
+                    <div className={classNames(styles.menuBarItem)}>
+                        {this.props.canSave ? itchSaveButton : (this.props.canRemix ? remixButton : [])}
+                    </div>
+                    {/* <div className={classNames(styles.menuBarItem)}>
+                        {this.props.canRemix ? remixButton : null}
+                    </div> */}
+                    {/* <div className={classNames(styles.menuBarItem, styles.communityButtonWrapper)}>
+                        {this.props.enableCommunity ?
+                            <Button
+                                className={classNames(styles.communityButton)}
+                                iconClassName={styles.communityButtonIcon}
+                                iconSrc={communityIcon}
+                                onClick={this.props.onSeeCommunity}
+                            >
+                                <FormattedMessage
+                                    defaultMessage="See Community"
+                                    description="Label for see community button"
+                                    id="gui.menuBar.seeCommunity"
+                                />
+                            </Button>
                         ) : (this.props.showComingSoon ? (
                             <MenuBarItemTooltip id="community-button">
                                 <CommunityButton className={styles.menuBarButton} />
                             </MenuBarItemTooltip>
-                        ) : [])}
-                    </div>
+                        }
+                    </div> */}
                 </div>
 
                 {/* show the proper UI in the account menu, given whether the user is
@@ -629,7 +738,28 @@ class MenuBar extends React.Component {
                         this.props.username ? (
                             // ************ user is logged in ************
                             <React.Fragment>
-                                <a href="/mystuff/">
+                                { this.props.feedbackVisible && (
+                                    <div className={classNames(styles.menuBarItem, styles.feedbackButtonWrapper)}>
+                                        <a
+                                            className={styles.feedbackLink}
+                                            href="https://docs.google.com/forms/d/e/1FAIpQLScRjrOVVgR47D3-vHYUaR5EWr1B148pv4d9L8sfg2tMV3lOGQ/viewform"
+                                            rel="noopener noreferrer"
+                                            target="_blank"
+                                        >
+                                            <Button
+                                                className={styles.feedbackButton}
+                                                iconSrc={feedbackIcon}
+                                            >
+                                                <FormattedMessage
+                                                    defaultMessage="Give Feedback"
+                                                    description="Label for feedback form modal button"
+                                                    id="gui.menuBar.giveFeedback"
+                                                />
+                                            </Button>
+                                        </a>
+                                    </div>
+                                )}
+                                {/* <MenuBarItemTooltip id="mystuff">
                                     <div
                                         className={classNames(
                                             styles.menuBarItem,
@@ -642,11 +772,11 @@ class MenuBar extends React.Component {
                                             src={mystuffIcon}
                                         />
                                     </div>
-                                </a>
+                                </MenuBarItemTooltip> */}
                                 <AccountNav
                                     className={classNames(
                                         styles.menuBarItem,
-                                        styles.hoverable,
+                                        /* styles.hoverable, */
                                         {[styles.active]: this.props.accountMenuOpen}
                                     )}
                                     isOpen={this.props.accountMenuOpen}
@@ -657,53 +787,32 @@ class MenuBar extends React.Component {
                                     onLogOut={this.props.onLogOut}
                                 />
                             </React.Fragment>
-                        ) : (
-                            // ********* user not logged in, but a session exists
-                            // ********* so they can choose to log in
-                            <React.Fragment>
-                                <div
-                                    className={classNames(
-                                        styles.menuBarItem,
-                                        styles.hoverable
-                                    )}
-                                    key="join"
-                                    onMouseUp={this.props.onOpenRegistration}
-                                >
-                                    <FormattedMessage
-                                        defaultMessage="Join Scratch"
-                                        description="Link for creating a Scratch account"
-                                        id="gui.menuBar.joinScratch"
-                                    />
-                                </div>
-                                <div
-                                    className={classNames(
-                                        styles.menuBarItem,
-                                        styles.hoverable
-                                    )}
-                                    key="login"
-                                    onMouseUp={this.props.onClickLogin}
-                                >
-                                    <FormattedMessage
-                                        defaultMessage="Sign in"
-                                        description="Link for signing in to your Scratch account"
-                                        id="gui.menuBar.signIn"
-                                    />
-                                    <LoginDropdown
-                                        className={classNames(styles.menuBarMenu)}
-                                        isOpen={this.props.loginMenuOpen}
-                                        isRtl={this.props.isRtl}
-                                        renderLogin={this.props.renderLogin}
-                                        onClose={this.props.onRequestCloseLogin}
-                                    />
-                                </div>
-                            </React.Fragment>
-                        )
+                        ) : []
                     ) : (
                         // ******** no login session is available, so don't show login stuff
                         <React.Fragment>
+                            <div className={classNames(styles.menuBarItem, styles.feedbackButtonWrapper)}>
+                                <a
+                                    className={styles.feedbackLink}
+                                    href="https://docs.google.com/forms/d/e/1FAIpQLScRjrOVVgR47D3-vHYUaR5EWr1B148pv4d9L8sfg2tMV3lOGQ/viewform"
+                                    rel="noopener noreferrer"
+                                    target="_blank"
+                                >
+                                    <Button
+                                        className={styles.feedbackButton}
+                                        iconSrc={feedbackIcon}
+                                    >
+                                        <FormattedMessage
+                                            defaultMessage="Give Feedback"
+                                            description="Label for feedback form modal button"
+                                            id="gui.menuBar.giveFeedback"
+                                        />
+                                    </Button>
+                                </a>
+                            </div>
                             {this.props.showComingSoon ? (
                                 <React.Fragment>
-                                    <MenuBarItemTooltip id="mystuff">
+                                    {/* <MenuBarItemTooltip id="mystuff">
                                         <div
                                             className={classNames(
                                                 styles.menuBarItem,
@@ -716,7 +825,7 @@ class MenuBar extends React.Component {
                                                 src={mystuffIcon}
                                             />
                                         </div>
-                                    </MenuBarItemTooltip>
+                                    </MenuBarItemTooltip> */}
                                     <MenuBarItemTooltip
                                         id="account-nav"
                                         place={this.props.isRtl ? 'right' : 'left'}
@@ -747,7 +856,7 @@ class MenuBar extends React.Component {
                     )}
                 </div>
 
-                {aboutButton}
+                {/* {aboutButton}*/}
             </Box>
         );
     }
@@ -763,17 +872,23 @@ MenuBar.propTypes = {
     canChangeLanguage: PropTypes.bool,
     canCreateCopy: PropTypes.bool,
     canCreateNew: PropTypes.bool,
+    canDownload: PropTypes.bool,
     canEditTitle: PropTypes.bool,
     canManageFiles: PropTypes.bool,
     canRemix: PropTypes.bool,
     canSave: PropTypes.bool,
     canShare: PropTypes.bool,
+    canSeeItchLessons: PropTypes.bool,
+    canUpload: PropTypes.bool,
     className: PropTypes.string,
     confirmReadyToReplaceProject: PropTypes.func,
     editMenuOpen: PropTypes.bool,
     enableCommunity: PropTypes.bool,
     fileMenuOpen: PropTypes.bool,
+    feedbackVisible: PropTypes.bool,
     intl: intlShape,
+    isLoggedIn: PropTypes.bool,
+    isManualUpdating: PropTypes.bool,
     isRtl: PropTypes.bool,
     isShared: PropTypes.bool,
     isShowingProject: PropTypes.bool,
@@ -804,6 +919,7 @@ MenuBar.propTypes = {
     onLogOut: PropTypes.func,
     onOpenRegistration: PropTypes.func,
     onOpenTipLibrary: PropTypes.func,
+    onProjectLessons: PropTypes.func,
     onProjectTelemetryEvent: PropTypes.func,
     onRequestOpenAbout: PropTypes.func,
     onRequestCloseAbout: PropTypes.func,
@@ -816,8 +932,12 @@ MenuBar.propTypes = {
     onShare: PropTypes.func,
     onStartSelectingFileUpload: PropTypes.func,
     onToggleLoginOpen: PropTypes.func,
+    onUpdateProjectTitle: PropTypes.func,
+    onViewLessons: PropTypes.func,
+    projectChanged: PropTypes.bool,
     projectTitle: PropTypes.string,
     renderLogin: PropTypes.func,
+    saveText: PropTypes.number,
     sessionExists: PropTypes.bool,
     shouldSaveBeforeTransition: PropTypes.func,
     showComingSoon: PropTypes.bool,
@@ -827,13 +947,35 @@ MenuBar.propTypes = {
 };
 
 MenuBar.defaultProps = {
-    logo: scratchLogo,
-    onShare: () => {}
+    // logo: scratchLogo,
+    onShare: () => { }
 };
 
-const mapStateToProps = (state, ownProps) => {
+const mapStateToProps = state => {
     const loadingState = state.scratchGui.projectState.loadingState;
     const user = state.session && state.session.session && state.session.session.user;
+    const saveText = getIsUpdating(loadingState) ? 1 :
+        state.scratchGui.projectState.needsUpdate ? 2 : 0;
+
+    /**
+     * 0 means that is on state saved
+     * 1 means that is on state saving
+     * 2 means that is on state not saved
+     */
+
+    let isWizard = false;
+    let isPreview = false;
+    let feedbackVisible = true;
+    if (ITCH_CONFIG.ITCH_LESSONS && typeof window.getScratchItchConfig === 'function') {
+        const configs = window.getScratchItchConfig();
+        isWizard = configs.isWizard;
+        feedbackVisible = configs.feedbackVisible;
+        isPreview = configs.isPreview;
+    }
+    const userOwnsProject = state.scratchGui.itchProject.projectUser !== null &&
+        typeof state.session.session.user !== 'undefined' &&
+        typeof state.session.session.user.id !== 'undefined' &&
+        state.session.session.user.id === state.scratchGui.itchProject.projectUser;
     return {
         aboutMenuOpen: aboutMenuOpen(state),
         accountMenuOpen: accountMenuOpen(state),
@@ -842,15 +984,19 @@ const mapStateToProps = (state, ownProps) => {
         isRtl: state.locales.isRtl,
         isUpdating: getIsUpdating(loadingState),
         isShowingProject: getIsShowingProject(loadingState),
+        isManualUpdating: getIsManualUpdating(loadingState),
         languageMenuOpen: languageMenuOpen(state),
         locale: state.locales.locale,
         loginMenuOpen: loginMenuOpen(state),
         projectTitle: state.scratchGui.projectTitle,
         sessionExists: state.session && typeof state.session.session !== 'undefined',
         username: user ? user.username : null,
-        userOwnsProject: ownProps.authorUsername && user &&
-            (ownProps.authorUsername === user.username),
-        vm: state.scratchGui.vm
+        saveText,
+        userOwnsProject,
+        vm: state.scratchGui.vm,
+        projectChanged: state.scratchGui.projectChanged,
+        canSeeItchLessons: state.scratchGui.studioLessons.content.length > 0 && (!isWizard || isPreview),
+        feedbackVisible: feedbackVisible
     };
 };
 
@@ -873,7 +1019,10 @@ const mapDispatchToProps = dispatch => ({
     onClickRemix: () => dispatch(remixProject()),
     onClickSave: () => dispatch(manualUpdateProject()),
     onClickSaveAsCopy: () => dispatch(saveProjectAsCopy()),
-    onSeeCommunity: () => dispatch(setPlayer(true))
+    onSeeCommunity: () => dispatch(setPlayer(true)),
+    onShare: () => dispatch(onSharing()),
+    onViewLessons: () => dispatch(viewLessons()),
+    onProjectLessons: (step, callback) => dispatch(activateLesson(step, callback))
 });
 
 export default compose(

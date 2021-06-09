@@ -1,3 +1,4 @@
+/* eslint-disable no-warning-comments */
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {compose} from 'redux';
@@ -6,6 +7,7 @@ import AppStateHOC from '../lib/app-state-hoc.jsx';
 import GUI from '../containers/gui.jsx';
 import HashParserHOC from '../lib/hash-parser-hoc.jsx';
 import log from '../lib/log.js';
+import ITCH_CONFIG from '../../itch.config';
 
 const onClickLogo = () => {
     window.location = 'https://scratch.mit.edu';
@@ -40,8 +42,12 @@ export default appTarget => {
     )(GUI);
 
     // TODO a hack for testing the backpack, allow backpack host to be set by url param
-    const backpackHostMatches = window.location.href.match(/[?&]backpack_host=([^&]*)&?/);
-    const backpackHost = backpackHostMatches ? backpackHostMatches[1] : null;
+    const backpackHostMatches = window.location.href.match(/[?&]backpackHost=([^&]*)&?/);
+
+    const scratchEditor = document.getElementById('scratch-editor');
+    const backpackHost = scratchEditor ? window.getBackPackHost() : (
+        backpackHostMatches ? backpackHostMatches[1] : ITCH_CONFIG.BACKPACK_HOST
+    );
 
     const scratchDesktopMatches = window.location.href.match(/[?&]isScratchDesktop=([^&]+)/);
     let simulateScratchDesktop;
@@ -55,11 +61,10 @@ export default appTarget => {
             simulateScratchDesktop = scratchDesktopMatches[1];
         }
     }
-
-    if (process.env.NODE_ENV === 'production' && typeof window === 'object') {
+    /* if (process.env.NODE_ENV === 'production' && typeof window === 'object') {
         // Warn before navigating away
         window.onbeforeunload = () => true;
-    }
+    } */
 
     ReactDOM.render(
         // important: this is checking whether `simulateScratchDesktop` is truthy, not just defined!

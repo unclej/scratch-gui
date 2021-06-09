@@ -23,6 +23,12 @@ const CLOSE_ALERT_WITH_ID = 'scratch-gui/alerts/CLOSE_ALERT_WITH_ID';
  */
 const initialState = {
     visible: true,
+    // list of alerts, each with properties:
+    // * content (optional): react element (a <FormattedMessage />)
+    // * extentionId (optional): id string that identifies the extension
+    // * iconURL (optional): string
+    // * level (required): string, one of AlertLevels
+    // * message (optional): string
     alertsList: []
 };
 

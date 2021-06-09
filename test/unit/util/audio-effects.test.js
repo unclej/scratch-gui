@@ -1,3 +1,5 @@
+/* eslint-disable jest/no-disabled-tests */
+/* eslint-disable no-warning-comments */
 /* global WebAudioTestAPI */
 import 'web-audio-test-api';
 WebAudioTestAPI.setState({

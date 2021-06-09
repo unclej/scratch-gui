@@ -26,6 +26,34 @@ const reducer = function (state, action) {
 };
 
 const setFullScreen = function (isFullScreen) {
+    const mainDivApp = document.getElementById('mainDivApp');
+    if (isFullScreen){
+        document.getElementsByTagName('body')[0].classList.remove('full-app-screen');
+        document.getElementsByTagName('html')[0].classList.remove('full-app-screen');
+        if (mainDivApp) {
+            mainDivApp.classList.remove('full-app-screen');
+        }
+
+        document.getElementsByTagName('body')[0].classList.add('only-player-app-screen');
+        document.getElementsByTagName('html')[0].classList.add('only-player-app-screen');
+        if (mainDivApp) {
+            mainDivApp.classList.add('only-player-app-screen');
+        }
+        window.dispatchEvent(new Event('resize'));
+    } else {
+        document.getElementsByTagName('body')[0].classList.remove('only-player-app-screen');
+        document.getElementsByTagName('html')[0].classList.remove('only-player-app-screen');
+        if (mainDivApp) {
+            mainDivApp.classList.remove('only-player-app-screen');
+        }
+
+        document.getElementsByTagName('body')[0].classList.add('full-app-screen');
+        document.getElementsByTagName('html')[0].classList.add('full-app-screen');
+        if (mainDivApp) {
+            mainDivApp.classList.add('full-app-screen');
+        }
+        window.dispatchEvent(new Event('resize'));
+    }
     return {
         type: SET_FULL_SCREEN,
         isFullScreen: isFullScreen

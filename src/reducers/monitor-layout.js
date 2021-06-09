@@ -1,3 +1,4 @@
+/* eslint-disable no-warning-comments */
 import log from '../lib/log';
 
 const ADD_MONITOR_RECT = 'scratch-gui/monitors/ADD_MONITOR_RECT';

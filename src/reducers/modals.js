@@ -1,7 +1,10 @@
+import ITCH_CONFIG from '../../itch.config';
+
 const OPEN_MODAL = 'scratch-gui/modals/OPEN_MODAL';
 const CLOSE_MODAL = 'scratch-gui/modals/CLOSE_MODAL';
 
 const MODAL_BACKDROP_LIBRARY = 'backdropLibrary';
+const MODAL_CAMERA_CAPTURE = 'cameraCapture';
 const MODAL_COSTUME_LIBRARY = 'costumeLibrary';
 const MODAL_EXTENSION_LIBRARY = 'extensionLibrary';
 const MODAL_LOADING_PROJECT = 'loadingProject';
@@ -12,8 +15,20 @@ const MODAL_SOUND_RECORDER = 'soundRecorder';
 const MODAL_CONNECTION = 'connectionModal';
 const MODAL_TIPS_LIBRARY = 'tipsLibrary';
 
+
+const MODAL_SHARE_PROJECT = 'shareProject';
+const MODAL_PREVIEW_PROJECT = 'previewProject';
+const MODAL_PROJECT_LESSONS = 'projectLessons';
+let previewModal = false;
+if (ITCH_CONFIG.ITCH_LESSONS && typeof window.getScratchItchConfig === 'function'){
+    const configs = window.getScratchItchConfig();
+    if (configs.isPreview) {
+        previewModal = true;
+    }
+}
 const initialState = {
     [MODAL_BACKDROP_LIBRARY]: false,
+    [MODAL_CAMERA_CAPTURE]: false,
     [MODAL_COSTUME_LIBRARY]: false,
     [MODAL_EXTENSION_LIBRARY]: false,
     [MODAL_LOADING_PROJECT]: false,
@@ -22,7 +37,10 @@ const initialState = {
     [MODAL_SPRITE_LIBRARY]: false,
     [MODAL_SOUND_RECORDER]: false,
     [MODAL_CONNECTION]: false,
-    [MODAL_TIPS_LIBRARY]: false
+    [MODAL_TIPS_LIBRARY]: false,
+    [MODAL_SHARE_PROJECT]: false,
+    [MODAL_PREVIEW_PROJECT]: previewModal,
+    [MODAL_PROJECT_LESSONS]: false
 };
 
 const reducer = function (state, action) {
@@ -55,6 +73,9 @@ const closeModal = function (modal) {
 const openBackdropLibrary = function () {
     return openModal(MODAL_BACKDROP_LIBRARY);
 };
+const openCameraCapture = function () {
+    return openModal(MODAL_CAMERA_CAPTURE);
+};
 const openCostumeLibrary = function () {
     return openModal(MODAL_COSTUME_LIBRARY);
 };
@@ -82,8 +103,20 @@ const openConnectionModal = function () {
 const openTipsLibrary = function () {
     return openModal(MODAL_TIPS_LIBRARY);
 };
+const openShareProject = function () {
+    return openModal(MODAL_SHARE_PROJECT);
+};
+const openPreviewProject = function () {
+    return openModal(MODAL_PREVIEW_PROJECT);
+};
+const openProjectLessons = function () {
+    return openModal(MODAL_PROJECT_LESSONS);
+};
 const closeBackdropLibrary = function () {
     return closeModal(MODAL_BACKDROP_LIBRARY);
+};
+const closeCameraCapture = function () {
+    return closeModal(MODAL_CAMERA_CAPTURE);
 };
 const closeCostumeLibrary = function () {
     return closeModal(MODAL_COSTUME_LIBRARY);
@@ -112,10 +145,20 @@ const closeTipsLibrary = function () {
 const closeConnectionModal = function () {
     return closeModal(MODAL_CONNECTION);
 };
+const closeShareProject = function (){
+    return closeModal(MODAL_SHARE_PROJECT);
+};
+const closePreviewProject = function (){
+    return closeModal(MODAL_PREVIEW_PROJECT);
+};
+const closeProjectLessons = function (){
+    return closeModal(MODAL_PROJECT_LESSONS);
+};
 export {
     reducer as default,
     initialState as modalsInitialState,
     openBackdropLibrary,
+    openCameraCapture,
     openCostumeLibrary,
     openExtensionLibrary,
     openLoadingProject,
@@ -125,7 +168,11 @@ export {
     openTelemetryModal,
     openTipsLibrary,
     openConnectionModal,
+    openShareProject,
+    openPreviewProject,
+    openProjectLessons,
     closeBackdropLibrary,
+    closeCameraCapture,
     closeCostumeLibrary,
     closeExtensionLibrary,
     closeLoadingProject,
@@ -134,5 +181,8 @@ export {
     closeSoundRecorder,
     closeTelemetryModal,
     closeTipsLibrary,
-    closeConnectionModal
+    closeConnectionModal,
+    closeShareProject,
+    closePreviewProject,
+    closeProjectLessons
 };

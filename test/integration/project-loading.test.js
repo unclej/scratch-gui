@@ -1,3 +1,5 @@
+/* eslint-disable jest/no-disabled-tests */
+/* eslint-disable no-warning-comments */
 import path from 'path';
 import SeleniumHelper from '../helpers/selenium-helper';
 

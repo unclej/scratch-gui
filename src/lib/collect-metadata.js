@@ -1,3 +1,4 @@
+/* eslint-disable no-warning-comments */
 /**
  * Report a telemetry event.
  * @param {string} event - one of `projectWasCreated`, `projectDidLoad`, `projectDidSave`, `projectWasUploaded`

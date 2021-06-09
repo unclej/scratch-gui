@@ -30,6 +30,11 @@ const BlocksOnly = props => (
 const App = AppStateHOC(HashParserHOC(BlocksOnly));
 
 const appTarget = document.createElement('div');
-document.body.appendChild(appTarget);
+const scratchEditor = document.getElementById('scratch-editor');
+if (scratchEditor){
+    scratchEditor.appendChild(appTarget);
+} else {
+    document.body.appendChild(appTarget);
+}
 
 ReactDOM.render(<App />, appTarget);

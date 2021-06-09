@@ -1,15 +1,18 @@
+/* eslint-disable no-warning-comments */
 import xhr from 'xhr';
 import costumePayload from './backpack/costume-payload';
 import soundPayload from './backpack/sound-payload';
 import spritePayload from './backpack/sprite-payload';
 import codePayload from './backpack/code-payload';
+import ITCH_CONFIG from '../../itch.config';
+
 
 // Add a new property for the full thumbnail url, which includes the host.
 // Also include a full body url for loading sprite zips
 // TODO retreiving the images through storage would allow us to remove this.
-const includeFullUrls = (item, host) => Object.assign({}, item, {
-    thumbnailUrl: `${host}/${item.thumbnail}`,
-    bodyUrl: `${host}/${item.body}`
+const includeFullUrls = item => Object.assign({}, item, {
+    thumbnailUrl: `${ITCH_CONFIG.ASSET_SERVER}${item.thumbnail}`,
+    bodyUrl: `${ITCH_CONFIG.ASSET_SERVER}${item.body}`
 });
 
 const getBackpackContents = ({
@@ -19,12 +22,15 @@ const getBackpackContents = ({
     limit,
     offset
 }) => new Promise((resolve, reject) => {
-    xhr({
+    const options = {
         method: 'GET',
         uri: `${host}/${username}?limit=${limit}&offset=${offset}`,
-        headers: {'x-token': token},
         json: true
-    }, (error, response) => {
+    };
+    if (process.env.ITCH_LESSONS) {
+        options.headers = {Authorization: `Bearer ${token}`};
+    }
+    xhr(options, (error, response) => {
         if (error || response.statusCode !== 200) {
             return reject(new Error(response.status));
         }
@@ -42,12 +48,15 @@ const saveBackpackObject = ({
     body, // Base64-encoded body of the object being saved
     thumbnail // Base64-encoded JPEG thumbnail of the object being saved
 }) => new Promise((resolve, reject) => {
-    xhr({
+    const options = {
         method: 'POST',
         uri: `${host}/${username}`,
-        headers: {'x-token': token},
         json: {type, mime, name, body, thumbnail}
-    }, (error, response) => {
+    };
+    if (process.env.ITCH_LESSONS) {
+        options.headers = {Authorization: `Bearer ${token}`};
+    }
+    xhr(options, (error, response) => {
         if (error || response.statusCode !== 200) {
             return reject(new Error(response.status));
         }
@@ -61,17 +70,21 @@ const deleteBackpackObject = ({
     token,
     id
 }) => new Promise((resolve, reject) => {
-    xhr({
+    const options = {
         method: 'DELETE',
-        uri: `${host}/${username}/${id}`,
-        headers: {'x-token': token}
-    }, (error, response) => {
+        uri: `${host}/${username}/${id}`
+    };
+    if (process.env.ITCH_LESSONS) {
+        options.headers = {Authorization: `Bearer ${token}`};
+    }
+    xhr(options, (error, response) => {
         if (error || response.statusCode !== 200) {
             return reject(new Error(response.status));
         }
         return resolve(response.body);
     });
 });
+
 
 // Two types of backpack items are not retreivable through storage
 // code, as json and sprite3 as arraybuffer zips.
