@@ -1,3 +1,4 @@
+/* eslint-disable no-warning-comments */
 var ExampleExtension = function () {
 };
 

@@ -1,3 +1,4 @@
+/* eslint-disable no-warning-comments */
 // TODO: add tests of extension alerts
 
 /* eslint-env jest */

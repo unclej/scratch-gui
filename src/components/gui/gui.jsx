@@ -30,6 +30,7 @@ import Alerts from '../../containers/alerts.jsx';
 import DragLayer from '../../containers/drag-layer.jsx';
 import ConnectionModal from '../../containers/connection-modal.jsx';
 import TelemetryModal from '../telemetry-modal/telemetry-modal.jsx';
+import LessonsCards from '../../containers/lessons-cards.jsx';
 
 import layout, {STAGE_SIZE_MODES} from '../../lib/layout-constants';
 import {resolveStageSize} from '../../lib/screen-utils';
@@ -39,7 +40,8 @@ import addExtensionIcon from './icon--extensions.svg';
 import codeIcon from './icon--code.svg';
 import costumesIcon from './icon--costumes.svg';
 import soundsIcon from './icon--sounds.svg';
-
+import ShareModal from '../../containers/share-modal.jsx';
+import PreviewModal from '../../containers/preview-modal.jsx';
 const messages = defineMessages({
     addExtension: {
         id: 'gui.gui.addExtension',
@@ -67,12 +69,17 @@ const GUIComponent = props => {
         blocksTabVisible,
         cardsVisible,
         canChangeLanguage,
+        lessonCardVisible,
+        isHiddenLessonModal,
         canCreateNew,
         canEditTitle,
         canManageFiles,
         canRemix,
+        isLoggedIn,
         canSave,
         canCreateCopy,
+        canDownload,
+        canUpload,
         canShare,
         canUseCloud,
         children,
@@ -112,6 +119,8 @@ const GUIComponent = props => {
         onTelemetryModalCancel,
         onTelemetryModalOptIn,
         onTelemetryModalOptOut,
+        shareProjectVisible,
+        previewProjectVisible,
         showComingSoon,
         soundsTabVisible,
         stageSizeMode,
@@ -119,6 +128,7 @@ const GUIComponent = props => {
         telemetryModalVisible,
         tipsLibraryVisible,
         vm,
+        showOtherButtons = true,
         ...componentProps
     } = omit(props, 'dispatch');
     if (children) {
@@ -149,6 +159,7 @@ const GUIComponent = props => {
                 loading={loading}
                 stageSize={STAGE_SIZE_MODES.large}
                 vm={vm}
+                showOtherButtons={showOtherButtons}
             >
                 {alertsVisible ? (
                     <Alerts className={styles.alertsContainer} />
@@ -171,6 +182,12 @@ const GUIComponent = props => {
                         onShowPrivacyPolicy={onShowPrivacyPolicy}
                     />
                 ) : null}
+                {shareProjectVisible ? (
+                    <ShareModal />
+                ) : null}
+                {previewProjectVisible ? (
+                    <PreviewModal />
+                ) : null}
                 {loading ? (
                     <Loader />
                 ) : null}
@@ -185,6 +202,9 @@ const GUIComponent = props => {
                 ) : null}
                 {cardsVisible ? (
                     <Cards />
+                ) : null}
+                {lessonCardVisible ? (
+                    <LessonsCards className={isHiddenLessonModal ? styles.hidden : ''} />
                 ) : null}
                 {alertsVisible ? (
                     <Alerts className={styles.alertsContainer} />
@@ -215,13 +235,16 @@ const GUIComponent = props => {
                     canCreateCopy={canCreateCopy}
                     canCreateNew={canCreateNew}
                     canEditTitle={canEditTitle}
+                    canDownload={canDownload}
                     canManageFiles={canManageFiles}
                     canRemix={canRemix}
                     canSave={canSave}
                     canShare={canShare}
+                    canUpload={canUpload}
                     className={styles.menuBarPosition}
                     enableCommunity={enableCommunity}
                     isShared={isShared}
+                    isLoggedIn={isLoggedIn}
                     logo={logo}
                     renderLogin={renderLogin}
                     showComingSoon={showComingSoon}
@@ -342,6 +365,7 @@ const GUIComponent = props => {
                         <Box className={classNames(styles.stageAndTargetWrapper, styles[stageSize])}>
                             <StageWrapper
                                 isFullScreen={isFullScreen}
+                                showOtherButtons={showOtherButtons}
                                 isRendererSupported={isRendererSupported}
                                 isRtl={isRtl}
                                 stageSize={stageSize}
@@ -376,11 +400,13 @@ GUIComponent.propTypes = {
     canChangeLanguage: PropTypes.bool,
     canCreateCopy: PropTypes.bool,
     canCreateNew: PropTypes.bool,
+    canDownload: PropTypes.bool,
     canEditTitle: PropTypes.bool,
     canManageFiles: PropTypes.bool,
     canRemix: PropTypes.bool,
     canSave: PropTypes.bool,
     canShare: PropTypes.bool,
+    canUpload: PropTypes.bool,
     canUseCloud: PropTypes.bool,
     cardsVisible: PropTypes.bool,
     children: PropTypes.node,
@@ -390,14 +416,18 @@ GUIComponent.propTypes = {
     intl: intlShape.isRequired,
     isCreating: PropTypes.bool,
     isFullScreen: PropTypes.bool,
+    isHiddenLessonModal: PropTypes.bool,
+    isLoggedIn: PropTypes.bool,
     isPlayerOnly: PropTypes.bool,
     isRtl: PropTypes.bool,
     isShared: PropTypes.bool,
+    lessonCardVisible: PropTypes.bool,
     loading: PropTypes.bool,
     logo: PropTypes.string,
     onActivateCostumesTab: PropTypes.func,
     onActivateSoundsTab: PropTypes.func,
     onActivateTab: PropTypes.func,
+    onClickAbout: PropTypes.func,
     onClickAccountNav: PropTypes.func,
     onClickLogo: PropTypes.func,
     onCloseAccountNav: PropTypes.func,
@@ -417,6 +447,8 @@ GUIComponent.propTypes = {
     onTelemetryModalOptOut: PropTypes.func,
     onToggleLoginOpen: PropTypes.func,
     renderLogin: PropTypes.func,
+    shareProjectVisible: PropTypes.bool,
+    previewProjectVisible: PropTypes.bool,
     showComingSoon: PropTypes.bool,
     soundsTabVisible: PropTypes.bool,
     stageSizeMode: PropTypes.oneOf(Object.keys(STAGE_SIZE_MODES)),
@@ -442,14 +474,59 @@ GUIComponent.defaultProps = {
     isCreating: false,
     isShared: false,
     loading: false,
+    canUpload: false,
+    canDownload: false,
+    isLoggedIn: false,
     showComingSoon: false,
     stageSizeMode: STAGE_SIZE_MODES.large
 };
 
-const mapStateToProps = state => ({
+const mapStateToProps = state => {
     // This is the button's mode, as opposed to the actual current state
-    stageSizeMode: state.scratchGui.stageSize.stageSize
-});
+    const isLoggedIn = state.session.session.user !== null &&
+        typeof state.session.session.user !== 'undefined' &&
+        typeof state.session.session.user.id !== 'undefined' &&
+        Object.keys(state.session.session.user).length > 0 && state.session.session.user.id !== 0;
+    const isNewProject = isLoggedIn && state.scratchGui.projectState.projectId === '0';
+    // eslint-disable-next-line no-console
+    const userOwnsProject = (state.scratchGui.itchProject.projectUser !== null &&
+        typeof state.session.session.user !== 'undefined' &&
+        typeof state.session.session.user.id !== 'undefined' &&
+        state.session.session.user.id === state.scratchGui.itchProject.projectUser) || isNewProject;
+    const projectInfoPresent = state.scratchGui.itchProject.projectId !== null;
+    const isStudent = isLoggedIn && typeof state.session.session.user.role !== 'undefined' &&
+        state.session.session.user.role === 'student';
+    const isSubmitted = state.scratchGui.itchProject.isSubmitted;
+    const url = window.location.search.substring(1).split('&');
+    const keyValue = {};
+    for (let i = 0; i < url.length; i++){
+        const d = url[i].split('=');
+        keyValue[d[0]] = d[1];
+    }
+    const backpackHost = keyValue.backpackHost ? keyValue.backpackHost : '';
+    const canDownload = true;
+    const canUpload = true;
+    const isPreview = false;
+    const backpackVisible = true;
+    const isWizard = false;
+    const basePath = './';
+    return {
+        isLoggedIn: isLoggedIn,
+        stageSizeMode: state.scratchGui.stageSize.stageSize,
+        canSave: isLoggedIn && userOwnsProject && !isSubmitted && !isPreview,
+        canRemix: isLoggedIn && !userOwnsProject && !isSubmitted && !isPreview,
+        canCreateCopy: userOwnsProject && projectInfoPresent && !isSubmitted && !isPreview,
+        canCreateNew: isLoggedIn && !isPreview,
+        canShare: isLoggedIn && userOwnsProject && !isPreview,
+        canUpload: isLoggedIn && userOwnsProject && !isSubmitted && canUpload && !isPreview,
+        canDownload: isLoggedIn && (userOwnsProject || !isStudent) && canDownload,
+        lessonCardVisible: state.scratchGui.studioLessons.visible && (!isWizard || isPreview),
+        isHiddenLessonModal: state.scratchGui.studioLessons.minimize,
+        backpackVisible: isLoggedIn && userOwnsProject && !isSubmitted && !isPreview && backpackVisible,
+        backpackHost,
+        basePath
+    };
+};
 
 export default injectIntl(connect(
     mapStateToProps

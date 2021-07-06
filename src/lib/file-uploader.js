@@ -1,3 +1,4 @@
+/* eslint-disable no-warning-comments */
 import {BitmapAdapter} from 'scratch-svg-renderer';
 import randomizeSpritePosition from './randomize-sprite-position.js';
 import bmpConverter from './bmp-converter';

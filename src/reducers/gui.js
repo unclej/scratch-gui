@@ -2,6 +2,7 @@ import {applyMiddleware, compose, combineReducers} from 'redux';
 import alertsReducer, {alertsInitialState} from './alerts';
 import assetDragReducer, {assetDragInitialState} from './asset-drag';
 import cardsReducer, {cardsInitialState} from './cards';
+import studioLessonsReducer, {studioLessonsInitialState} from './studioLessons';
 import colorPickerReducer, {colorPickerInitialState} from './color-picker';
 import connectionModalReducer, {connectionModalInitialState} from './connection-modal';
 import customProceduresReducer, {customProceduresInitialState} from './custom-procedures';
@@ -15,7 +16,13 @@ import modeReducer, {modeInitialState} from './mode';
 import monitorReducer, {monitorsInitialState} from './monitors';
 import monitorLayoutReducer, {monitorLayoutInitialState} from './monitor-layout';
 import projectChangedReducer, {projectChangedInitialState} from './project-changed';
-import projectStateReducer, {projectStateInitialState} from './project-state';
+import projectAssetsReducer, {projectAssetsInitialState} from './project-assets';
+import projectStateReducer, {
+    defaultProjectId,
+    projectStateInitialState,
+    LoadingState as ProjectLoadingState
+} from './project-state';
+import itchProjectReducer, {itchProjectInitialState} from './itch-project';
 import projectTitleReducer, {projectTitleInitialState} from './project-title';
 import fontsLoadedReducer, {fontsLoadedInitialState} from './fonts-loaded';
 import restoreDeletionReducer, {restoreDeletionInitialState} from './restore-deletion';
@@ -50,7 +57,9 @@ const guiInitialState = {
     monitors: monitorsInitialState,
     monitorLayout: monitorLayoutInitialState,
     projectChanged: projectChangedInitialState,
+    projectAssets: projectAssetsInitialState,
     projectState: projectStateInitialState,
+    itchProject: itchProjectInitialState,
     projectTitle: projectTitleInitialState,
     fontsLoaded: fontsLoadedInitialState,
     restoreDeletion: restoreDeletionInitialState,
@@ -59,6 +68,7 @@ const guiInitialState = {
     toolbox: toolboxInitialState,
     vm: vmInitialState,
     vmStatus: vmStatusInitialState,
+    studioLessons: studioLessonsInitialState,
     workspaceMetrics: workspaceMetricsInitialState
 };
 
@@ -130,6 +140,27 @@ const initTelemetryModal = function (currentState) {
         }
     );
 };
+const initProject = function (currentState, projectId) {
+    let projectState = projectStateInitialState;
+    if (projectId === defaultProjectId || !projectId) {
+        projectState = Object.assign({}, projectState, {
+            loadingState: ProjectLoadingState.FETCHING_NEW_DEFAULT,
+            projectId: defaultProjectId
+        });
+    } else {
+        projectState = Object.assign({}, projectState, {
+            loadingState: ProjectLoadingState.FETCHING_WITH_ID,
+            projectId: projectId
+        });
+    }
+    return Object.assign(
+        {},
+        currentState,
+        {
+            projectState: projectState
+        }
+    );
+};
 
 const guiReducer = combineReducers({
     alerts: alertsReducer,
@@ -149,7 +180,9 @@ const guiReducer = combineReducers({
     monitors: monitorReducer,
     monitorLayout: monitorLayoutReducer,
     projectChanged: projectChangedReducer,
+    projectAssets: projectAssetsReducer,
     projectState: projectStateReducer,
+    itchProject: itchProjectReducer,
     projectTitle: projectTitleReducer,
     fontsLoaded: fontsLoadedReducer,
     restoreDeletion: restoreDeletionReducer,
@@ -158,6 +191,7 @@ const guiReducer = combineReducers({
     toolbox: toolboxReducer,
     vm: vmReducer,
     vmStatus: vmStatusReducer,
+    studioLessons: studioLessonsReducer,
     workspaceMetrics: workspaceMetricsReducer
 });
 
@@ -168,6 +202,7 @@ export {
     initEmbedded,
     initFullScreen,
     initPlayer,
+    initProject,
     initTelemetryModal,
     initTutorialCard
 };

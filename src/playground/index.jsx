@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 // Polyfills
 import 'es6-object-assign/auto';
 import 'core-js/fn/array/includes';

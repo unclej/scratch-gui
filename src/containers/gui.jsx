@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import PropTypes from 'prop-types';
 import React from 'react';
 import {compose} from 'redux';
@@ -28,7 +29,7 @@ import {
 import FontLoaderHOC from '../lib/font-loader-hoc.jsx';
 import LocalizationHOC from '../lib/localization-hoc.jsx';
 import SBFileUploaderHOC from '../lib/sb-file-uploader-hoc.jsx';
-import ProjectFetcherHOC from '../lib/project-fetcher-hoc.jsx';
+// import ProjectFetcherHOC from '../lib/project-fetcher-hoc.jsx';
 import TitledHOC from '../lib/titled-hoc.jsx';
 import ProjectSaverHOC from '../lib/project-saver-hoc.jsx';
 import QueryParserHOC from '../lib/query-parser-hoc.jsx';
@@ -36,9 +37,21 @@ import storage from '../lib/storage';
 import vmListenerHOC from '../lib/vm-listener-hoc.jsx';
 import vmManagerHOC from '../lib/vm-manager-hoc.jsx';
 import cloudManagerHOC from '../lib/cloud-manager-hoc.jsx';
+import ItchProject from '../lib/project.jsx';
+// eslint-disable-next-line no-unused-vars
+import EventMessageHOC from '../lib/event-message-hoc.jsx';
+import ITCH_CONFIG from '../../itch.config';
 
 import GUIComponent from '../components/gui/gui.jsx';
 import {setIsScratchDesktop} from '../lib/isScratchDesktop.js';
+
+/* const messages = defineMessages({
+    defaultProjectTitle: {
+        id: 'gui.gui.defaultProjectTitle',
+        description: 'Default title for project',
+        defaultMessage: 'New Project'
+    }
+});*/
 
 class GUI extends React.Component {
     componentDidMount () {
@@ -57,7 +70,18 @@ class GUI extends React.Component {
         }
     }
     render () {
+        const url = window.location.search.substring(1).split('&');
+        const keyValue = {};
+        for (let i = 0; i < url.length; i++){
+            const d = url[i].split('=');
+            keyValue[d[0]] = d[1];
+        }
         if (this.props.isError) {
+            if (window.top !== window){
+                parent.postMessage(
+                    ['loaded', [true]],
+                    (keyValue.baseUrl ? keyValue.baseUrl : (ITCH_CONFIG.BASE_URL + ITCH_CONFIG.BASE_URL_EXTENSION)));
+            }
             throw new Error(
                 `Error in Scratch GUI [location=${window.location}]: ${this.props.error}`);
         }
@@ -82,6 +106,7 @@ class GUI extends React.Component {
             loadingStateVisible,
             ...componentProps
         } = this.props;
+        console.log(this.props);
         return (
             <GUIComponent
                 loading={fetchingProject || isLoading || loadingStateVisible}
@@ -112,6 +137,8 @@ GUI.propTypes = {
     onVmInit: PropTypes.func,
     projectHost: PropTypes.string,
     projectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    shareProjectVisible: PropTypes.bool,
+    previewProjectVisible: PropTypes.bool,
     telemetryModalVisible: PropTypes.bool,
     vm: PropTypes.instanceOf(VM).isRequired
 };
@@ -126,12 +153,13 @@ GUI.defaultProps = {
 
 const mapStateToProps = state => {
     const loadingState = state.scratchGui.projectState.loadingState;
+    const isWizard = false;
     return {
         activeTabIndex: state.scratchGui.editorTab.activeTabIndex,
         alertsVisible: state.scratchGui.alerts.visible,
         backdropLibraryVisible: state.scratchGui.modals.backdropLibrary,
         blocksTabVisible: state.scratchGui.editorTab.activeTabIndex === BLOCKS_TAB_INDEX,
-        cardsVisible: state.scratchGui.cards.visible,
+        cardsVisible: state.scratchGui.cards.visible && !isWizard,
         connectionModalVisible: state.scratchGui.modals.connectionModal,
         costumeLibraryVisible: state.scratchGui.modals.costumeLibrary,
         costumesTabVisible: state.scratchGui.editorTab.activeTabIndex === COSTUMES_TAB_INDEX,
@@ -150,7 +178,9 @@ const mapStateToProps = state => {
         ),
         telemetryModalVisible: state.scratchGui.modals.telemetryModal,
         tipsLibraryVisible: state.scratchGui.modals.tipsLibrary,
-        vm: state.scratchGui.vm
+        vm: state.scratchGui.vm,
+        shareProjectVisible: state.scratchGui.modals.shareProject,
+        previewProjectVisible: state.scratchGui.modals.previewProject
     };
 };
 
@@ -177,9 +207,10 @@ const WrappedGui = compose(
     ErrorBoundaryHOC('Top Level App'),
     FontLoaderHOC,
     QueryParserHOC,
-    ProjectFetcherHOC,
+    // ProjectFetcherHOC,
     TitledHOC,
     ProjectSaverHOC,
+    ItchProject,
     vmListenerHOC,
     vmManagerHOC,
     SBFileUploaderHOC,

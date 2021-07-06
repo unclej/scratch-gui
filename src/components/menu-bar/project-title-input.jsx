@@ -1,9 +1,11 @@
+/* eslint-disable react/no-unused-prop-types */
 import classNames from 'classnames';
 import {connect} from 'react-redux';
 import PropTypes from 'prop-types';
 import React from 'react';
 import {defineMessages, intlShape, injectIntl} from 'react-intl';
 import {setProjectTitle} from '../../reducers/project-title';
+import {setProjectChanged} from '../../reducers/project-changed';
 
 import BufferedInputHOC from '../forms/buffered-input-hoc.jsx';
 import Input from '../forms/input.jsx';
@@ -37,18 +39,31 @@ const ProjectTitleInput = ({
 );
 
 ProjectTitleInput.propTypes = {
+    canEditTitle: PropTypes.bool,
     className: PropTypes.string,
     intl: intlShape.isRequired,
+    onProjectChanged: PropTypes.func,
+    reduxProjectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     onSubmit: PropTypes.func,
     projectTitle: PropTypes.string
 };
 
-const mapStateToProps = state => ({
-    projectTitle: state.scratchGui.projectTitle
-});
+const mapStateToProps = (state, ownProps) => {
+    const isSubmitted = state.scratchGui.itchProject.isSubmitted;
+    const isPreview = false;
+    return {
+        projectTitle: state.scratchGui.projectTitle,
+        canEditTitle: ownProps.userOwnsProject && !isSubmitted && !isPreview,
+        reduxProjectId: state.scratchGui.projectState.projectId
+    };
+};
 
 const mapDispatchToProps = dispatch => ({
-    onSubmit: title => dispatch(setProjectTitle(title))
+    onSubmit: title => {
+        dispatch(setProjectTitle(title));
+        dispatch(setProjectChanged());
+    },
+    onProjectChanged: () => dispatch(setProjectChanged())
 });
 
 export default injectIntl(connect(

@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unused-prop-types */
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -27,6 +28,9 @@ const Player = ({isPlayerOnly, onSeeInside, projectId}) => (
             enableCommunity
             isPlayerOnly={isPlayerOnly}
             projectId={projectId}
+            canSave={false}
+            showBranding={false}
+            showOtherButtons={false}
         />
     </Box>
 );
@@ -61,4 +65,7 @@ const WrappedPlayer = compose(
 const appTarget = document.createElement('div');
 document.body.appendChild(appTarget);
 
-ReactDOM.render(<WrappedPlayer isPlayerOnly />, appTarget);
+ReactDOM.render(<WrappedPlayer
+    isPlayerOnly
+    isFullScreen
+/>, appTarget);

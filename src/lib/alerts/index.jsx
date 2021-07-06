@@ -15,7 +15,7 @@ const AlertLevels = {
     INFO: 'info',
     WARN: 'warn'
 };
-
+const showDownload = true;
 const alerts = [
     {
         alertId: 'createSuccess',
@@ -128,7 +128,7 @@ const alerts = [
         alertId: 'savingError',
         clearList: ['createSuccess', 'creating', 'createCopySuccess', 'creatingCopy',
             'createRemixSuccess', 'creatingRemix', 'saveSuccess', 'saving'],
-        showDownload: true,
+        showDownload,
         showSaveNow: true,
         closeButton: false,
         content: (
@@ -212,6 +212,20 @@ const alerts = [
         ),
         iconSpinner: true,
         level: AlertLevels.SUCCESS
+    },
+    {
+        alertId: 'saveOriginalProject',
+        alertType: AlertTypes.INLINE,
+        clearList: ['saveSuccess', 'saving', 'savingError'],
+        content: (
+            <FormattedMessage
+                defaultMessage="Save original project..."
+                description="Message indicating that project is on process of saving original Project"
+                id="itchLocale.alerts.savingOriginal"
+            />
+        ),
+        iconSpinner: true,
+        level: AlertLevels.INFO
     }
 ];
 

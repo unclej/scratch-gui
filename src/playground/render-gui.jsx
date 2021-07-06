@@ -1,3 +1,4 @@
+/* eslint-disable no-warning-comments */
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {compose} from 'redux';
@@ -55,11 +56,10 @@ export default appTarget => {
             simulateScratchDesktop = scratchDesktopMatches[1];
         }
     }
-
-    if (process.env.NODE_ENV === 'production' && typeof window === 'object') {
+    /* if (process.env.NODE_ENV === 'production' && typeof window === 'object') {
         // Warn before navigating away
         window.onbeforeunload = () => true;
-    }
+    } */
 
     ReactDOM.render(
         // important: this is checking whether `simulateScratchDesktop` is truthy, not just defined!

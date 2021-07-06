@@ -41,6 +41,7 @@ const StageComponent = props => {
                     styles.stageWrapper,
                     {[styles.withColorPicker]: !isFullScreen && isColorPicking})}
                 onDoubleClick={onDoubleClick}
+                id="parentOfMainStageCanvas"
             >
                 <Box
                     className={classNames(

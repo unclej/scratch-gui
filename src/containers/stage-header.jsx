@@ -3,7 +3,7 @@ import React from 'react';
 import bindAll from 'lodash.bindall';
 import VM from 'scratch-vm';
 import {STAGE_SIZE_MODES} from '../lib/layout-constants';
-import {setStageSize} from '../reducers/stage-size';
+import {setStageSize, setProjectPage, setToEditProjectPage, setWindowFullScreen} from '../reducers/stage-size';
 import {setFullScreen} from '../reducers/mode';
 
 import {connect} from 'react-redux';
@@ -33,6 +33,9 @@ class StageHeader extends React.Component {
         const {
             ...props
         } = this.props;
+        if (!props.showBranding){
+            props.showBranding = false;
+        }
         return (
             <StageHeaderComponent
                 {...props}
@@ -45,6 +48,8 @@ class StageHeader extends React.Component {
 StageHeader.propTypes = {
     isFullScreen: PropTypes.bool,
     isPlayerOnly: PropTypes.bool,
+    isProjectPage: PropTypes.bool,
+    isWindowFullScreen: PropTypes.bool,
     onSetStageUnFull: PropTypes.func.isRequired,
     showBranding: PropTypes.bool,
     stageSizeMode: PropTypes.oneOf(Object.keys(STAGE_SIZE_MODES)),
@@ -55,14 +60,20 @@ const mapStateToProps = state => ({
     stageSizeMode: state.scratchGui.stageSize.stageSize,
     showBranding: state.scratchGui.mode.showBranding,
     isFullScreen: state.scratchGui.mode.isFullScreen,
-    isPlayerOnly: state.scratchGui.mode.isPlayerOnly
+    isPlayerOnly: state.scratchGui.mode.isPlayerOnly,
+    isProjectPage: state.scratchGui.stageSize.isProjectPage,
+    isWindowFullScreen: state.scratchGui.stageSize.isWindowFullScreen
 });
 
 const mapDispatchToProps = dispatch => ({
     onSetStageLarge: () => dispatch(setStageSize(STAGE_SIZE_MODES.large)),
     onSetStageSmall: () => dispatch(setStageSize(STAGE_SIZE_MODES.small)),
     onSetStageFull: () => dispatch(setFullScreen(true)),
-    onSetStageUnFull: () => dispatch(setFullScreen(false))
+    onSetStageUnFull: () => dispatch(setFullScreen(false)),
+    onSetProjectPageFromFull: () => dispatch(setProjectPage(true)),
+    onSetProjectPageFromUnFull: () => dispatch(setProjectPage(false)),
+    onSetToEditProject: () => dispatch(setToEditProjectPage()),
+    onSetWindowFullScreen: () => dispatch(setWindowFullScreen())
 });
 
 export default connect(

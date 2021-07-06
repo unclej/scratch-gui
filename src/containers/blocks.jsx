@@ -1,3 +1,4 @@
+/* eslint-disable no-warning-comments */
 import bindAll from 'lodash.bindall';
 import debounce from 'lodash.debounce';
 import defaultsDeep from 'lodash.defaultsdeep';
@@ -201,11 +202,19 @@ class Blocks extends React.Component {
         this.ScratchBlocks.ScratchMsgs.setLocale(this.props.locale);
         this.props.vm.setLocale(this.props.locale, this.props.messages)
             .then(() => {
-                this.workspace.getFlyout().setRecyclingEnabled(false);
+                
+                const flyout = this.workspace.getFlyout();
+                // eslint-disable-next-line no-console
+                console.log(this.workspace, 'Workspace', flyout);
+                if (flyout) {
+                    flyout.setRecyclingEnabled(false);
+                }
                 this.props.vm.refreshWorkspace();
                 this.requestToolboxUpdate();
                 this.withToolboxUpdates(() => {
-                    this.workspace.getFlyout().setRecyclingEnabled(true);
+                    if (flyout) {
+                        flyout.setRecyclingEnabled(true);
+                    }
                 });
             });
     }
@@ -656,7 +665,7 @@ Blocks.defaultProps = {
 const mapStateToProps = state => ({
     anyModalVisible: (
         Object.keys(state.scratchGui.modals).some(key => state.scratchGui.modals[key]) ||
-        state.scratchGui.mode.isFullScreen
+        state.scratchGui.mode.isFullScreen || state.scratchGui.stageSize.isProjectPage
     ),
     extensionLibraryVisible: state.scratchGui.modals.extensionLibrary,
     isRtl: state.locales.isRtl,

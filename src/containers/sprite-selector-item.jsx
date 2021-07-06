@@ -1,3 +1,4 @@
+/* eslint-disable no-alert */
 import bindAll from 'lodash.bindall';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -92,7 +93,10 @@ class SpriteSelectorItem extends React.PureComponent {
     }
     handleDelete (e) {
         e.stopPropagation(); // To prevent from bubbling back to handleClick
-        this.props.onDeleteButtonClick(this.props.id);
+        const confirmToDelete = confirm('Are you sure that you want to delete this Sprite?');
+        if (confirmToDelete) {
+            this.props.onDeleteButtonClick(this.props.id);
+        }
     }
     handleDuplicate (e) {
         e.stopPropagation(); // To prevent from bubbling back to handleClick

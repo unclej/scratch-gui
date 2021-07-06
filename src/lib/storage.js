@@ -1,3 +1,4 @@
+/* eslint-disable no-warning-comments */
 import ScratchStorage from 'scratch-storage';
 
 import defaultProject from './default-project';
@@ -24,29 +25,71 @@ class Storage extends ScratchStorage {
             // We set both the create and update configs to the same method because
             // storage assumes it should update if there is an assetId, but the
             // asset store uses the assetId as part of the create URI.
-            this.getAssetCreateConfig.bind(this),
+            this.getAssetGetConfig.bind(this),
             this.getAssetCreateConfig.bind(this)
         );
         this.addWebStore(
             [this.AssetType.Sound],
-            asset => `static/extension-assets/scratch3_music/${asset.assetId}.${asset.dataFormat}`
+            this.getAssetGetConfig.bind(this)
+            // asset => `static/extension-assets/scratch3_music/${asset.assetId}.${asset.dataFormat}`
         );
+    }
+    setLoggedInUser (id) {
+        this.loggedInUser = id;
+    }
+    setLoggedInStudioId (id) {
+        this.loggedInStudio = id;
+    }
+    setStarterProjectId (id) {
+        this.starterProjectId = id ? id : 0;
     }
     setProjectHost (projectHost) {
         this.projectHost = projectHost;
     }
+    setAssetCreateHost (createHost) {
+        this.assetCreateHost = createHost;
+    }
+    setProjectData (projectData) {
+        this.projectData = projectData;
+    }
+    setToken (token) {
+        this.token = token;
+    }
+    getToken () {
+        return this.token;
+    }
+    getProjectData () {
+        return this.token;
+    }
+    getLoggedInStudioId () {
+        return this.loggedInStudio;
+    }
     getProjectGetConfig (projectAsset) {
-        return `${this.projectHost}/${projectAsset.assetId}`;
+        const config = {
+            url: `${this.projectHost}/${projectAsset.assetId}`
+        };
+        const token = this.getToken();
+        if (token) {
+            config.headers = {
+                Authorization: `Bearer ${token}`
+            };
+        }
+        return config;
     }
     getProjectCreateConfig () {
         return {
-            url: `${this.projectHost}/`,
-            withCredentials: true
+            url: `${this.projectHost}project/create`,
+            headers: {
+                Authorization: `Bearer ${this.getToken()}`
+            }
         };
     }
     getProjectUpdateConfig (projectAsset) {
         return {
-            url: `${this.projectHost}/${projectAsset.assetId}`,
+            url: `${this.projectHost}/${projectAsset.assetId}/update`,
+            headers: {
+                Authorization: `Bearer ${this.getToken()}`
+            },
             withCredentials: true
         };
     }
@@ -54,17 +97,30 @@ class Storage extends ScratchStorage {
         this.assetHost = assetHost;
     }
     getAssetGetConfig (asset) {
-        return `${this.assetHost}/internalapi/asset/${asset.assetId}.${asset.dataFormat}/get/`;
+        const time = Date.now();
+        return `${this.assetHost}${asset.assetId}.${asset.dataFormat}?time=${time}`;
+    }
+    getAssetUpdateConfig (md5) {
+        return `${this.assetCreateHost}/${md5}`;
+    }
+    getThumbnailUpdateConfig (projectId, md5) {
+        return `${this.assetCreateHost}project/${projectId}/thumbnail/${md5}`;
+    }
+    getLessonReadUrl (projectId) {
+        return `${this.projectHost}project/${projectId}/lesson/mark-as-read`;
+    }
+    getShareUrl (projectId) {
+        return `${this.projectHost}project/${projectId}/share`;
     }
     getAssetCreateConfig (asset) {
         return {
-            // There is no such thing as updating assets, but storage assumes it
-            // should update if there is an assetId, and the asset store uses the
-            // assetId as part of the create URI. So, force the method to POST.
-            // Then when storage finds this config to use for the "update", still POSTs
             method: 'post',
-            url: `${this.assetHost}/${asset.assetId}.${asset.dataFormat}`,
-            withCredentials: true
+            url: `${this.assetCreateHost}project/${this.starterProjectId}/asset/${asset.assetId}.${asset.dataFormat}`,
+            withCredentials: false,
+            headers: {
+                'Authorization': `Bearer ${this.getToken()}`,
+                'Content-Type': 'application/json'
+            }
         };
     }
     setTranslatorFunction (translator) {

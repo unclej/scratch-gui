@@ -1,3 +1,4 @@
+/* eslint-disable no-warning-comments */
 import computedStyleToInlineStyle from 'computed-style-to-inline-style';
 import ScratchBlocks from 'scratch-blocks';
 

@@ -1,3 +1,4 @@
+/* eslint-disable no-warning-comments */
 import classNames from 'classnames';
 import bindAll from 'lodash.bindall';
 import PropTypes from 'prop-types';

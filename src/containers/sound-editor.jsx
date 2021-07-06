@@ -165,7 +165,7 @@ class SoundEditor extends React.Component {
             )
             .catch(e => {
                 // Encoding failed, or the sound was too large to save so edit is rejected
-                log.error(`Encountered error while trying to encode sound update: ${e.message}`);
+                log.error(`Encountered error while trying to encode sound update: ${e}`);
                 return false; // Edit was not applied
             });
     }

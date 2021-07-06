@@ -1,3 +1,4 @@
+/* eslint-disable jest/no-disabled-tests */
 /* globals Promise */
 
 import path from 'path';

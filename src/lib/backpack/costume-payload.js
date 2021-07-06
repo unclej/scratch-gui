@@ -1,3 +1,4 @@
+/* eslint-disable no-warning-comments */
 import jpegThumbnail from './jpeg-thumbnail';
 import getCostumeUrl from '../get-costume-url';
 

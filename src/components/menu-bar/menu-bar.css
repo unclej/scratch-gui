@@ -200,6 +200,19 @@
     opacity: 0.5;
 }
 
+/* .save-in-progress {
+  animation: hue-rotate 3s linear infinite;
+} */
+
+@keyframes hue-rotate {
+  from {
+    filter: hue-rotate();
+  }
+  to {
+    filter: hue-rotate(360deg);
+  }
+}
+
 .mystuff > a {
   background-repeat: no-repeat;
   background-position: center center;
@@ -217,6 +230,19 @@
 
 .mystuff > a {
   background-image: url("/images/mystuff.png");
+}
+.itch-lesson{
+    margin-left:5px;
+}
+.save-button {
+    background: $ui-white;
+    height: 32px;
+    box-shadow: 0 0 0 1px $ui-black-transparent;
+    color:$motion-primary;
+}
+.lesson-icon{
+    margin-right:5px;
+    height: 21px;
 }
 
 .about-icon {

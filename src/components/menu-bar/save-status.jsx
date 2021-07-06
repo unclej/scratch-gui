@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unused-prop-types */
 import {connect} from 'react-redux';
 import {FormattedMessage} from 'react-intl';
 import PropTypes from 'prop-types';
